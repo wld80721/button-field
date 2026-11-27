@@ -1,3 +1,4 @@
+import { firstWorld } from "./world-data.js";
 import { fmtExact } from "./numbers.js";
 import { fieldSprite } from "./field-art.js";
 import { runtime } from "./runtime.js";
@@ -152,6 +153,7 @@ function updateFarm() {
       setValue(option, "hidden", locked);
       setValue(option, "disabled", locked);
     }
+    if (select.value === "magical" && !s.blacksmith.seeds) setValue(select, "value", "glowleaf");
     const def = crops[select.value] || crops.glowleaf;
     const status = plot
       ? crops[plot.crop].name +
@@ -246,7 +248,7 @@ function updateMine() {
 function renderSites() {
   const farm = s.total >= farmAt;
   const mining = s.total >= mineAt;
-  setValue($("fieldSites"), "hidden", !farm && !mining);
+  setValue($("fieldSites"), "hidden", s.world === firstWorld || (!farm && !mining));
   setValue($("farm"), "hidden", !farm);
   setValue($("mine"), "hidden", !mining);
   if (!farm && !mining) return;
@@ -254,14 +256,9 @@ function renderSites() {
   const planted = plots.filter(Boolean);
   const ripe = planted.filter((plot) => plot.remaining === 0).length;
   const farmButton = $("farm");
-  setText(
-    $("farmStatus"),
-    ripe
-      ? ripe + " ripe"
-      : planted.length
-        ? planted.length + " growing"
-        : "Ready to plant",
-  );
+  const gardenStatus = ripe ? ripe + " ripe" : planted.length ? planted.length + " growing" : "Ready to plant";
+  setText($("farmStatus"), gardenStatus);
+  setText($("landmark-farm-status"), gardenStatus);
   setValue(
     farmButton.dataset,
     "stage",
@@ -275,7 +272,9 @@ function renderSites() {
     const ready = available.filter(
       (id) => s.sites.veins[id].remaining === 0,
     ).length;
-    setText($("mineStatus"), ready + " / " + available.length + " available");
+    const mineStatus = ready + " / " + available.length + " available";
+    setText($("mineStatus"), mineStatus);
+    setText($("landmark-mine-status"), mineStatus);
     setValue($("mine").dataset, "stage", ready ? "ready" : "cooling");
   }
   if (runtime.modalType === "farm") updateFarm();

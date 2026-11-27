@@ -23,6 +23,7 @@ import {
   hideComparison,
   positionComparison,
   updateLootRuleSummary,
+  updateForge,
   updateRecipes,
 } from "./equipment.js";
 import { buyAscensionUpgrade } from "./prestige.js";
@@ -140,7 +141,6 @@ $("combatRetreat").addEventListener("click", () => {
   if (confirm("Retreat and end this boss fight?")) leaveFight();
   else resetCombatClock();
 });
-$("combatDone").addEventListener("click", () => openModal("bosses"));
 $("combatDismiss").addEventListener("click", () => {
   resetCombatView();
   renderCombatField();
@@ -172,7 +172,8 @@ $("modal").addEventListener("click", (e) => {
 $("modalBody").addEventListener("change", (e) => {
   const { id, value } = e.target;
   if (id === "smithAssist") updateTimingAssist();
-  if (id === "recipeSet") updateRecipes();
+  if (id === "recipeSet" || id === "recipePayment") updateRecipes();
+  if (id === "forgePayment") updateForge();
   if (siteControlChange(e.target)) {
     renderSites();
     save();
@@ -298,10 +299,6 @@ $("modalBody").addEventListener("click", (e) => {
   }
   if (b.id === "wheelClaim") {
     collectWheel();
-    return;
-  }
-  if (b.id === "wheelNext") {
-    closeModal();
     return;
   }
   if (b.dataset.treeTab) {

@@ -1522,12 +1522,12 @@ textarea {
   position: relative;
 }
 .milestone-wheel .window-head h2 {
-  position: absolute;
-  left: 12px;
+  margin-right: auto;
   font-size: 14px;
   letter-spacing: 0.17em;
   color: #fff;
 }
+.milestone-wheel #close { min-height: 44px; }
 .milestone-wheel .window-body {
   padding: 0;
   overflow: visible;
@@ -1761,9 +1761,6 @@ textarea {
 }
 .wheel-claim:disabled {
   opacity: 0.7;
-}
-.wheel-controls .action {
-  background: #28364c;
 }
 @media (max-width: 600px) {
   .wheel-track {
@@ -2568,9 +2565,7 @@ textarea {
 }
 .site-upgrades button,
 .site-plot button,
-.site-controls button,
-#temperGear,
-#craftGatheredGear {
+.site-controls button {
   white-space: normal;
 }
 .mine-vein {
@@ -3573,9 +3568,11 @@ textarea {
 .smith-bench { position: sticky; bottom: 0; z-index: 4; background: #30232b; border: 1px solid #ba835e; padding: 8px; }
 .smith-bench p { margin: 5px 0; }
 .smith-bench .actions { margin: 0; flex-wrap: wrap; align-items: center; }
-.smith-meter { position: relative; height: 14px; border: 2px solid #c8916e; background: #261e2a; margin: 4px 5px; }
+.smith-meter { position: relative; overflow: hidden; height: 14px; border: 2px solid #c8916e; background: #261e2a; margin: 4px 5px; }
 .smith-meter i { position: absolute; height: 100%; background: #b1d578; }
-.smith-meter b { position: absolute; width: 4px; height: 130%; top: -15%; background: #fff6da; }
+.smith-meter b { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+.smith-meter b::before { content: ""; display: block; width: 4px; height: 100%; background: #fff6da; }
+#smithPanel #forgeBalance { display: none; }
 .smith-wallet { margin: 6px 0 12px; color: #f5d5a9; font-size: .9rem; }
 .smith-blueprints article { border-left: 3px solid var(--plate); margin: 7px 2px; padding: 4px 9px; background: #251d25; }
 .smith-blueprints strong { color: var(--plate); }
@@ -3603,8 +3600,6 @@ textarea {
   .smith-room *, .field-signature, .smith-fireball { animation: none !important; }
 }
 [data-location="forge"][data-recipes-ready="false"] #smith-table { display: grid; }
-.smith-meter { container-type: inline-size; }
-.smith-meter b { left: 0; }
 .smith-result { margin: 8px 0 0; color: #ffdb98; }
 .smith-result:empty { margin: 0; }
 #press.phantom-press .cap { transform: translateY(6px); filter: drop-shadow(0 0 8px #e1beff); }
@@ -3617,6 +3612,35 @@ textarea {
   box-shadow: inset 0 4px #aa76534d, inset 0 0 40px #211a284d;
   background: linear-gradient(90deg, transparent 28%, #342631b3 28% 29%, #af785948 29% 29.5%, transparent 29.5% 69%, #342631b3 69% 70%, #af785948 70% 70.5%, transparent 70.5%);
   pointer-events: none;
+}
+
+.living-landmark small {
+  display: block;
+  font-size: .68rem;
+  color: #d1e6bc;
+}
+.smith-current span { border-color: #f2c17e; color: #ffe0a3; }
+.smith-current { cursor: default; }
+
+@media (max-height: 450px) {
+  .modal[data-location="forge"] .window-head { padding: 5px 12px; }
+  .modal[data-location="forge"] .window-body { padding: 8px; }
+  .smith-room {
+    min-height: 138px;
+    grid-template-rows: 52px 66px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .smith-station, .smith-bins { gap: 1px; padding: 1px; }
+  .smith-station svg, .smith-bins svg { max-height: 37px; }
+  .smith-furnace svg { max-height: 59px; }
+  .smith-banners { min-height: 0; align-self: start; }
+  .smith-banners span { font-size: .65rem; padding: 0 3px; }
+  .smith-piece { bottom: 49px; }
+  .smith-piece svg { width: 30px; }
+  .smith-bench { position: static; padding: 3px 6px; }
+  .smith-bench .actions button { min-height: 34px; }
+  .smith-room:has(+ .smith-bench:not([hidden])) ~ .smith-wallet { display: none; }
 }
 </style>
   </head>
@@ -3826,7 +3850,6 @@ textarea {
             Guard <kbd>G</kbd>
           </button>
           <button id="combatRetreat" class="action secondary">Retreat</button>
-          <button id="combatDone" class="action gold" hidden>Boss Board</button>
           <button id="combatDismiss" class="action secondary" hidden>
             Dismiss
           </button>
@@ -5746,7 +5769,7 @@ textarea {
       ...Object.values(worlds).map((world) => [
         world.at,
         world.name,
-        "Travel there from the Worlds menu."
+        "Use the Grasslands Trade gate or the Worlds menu in other fields."
       ])
     ].filter(([amount]) => !hasRunCoins(state, amount));
     const grouped = /* @__PURE__ */ new Map();
@@ -7793,7 +7816,7 @@ textarea {
   }
   function renderCombatField() {
     const enabled = s.total >= milestones.combat;
-    setValue($("bosses"), "hidden", !enabled);
+    setValue($("bosses"), "hidden", s.world === firstWorld || !enabled);
     const a = s.combat.attempt;
     const panel = $("combatPanel");
     const shown = Boolean(a || result);
@@ -7812,7 +7835,6 @@ textarea {
     setText($("combatName"), def.name);
     setValue($("combatGuard"), "hidden", !a);
     setValue($("combatRetreat"), "hidden", !a);
-    setValue($("combatDone"), "hidden", Boolean(a));
     setValue($("combatDismiss"), "hidden", Boolean(a));
     setValue($("combatMeters"), "hidden", !a);
     setValue($("combatWarnTime"), "hidden", !a);
@@ -8286,6 +8308,7 @@ textarea {
         setValue(option, "hidden", locked);
         setValue(option, "disabled", locked);
       }
+      if (select.value === "magical" && !s.blacksmith.seeds) setValue(select, "value", "glowleaf");
       const def = crops[select.value] || crops.glowleaf;
       const status = plot ? crops[plot.crop].name + (plot.remaining ? " \xB7 " + seconds(plot.remaining) : " \xB7 Ripe") : "Empty soil";
       setText($("plotStatus-" + index), status);
@@ -8357,7 +8380,7 @@ textarea {
   function renderSites() {
     const farm = s.total >= farmAt;
     const mining = s.total >= mineAt;
-    setValue($("fieldSites"), "hidden", !farm && !mining);
+    setValue($("fieldSites"), "hidden", s.world === firstWorld || !farm && !mining);
     setValue($("farm"), "hidden", !farm);
     setValue($("mine"), "hidden", !mining);
     if (!farm && !mining) return;
@@ -8365,10 +8388,9 @@ textarea {
     const planted = plots.filter(Boolean);
     const ripe = planted.filter((plot) => plot.remaining === 0).length;
     const farmButton = $("farm");
-    setText(
-      $("farmStatus"),
-      ripe ? ripe + " ripe" : planted.length ? planted.length + " growing" : "Ready to plant"
-    );
+    const gardenStatus = ripe ? ripe + " ripe" : planted.length ? planted.length + " growing" : "Ready to plant";
+    setText($("farmStatus"), gardenStatus);
+    setText($("landmark-farm-status"), gardenStatus);
     setValue(
       farmButton.dataset,
       "stage",
@@ -8381,7 +8403,9 @@ textarea {
       const ready = available.filter(
         (id) => s.sites.veins[id].remaining === 0
       ).length;
-      setText($("mineStatus"), ready + " / " + available.length + " available");
+      const mineStatus = ready + " / " + available.length + " available";
+      setText($("mineStatus"), mineStatus);
+      setText($("landmark-mine-status"), mineStatus);
       setValue($("mine").dataset, "stage", ready ? "ready" : "cooling");
     }
     if (runtime.modalType === "farm") updateFarm();
@@ -8491,7 +8515,7 @@ textarea {
     return runtime.petSelected;
   }
   function renderCompanions(now = Date.now()) {
-    setValue($("companions"), "hidden", s.total < companionsAt);
+    setValue($("companions"), "hidden", s.world === firstWorld || s.total < companionsAt);
     updatePetField();
     if (runtime.modalType !== "companions") return;
     const camp = s.companions;
@@ -8998,7 +9022,7 @@ textarea {
     farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
     grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
     mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
-    bosses: { name: "Boss clearing", at: milestones.combat, screens: ["bosses"] },
+    bosses: { name: "Boss Board", at: milestones.combat, screens: ["bosses"] },
     gate: { name: "Trade gate", at: worlds.desert.at, screens: ["worlds"] }
   };
   var regionalRoutes = Object.entries(worlds).filter(([id]) => id !== firstWorld);
@@ -9014,7 +9038,8 @@ textarea {
   }
   function landmarkMarkup([id, { name, find, cover }]) {
     const secret = find ? '<button class="living-find" data-discovery="' + find + '" aria-label="' + discoveries[find].clue + '">' + fieldSprite(cover) + '</button><span class="living-keepsake" data-keepsake="' + find + '" title="' + discoveries[find].name + '" hidden>' + fieldSprite(find) + "</span>" : "";
-    return '<div class="living-plot" data-field-plot="' + id + '" hidden><button class="living-landmark" data-landmark="' + id + '">' + fieldSprite(id) + "<span>" + name + "</span></button>" + secret + (id === "camp" ? '<span id="fieldExpeditionKit" aria-hidden="true" hidden>' + fieldSprite("lantern") + "</span>" : "") + (id === "bosses" ? '<span id="fieldTrophies" hidden></span>' : "") + (id === "gate" ? '<span id="fieldPennants" aria-hidden="true"></span>' : "") + "</div>";
+    const status = id === "farm" || id === "mine" ? '<small id="landmark-' + id + '-status"></small>' : "";
+    return '<div class="living-plot" data-field-plot="' + id + '" hidden><button class="living-landmark" data-landmark="' + id + '">' + fieldSprite(id) + "<span>" + name + status + "</span></button>" + secret + (id === "camp" ? '<span id="fieldExpeditionKit" aria-hidden="true" hidden>' + fieldSprite("lantern") + "</span>" : "") + (id === "bosses" ? '<span id="fieldTrophies" hidden></span>' : "") + (id === "gate" ? '<span id="fieldPennants" aria-hidden="true"></span>' : "") + "</div>";
   }
   function initLivingField() {
     const ambient = [
@@ -9440,7 +9465,7 @@ textarea {
   }
   function wheelMarkup() {
     const index = runtime.wheelResult === null ? s.wheelClaims % wheelRewards.length : runtime.wheelResult, r = wheelRewards[index], ready = wheelReady(), progress2 = wheelProgress(), claimed = runtime.wheelResult !== null;
-    return `<div class="wheel-stage"><div class="wheel-disc" aria-hidden="true"><div class="wheel-face" style="--angle:${-index * 60}deg"></div><div class="wheel-pointer"></div></div><div class="wheel-info"><strong>${claimed ? "Reward collected!" : ready ? "Milestone complete!" : "Next milestone reward"}</strong>${r.detail}<small>${claimed ? "Your reward has been added." : ready ? "Spin to collect your displayed milestone reward." : "A new reward becomes available after 50 presses following each claim. Rewards do not stack."}</small>${claimed ? "" : `<div class="wheel-progress"><i style="width:${progress2 * 2}%"></i></div><small>${progress2}/50 presses \xB7 ${ready} reward available</small>`}</div><div class="wheel-reel"><div class="wheel-title">REWARD WHEEL</div><div class="wheel-track"><div class="wheel-strip" id="wheelStrip">${Array.from({ length: 29 }, (_, j) => rewardCard(index + j - 2, j === 2 ? "chosen" : "")).join("")}</div></div></div><div class="wheel-controls">${claimed ? '<button class="wheel-claim" id="wheelNext">Done</button>' : `<button class="wheel-claim" id="wheelClaim" ${!ready ? "disabled" : ""}>${ready ? "SPIN WHEEL" : "SPIN WHEEL \xB7 " + (50 - progress2) + " presses left"}</button>`}<button class="action secondary" data-close="1">Return to field</button></div></div>`;
+    return `<div class="wheel-stage"><div class="wheel-disc" aria-hidden="true"><div class="wheel-face" style="--angle:${-index * 60}deg"></div><div class="wheel-pointer"></div></div><div class="wheel-info"><strong>${claimed ? "Reward collected!" : ready ? "Milestone complete!" : "Next milestone reward"}</strong>${r.detail}<small>${claimed ? "Your reward has been added." : ready ? "Spin to collect your displayed milestone reward." : "A new reward becomes available after 50 presses following each claim. Rewards do not stack."}</small>${claimed ? "" : `<div class="wheel-progress"><i style="width:${progress2 * 2}%"></i></div><small>${progress2}/50 presses \xB7 ${ready} reward available</small>`}</div><div class="wheel-reel"><div class="wheel-title">REWARD WHEEL</div><div class="wheel-track"><div class="wheel-strip" id="wheelStrip">${Array.from({ length: 29 }, (_, j) => rewardCard(index + j - 2, j === 2 ? "chosen" : "")).join("")}</div></div></div><div class="wheel-controls">${claimed ? "" : `<button class="wheel-claim" id="wheelClaim" ${!ready ? "disabled" : ""}>${ready ? "SPIN WHEEL" : "SPIN WHEEL \xB7 " + (50 - progress2) + " presses left"}</button>`}</div></div>`;
   }
   function centerReel(strip, index) {
     const card = strip.children[index], track = strip.parentElement;
@@ -9480,12 +9505,11 @@ textarea {
         return;
       runtime.wheelMoving = false;
       placeReel();
-      const controls = $("modalBody").querySelector(".wheel-controls");
-      controls.innerHTML = '<button class="wheel-claim" id="wheelNext">Done</button><button class="action secondary" data-close="1">Return to field</button>';
+      $("modalBody").querySelector(".wheel-controls").hidden = true;
       const detail = $("modalBody").querySelector(".wheel-info");
       detail.innerHTML = `<strong>Reward collected!</strong>${r.detail}<small>Your reward has been added.</small>`;
       if (strip) strip.children[20].classList.add("chosen", "revealed");
-      $("wheelNext").focus();
+      $("close").focus();
     };
     if (!strip) {
       finish();
@@ -9740,8 +9764,10 @@ textarea {
     );
     setValue($("inventory"), "hidden", !access.gear);
     setText($("invCount"), s.items.length);
-    setValue($("upgrades"), "hidden", !access.workshop);
-    setValue($("skills"), "hidden", !access.skills);
+    const home = s.world === firstWorld;
+    setValue($("upgrades"), "hidden", home || !access.workshop);
+    setValue($("skills"), "hidden", home || !access.skills);
+    setValue($("worlds"), "hidden", home && s.total >= worlds.desert.at);
     setValue($("collection"), "hidden", !access.collection);
     setText($("ticker"), s.notice);
     worldReadout(pieces);
@@ -9757,9 +9783,7 @@ textarea {
     renderCombatField();
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
-    refreshBlacksmith();
-    if (runtime.modalType === "forge") updateForge();
-    if (runtime.modalType === "recipes") updateRecipes();
+    refreshBlacksmithDialog();
     if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
       updateBuyButtons();
   }
@@ -9893,7 +9917,7 @@ textarea {
       const i = equipped(j);
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>\u2014 Empty \u2014</b>"}</div>`;
     }).join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
-    ${inForge ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " \xB7 " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
+    ${inForge || s.world === firstWorld ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " \xB7 " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
     <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
     <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
   }
@@ -9944,10 +9968,11 @@ textarea {
     $("modal").classList.toggle("constellation", type === "skills");
     $("modal").classList.toggle("milestone-wheel", type === "wheel");
     renderLocationScene(s, runtime.fieldLocation, entering);
-    $("close").textContent = landmark ? "Return to field" : type === "skills" ? "DONE" : "\u2715";
+    const returnsToField = landmark || type === "wheel";
+    $("close").textContent = returnsToField ? "Return to field" : type === "skills" ? "DONE" : "\u2715";
     $("close").setAttribute(
       "aria-label",
-      landmark ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog"
+      returnsToField ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog"
     );
     const oldLegend = $("treeLegend");
     if (oldLegend) oldLegend.remove();
@@ -10070,6 +10095,27 @@ textarea {
     if (location === "forge") b.closest(".window").scrollTop = 0;
     if (type === "skills") updateBuyButtons();
     $("close").focus();
+  }
+  function refreshBlacksmithDialog() {
+    const type = runtime.modalType;
+    if (type !== "forge" && type !== "recipes") {
+      refreshBlacksmith();
+      return;
+    }
+    const id = type === "forge" ? Number($("forgeBuy").dataset.forge) : void 0;
+    if (!runtime.fieldLocation && fieldLocationFor(s, "forge", type)) {
+      const selection = type === "recipes" && [$("recipeSet").value, $("recipeSlot").value];
+      openModal(type, id, "forge");
+      if (selection) {
+        $("recipeSet").value = selection[0];
+        $("recipeSlot").value = selection[1];
+        updateRecipes();
+      }
+      return;
+    }
+    refreshBlacksmith();
+    if (type === "forge") updateForge();
+    else updateRecipes();
   }
   function closeModal() {
     clearWork();
@@ -10288,9 +10334,11 @@ textarea {
     <h3>${itemName(item)}</h3><div id="forgeStat" class="item-stat"></div></div></div>
     <p class="subtext">Each rank adds 12% of the current base stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
-    <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
-    <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
-    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button></div>`;
+    <div class="gear-filters recipe-controls">
+      <label id="forgePaymentRow" hidden>Temper payment <select id="forgePayment"><option value="standard">Coins and scrap</option><option value="materials">Gathered materials</option></select></label>
+      <button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+      <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button>
+    </div>`;
   }
   function updateForge() {
     const button = $("forgeBuy");
@@ -10326,14 +10374,14 @@ textarea {
       );
     }
     const temper = materialOffer(s, item);
-    setValue($("temperGear"), "hidden", !temper);
-    setValue($("temperGear"), "disabled", !temper?.available);
-    if (temper)
-      setText($("temperGear"), "Material temper \xB7 " + costText(temper.cost));
-    setValue(button, "disabled", !offer2.available);
+    const useMaterials2 = Boolean(temper && $("forgePayment").value === "materials");
+    const payment = useMaterials2 ? temper : offer2;
+    setValue($("forgePaymentRow"), "hidden", !temper);
+    setValue(button.dataset, "payment", useMaterials2 ? "materials" : "standard");
+    setValue(button, "disabled", !payment.available);
     setText(
       button,
-      offer2.maxed ? "Fully forged" : offer2.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Forge \xB7 " + fmtExact(offer2.cost.coins) + " coins + " + fmtExact(offer2.cost.scrap) + " scrap"
+      offer2.maxed ? "Fully forged" : offer2.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Temper \xB7 " + costText(payment.cost)
     );
   }
   function costLabel(cost) {
@@ -10376,10 +10424,9 @@ textarea {
     <div class="gear-filters recipe-controls">
     <label>Set <select id="recipeSet">${Object.entries(builds).filter(([id, set]) => !set.rewardSlots && (!set.signature || s.blacksmith.recipes.includes(id))).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
-    </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
-    <button id="craftGear" class="action gold">Craft \xB7 ${costLabel(craftCost)}</button>
-    <button id="craftGatheredGear" class="action gold">Craft with materials \xB7 ${costText(gatheredRecipeCost)}</button>
-    <p id="gatheredBalance"></p>
+    <label id="recipePaymentRow">Payment <select id="recipePayment"><option value="standard">Coins, scrap, and shards</option><option value="materials">Gathered materials</option></select></label>
+    </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p>
+    <p id="recipeBalance" hidden></p><button id="craftGear" class="action gold">Craft</button>
     </div>
     <details class="smith-blueprints"><summary>Rare blueprints</summary>${Object.entries(blueprints).map(
       ([id, def]) => `<article style="--plate:${def.color}"><strong>${def.name} \xB7 ${def.signature}</strong>
@@ -10393,29 +10440,16 @@ textarea {
     setValue($("recipeGate"), "hidden", unlocked);
     const full = s.items.length >= gearBagLimit;
     const set = $("recipeSet").value;
-    const cost = recipePayment(s, set, false);
-    const gathered = recipePayment(s, set, true);
     const rare = Object.hasOwn(blueprints, set);
-    setValue($("craftGatheredGear"), "hidden", rare);
-    setText($("craftGear"), cost ? "Craft \xB7 " + costText(cost) : rare ? "Unlocks at " + fmtExact(blueprints[set].at) + " earned" : "Craft");
-    setText(
-      $("recipeBalance"),
-      full ? "Gear bag is full." : "Available \xB7 " + costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards })
-    );
-    setText(
-      $("gatheredBalance"),
-      "Gathered materials \xB7 " + costText({ copperOre: s.copperOre, glowleaf: s.glowleaf })
-    );
-    setValue(
-      $("craftGatheredGear"),
-      "disabled",
-      !gathered || full || !canPay(s, gathered)
-    );
-    setValue(
-      $("craftGear"),
-      "disabled",
-      !cost || full || !canPay(s, cost)
-    );
+    const useMaterials2 = !rare && $("recipePayment").value === "materials";
+    const cost = recipePayment(s, set, useMaterials2);
+    const button = $("craftGear");
+    setValue($("recipePaymentRow"), "hidden", rare);
+    setValue(button.dataset, "payment", useMaterials2 ? "materials" : "standard");
+    setText(button, cost ? "Craft \xB7 " + costText(cost) : rare ? "Unlocks at " + fmtExact(blueprints[set].at) + " earned" : "Craft");
+    setValue($("recipeBalance"), "hidden", !full);
+    if (full) setText($("recipeBalance"), "Gear bag is full.");
+    setValue(button, "disabled", !cost || full || !canPay(s, cost));
   }
   var equipModes = {
     off: "Off",
@@ -10533,7 +10567,8 @@ textarea {
       (row, y) => [...row].map((p, x) => p === "." ? "" : `<rect x="${x}" y="${y}" width="1" height="1" fill="${pixels[p]}" data-pixel="${p}"/>`).join("")
     ).join("")}${fixtureDetail[key]}</svg>`;
   }
-  function station(id, title, attrs = "") {
+  function station(id, title, attrs, current = false) {
+    if (current) return `<div class="smith-station smith-${id} smith-current" aria-current="location">${fixture(id)}<span>${title}</span></div>`;
     return `<button type="button" class="smith-station smith-${id}" id="smith-${id}" ${attrs}>${fixture(id)}<span>${title}</span></button>`;
   }
   function displayMarkup() {
@@ -10554,8 +10589,8 @@ textarea {
     ${station("furnace", "Heat", "data-smith-step=furnace disabled")}
     ${station("anvil", "Strike", "data-smith-step=anvil disabled")}
     ${station("quench", "Quench", "data-smith-step=quench disabled")}
-    ${station("table", "Recipes", "data-open=recipes" + (s.total < 2500 ? ' aria-label="Recipes, unlocks at 2,500 earned"' : ""))}
-    ${station("rack", "Equipment rack", "data-open=inventory")}
+    ${station("table", "Recipes", "data-open=recipes" + (s.total < 2500 ? ' aria-label="Recipes, unlocks at 2,500 earned"' : ""), runtime.modalType === "recipes")}
+    ${station("rack", "Equipment rack", "data-open=inventory", runtime.modalType === "inventory")}
     <div class="smith-bins">${fixture("bins")}<span>Materials</span></div>
     <div id="smithPiece" class="smith-piece" hidden></div>
     <div class="smith-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -10581,7 +10616,7 @@ textarea {
   }
   function animateMarker(now) {
     if (!work || work.stage !== "anvil") return;
-    $("smithMarker").style.transform = `translateX(${markerAt(work, now)}cqw)`;
+    $("smithMarker").style.transform = `translateX(${markerAt(work, now)}%)`;
     frame = requestAnimationFrame(animateMarker);
   }
   function drawWork(message) {
@@ -10589,8 +10624,10 @@ textarea {
     $("smithRoom").dataset.stage = stage ?? "";
     for (const step of ["furnace", "anvil", "quench"])
       setValue($("smith-" + step), "disabled", stage !== step);
-    for (const station2 of ["table", "rack"])
-      setValue($("smith-" + station2), "disabled", Boolean(work));
+    for (const station2 of ["table", "rack"]) {
+      const button = $("smith-" + station2);
+      if (button) setValue(button, "disabled", Boolean(work));
+    }
     $("smithBench").hidden = !work;
     $("smithPanel").hidden = Boolean(work);
     $("smithPiece").hidden = !work;
@@ -10620,7 +10657,7 @@ textarea {
   }
   function handleBlacksmith(button) {
     const step = button.dataset.smithStep;
-    if (!step && !button.dataset.forge && !button.dataset.evolve && !["craftGear", "craftGatheredGear"].includes(button.id)) return false;
+    if (!step && !button.dataset.forge && !button.dataset.evolve && button.id !== "craftGear") return false;
     if (!$("smithRoom")) return true;
     const now = performance.now();
     if (!step && !work) {
@@ -10630,7 +10667,7 @@ textarea {
         id: Number(button.dataset.evolve || button.dataset.forge),
         set: $("recipeSet")?.value,
         slot: Number($("recipeSlot")?.value),
-        gathered: ["craftGatheredGear", "temperGear"].includes(button.id)
+        gathered: button.dataset.payment === "materials"
       });
       if (work) {
         setText(document.querySelector(".smith-result"), "");
@@ -10726,7 +10763,6 @@ textarea {
     if (confirm("Retreat and end this boss fight?")) leaveFight();
     else resetCombatClock();
   });
-  $("combatDone").addEventListener("click", () => openModal("bosses"));
   $("combatDismiss").addEventListener("click", () => {
     resetCombatView();
     renderCombatField();
@@ -10758,7 +10794,8 @@ textarea {
   $("modalBody").addEventListener("change", (e) => {
     const { id, value } = e.target;
     if (id === "smithAssist") updateTimingAssist();
-    if (id === "recipeSet") updateRecipes();
+    if (id === "recipeSet" || id === "recipePayment") updateRecipes();
+    if (id === "forgePayment") updateForge();
     if (siteControlChange(e.target)) {
       renderSites();
       save();
@@ -10879,10 +10916,6 @@ textarea {
     }
     if (b.id === "wheelClaim") {
       collectWheel();
-      return;
-    }
-    if (b.id === "wheelNext") {
-      closeModal();
       return;
     }
     if (b.dataset.treeTab) {

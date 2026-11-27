@@ -17,7 +17,7 @@ import { save } from "./saves.js";
 import { sound } from "./sound.js";
 import { equippedGear, itemName, s } from "./state.js";
 import { $, setText, setValue } from "./ui-dom.js";
-import { worlds } from "./world-data.js";
+import { firstWorld, worlds } from "./world-data.js";
 
 let lastTick;
 let selected = "";
@@ -216,7 +216,7 @@ function leaveFight() {
 
 function renderCombatField() {
   const enabled = s.total >= milestones.combat;
-  setValue($("bosses"), "hidden", !enabled);
+  setValue($("bosses"), "hidden", s.world === firstWorld || !enabled);
   const a = s.combat.attempt;
   const panel = $("combatPanel");
   const shown = Boolean(a || result);
@@ -235,7 +235,6 @@ function renderCombatField() {
   setText($("combatName"), def.name);
   setValue($("combatGuard"), "hidden", !a);
   setValue($("combatRetreat"), "hidden", !a);
-  setValue($("combatDone"), "hidden", Boolean(a));
   setValue($("combatDismiss"), "hidden", Boolean(a));
   setValue($("combatMeters"), "hidden", !a);
   setValue($("combatWarnTime"), "hidden", !a);

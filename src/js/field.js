@@ -1,5 +1,4 @@
 import { advanceClone, fieldSignatures } from "./blacksmith-effects.js";
-import { refreshBlacksmith } from "./blacksmith-view.js";
 import { signatureMark } from "./sprites.js";
 import { strikeBoss } from "./combat.js";
 import {
@@ -19,7 +18,7 @@ import { renderSites, rewardText } from "./site-view.js";
 import { advanceSites } from "./sites.js";
 import { buildProfile } from "./build-gear.js";
 import { clamp, rarity, stages } from "./data.js";
-import { updateBuyButtons } from "./dialogs.js";
+import { refreshBlacksmithDialog, updateBuyButtons } from "./dialogs.js";
 import {
   burst,
   directionalFloat,
@@ -27,7 +26,6 @@ import {
   toast,
   toastTimer,
 } from "./effects.js";
-import { updateForge, updateRecipes } from "./equipment.js";
 import { renderLivingField } from "./field-view.js";
 import {
   applyPress,
@@ -57,7 +55,7 @@ import {
 } from "./state.js";
 import { $, setText, setValue } from "./ui-dom.js";
 import { wheelHUD } from "./wheel.js";
-import { recordWorld, worlds } from "./world-data.js";
+import { firstWorld, recordWorld, worlds } from "./world-data.js";
 import {
   updateWorlds,
   worldChests,
@@ -331,8 +329,10 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   );
   setValue($("inventory"), "hidden", !access.gear);
   setText($("invCount"), s.items.length);
-  setValue($("upgrades"), "hidden", !access.workshop);
-  setValue($("skills"), "hidden", !access.skills);
+  const home = s.world === firstWorld;
+  setValue($("upgrades"), "hidden", home || !access.workshop);
+  setValue($("skills"), "hidden", home || !access.skills);
+  setValue($("worlds"), "hidden", home && s.total >= worlds.desert.at);
   setValue($("collection"), "hidden", !access.collection);
   setText($("ticker"), s.notice);
   worldReadout(pieces);
@@ -348,9 +348,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   renderCombatField();
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
-  refreshBlacksmith();
-  if (runtime.modalType === "forge") updateForge();
-  if (runtime.modalType === "recipes") updateRecipes();
+  refreshBlacksmithDialog();
   if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
     updateBuyButtons();
 }

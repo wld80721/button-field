@@ -92,7 +92,7 @@ function wheelMarkup() {
     ready = wheelReady(),
     progress = wheelProgress(),
     claimed = runtime.wheelResult !== null;
-  return `<div class="wheel-stage"><div class="wheel-disc" aria-hidden="true"><div class="wheel-face" style="--angle:${-index * 60}deg"></div><div class="wheel-pointer"></div></div><div class="wheel-info"><strong>${claimed ? "Reward collected!" : ready ? "Milestone complete!" : "Next milestone reward"}</strong>${r.detail}<small>${claimed ? "Your reward has been added." : ready ? "Spin to collect your displayed milestone reward." : "A new reward becomes available after 50 presses following each claim. Rewards do not stack."}</small>${claimed ? "" : `<div class="wheel-progress"><i style="width:${progress * 2}%"></i></div><small>${progress}/50 presses · ${ready} reward available</small>`}</div><div class="wheel-reel"><div class="wheel-title">REWARD WHEEL</div><div class="wheel-track"><div class="wheel-strip" id="wheelStrip">${Array.from({ length: 29 }, (_, j) => rewardCard(index + j - 2, j === 2 ? "chosen" : "")).join("")}</div></div></div><div class="wheel-controls">${claimed ? '<button class="wheel-claim" id="wheelNext">Done</button>' : `<button class="wheel-claim" id="wheelClaim" ${!ready ? "disabled" : ""}>${ready ? "SPIN WHEEL" : "SPIN WHEEL · " + (50 - progress) + " presses left"}</button>`}<button class="action secondary" data-close="1">Return to field</button></div></div>`;
+  return `<div class="wheel-stage"><div class="wheel-disc" aria-hidden="true"><div class="wheel-face" style="--angle:${-index * 60}deg"></div><div class="wheel-pointer"></div></div><div class="wheel-info"><strong>${claimed ? "Reward collected!" : ready ? "Milestone complete!" : "Next milestone reward"}</strong>${r.detail}<small>${claimed ? "Your reward has been added." : ready ? "Spin to collect your displayed milestone reward." : "A new reward becomes available after 50 presses following each claim. Rewards do not stack."}</small>${claimed ? "" : `<div class="wheel-progress"><i style="width:${progress * 2}%"></i></div><small>${progress}/50 presses · ${ready} reward available</small>`}</div><div class="wheel-reel"><div class="wheel-title">REWARD WHEEL</div><div class="wheel-track"><div class="wheel-strip" id="wheelStrip">${Array.from({ length: 29 }, (_, j) => rewardCard(index + j - 2, j === 2 ? "chosen" : "")).join("")}</div></div></div><div class="wheel-controls">${claimed ? "" : `<button class="wheel-claim" id="wheelClaim" ${!ready ? "disabled" : ""}>${ready ? "SPIN WHEEL" : "SPIN WHEEL · " + (50 - progress) + " presses left"}</button>`}</div></div>`;
 }
 function centerReel(strip, index) {
   const card = strip.children[index],
@@ -137,13 +137,11 @@ function collectWheel() {
       return;
     runtime.wheelMoving = false;
     placeReel();
-    const controls = $("modalBody").querySelector(".wheel-controls");
-    controls.innerHTML =
-      '<button class="wheel-claim" id="wheelNext">Done</button><button class="action secondary" data-close="1">Return to field</button>';
+    $("modalBody").querySelector(".wheel-controls").hidden = true;
     const detail = $("modalBody").querySelector(".wheel-info");
     detail.innerHTML = `<strong>Reward collected!</strong>${r.detail}<small>Your reward has been added.</small>`;
     if (strip) strip.children[20].classList.add("chosen", "revealed");
-    $("wheelNext").focus();
+    $("close").focus();
   };
   if (!strip) {
     finish();

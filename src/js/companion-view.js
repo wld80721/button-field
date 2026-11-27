@@ -24,6 +24,7 @@ import {
   tripRemaining,
   tripSlots,
 } from "./companions.js";
+import { firstWorld } from "./world-data.js";
 import { fmtExact } from "./numbers.js";
 import { runtime } from "./runtime.js";
 import { costText } from "./site-view.js";
@@ -115,7 +116,7 @@ function safePetSelection() {
 }
 
 function renderCompanions(now = Date.now()) {
-  setValue($("companions"), "hidden", s.total < companionsAt);
+  setValue($("companions"), "hidden", s.world === firstWorld || s.total < companionsAt);
   updatePetField();
   if (runtime.modalType !== "companions") return;
   const camp = s.companions;

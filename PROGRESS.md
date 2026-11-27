@@ -4,6 +4,12 @@
 
 The Legendary Blacksmith follows The Living Field (`b78f443`). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
+## Navigation and Blacksmith fixes · 2026-11-28
+
+- Removed redundant Grasslands shortcuts and kept the equivalent routes in other worlds. Consolidated Forge payment actions, wheel exit, and Boss Board entry.
+- Fixed the Forge getting stuck when passive earnings reached its unlock while the item preview was open. Verified that the anvil and timing meter can be used together at 568 × 320. The Garden resets the seed selector after the last magical seed is planted.
+- Verified the standalone build, 41 unit tests, and 49 offline Chromium checks. Reviewed desktop, portrait, and landscape screenshots. Firefox and WebKit could not start in this environment.
+
 ## The Legendary Blacksmith · Release
 
 The workshop, four equipment sets, and schema 7 migration are included in Expansion 2.

@@ -14,7 +14,7 @@ const landmarks = {
   farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
   grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
   mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
-  bosses: { name: "Boss clearing", at: milestones.combat, screens: ["bosses"] },
+  bosses: { name: "Boss Board", at: milestones.combat, screens: ["bosses"] },
   gate: { name: "Trade gate", at: worlds.desert.at, screens: ["worlds"] },
 };
 
@@ -38,9 +38,10 @@ function landmarkMarkup([id, { name, find, cover }]) {
         fieldSprite(cover) + '</button><span class="living-keepsake" data-keepsake="' + find +
         '" title="' + discoveries[find].name + '" hidden>' + fieldSprite(find) + '</span>'
     : "";
+  const status = id === "farm" || id === "mine" ? '<small id="landmark-' + id + '-status"></small>' : "";
   return '<div class="living-plot" data-field-plot="' + id + '" hidden>' +
     '<button class="living-landmark" data-landmark="' + id + '">' +
-      fieldSprite(id) + '<span>' + name + '</span></button>' + secret +
+      fieldSprite(id) + '<span>' + name + status + '</span></button>' + secret +
     (id === "camp" ? '<span id="fieldExpeditionKit" aria-hidden="true" hidden>' + fieldSprite("lantern") + '</span>' : "") +
     (id === "bosses" ? '<span id="fieldTrophies" hidden></span>' : "") +
     (id === "gate" ? '<span id="fieldPennants" aria-hidden="true"></span>' : "") +

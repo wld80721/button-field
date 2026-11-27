@@ -4,6 +4,7 @@ import { rarity } from "./data.js";
 import { forgeMarkup } from "./equipment.js";
 import { fieldSprite } from "./field-art.js";
 import { materials } from "./sites.js";
+import { runtime } from "./runtime.js";
 import { gearIcon, itemIcon } from "./sprites.js";
 import { sound } from "./sound.js";
 import { itemName, level, s } from "./state.js";
@@ -38,7 +39,8 @@ function fixture(key) {
   ).join("")}${fixtureDetail[key]}</svg>`;
 }
 
-function station(id, title, attrs = "") {
+function station(id, title, attrs, current = false) {
+  if (current) return `<div class="smith-station smith-${id} smith-current" aria-current="location">${fixture(id)}<span>${title}</span></div>`;
   return `<button type="button" class="smith-station smith-${id}" id="smith-${id}" ${attrs}>${fixture(id)}<span>${title}</span></button>`;
 }
 
@@ -62,8 +64,8 @@ function blacksmithMarkup(panel = "", resultId = "smithResult") {
     ${station("furnace", "Heat", "data-smith-step=furnace disabled")}
     ${station("anvil", "Strike", "data-smith-step=anvil disabled")}
     ${station("quench", "Quench", "data-smith-step=quench disabled")}
-    ${station("table", "Recipes", "data-open=recipes" + (s.total < 2500 ? ' aria-label="Recipes, unlocks at 2,500 earned"' : ""))}
-    ${station("rack", "Equipment rack", "data-open=inventory")}
+    ${station("table", "Recipes", "data-open=recipes" + (s.total < 2500 ? ' aria-label="Recipes, unlocks at 2,500 earned"' : ""), runtime.modalType === "recipes")}
+    ${station("rack", "Equipment rack", "data-open=inventory", runtime.modalType === "inventory")}
     <div class="smith-bins">${fixture("bins")}<span>Materials</span></div>
     <div id="smithPiece" class="smith-piece" hidden></div>
     <div class="smith-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -93,7 +95,7 @@ function clearWork() {
 
 function animateMarker(now) {
   if (!work || work.stage !== "anvil") return;
-  $("smithMarker").style.transform = `translateX(${markerAt(work, now)}cqw)`;
+  $("smithMarker").style.transform = `translateX(${markerAt(work, now)}%)`;
   frame = requestAnimationFrame(animateMarker);
 }
 
@@ -102,8 +104,10 @@ function drawWork(message) {
   $("smithRoom").dataset.stage = stage ?? "";
   for (const step of ["furnace", "anvil", "quench"])
     setValue($("smith-" + step), "disabled", stage !== step);
-  for (const station of ["table", "rack"])
-    setValue($("smith-" + station), "disabled", Boolean(work));
+  for (const station of ["table", "rack"]) {
+    const button = $("smith-" + station);
+    if (button) setValue(button, "disabled", Boolean(work));
+  }
   $("smithBench").hidden = !work;
   $("smithPanel").hidden = Boolean(work);
   $("smithPiece").hidden = !work;
@@ -137,7 +141,7 @@ function playStation(kind) {
 
 function handleBlacksmith(button) {
   const step = button.dataset.smithStep;
-  if (!step && !button.dataset.forge && !button.dataset.evolve && !["craftGear", "craftGatheredGear"].includes(button.id)) return false;
+  if (!step && !button.dataset.forge && !button.dataset.evolve && button.id !== "craftGear") return false;
   if (!$("smithRoom")) return true;
   const now = performance.now();
   if (!step && !work) {
@@ -145,7 +149,7 @@ function handleBlacksmith(button) {
     work = beginWork(s, {
       kind, id: Number(button.dataset.evolve || button.dataset.forge),
       set: $("recipeSet")?.value, slot: Number($("recipeSlot")?.value),
-      gathered: ["craftGatheredGear", "temperGear"].includes(button.id),
+      gathered: button.dataset.payment === "materials",
     });
     if (work) {
       setText(document.querySelector(".smith-result"), "");
