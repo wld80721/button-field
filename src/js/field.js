@@ -1,3 +1,5 @@
+import { renderSites, rewardText } from "./site-view.js";
+import { advanceSites } from "./sites.js";
 import { buildProfile } from "./build-gear.js";
 import { clamp, rarity, stages } from "./data.js";
 import { updateBuyButtons } from "./dialogs.js";
@@ -135,6 +137,7 @@ function press() {
   recordEarnings(totalBefore);
   if (chest) revealChest(chest);
   if (opened) showOpenedChest(opened);
+  showSiteRewards(advanceSites(s, 1000, true).rewards);
   directionalFloat(
     (effect || ability ? (effect || ability) + " · " : "") +
       "+" +
@@ -192,6 +195,13 @@ function showOpenedChest({ chest: c, item, disposition, gathered }) {
       (gathered ? " · Forager +" + gathered + " scrap." : "!"),
   );
 }
+function showSiteRewards(rewards) {
+  if (!rewards.length) return;
+  const label = "Gathered · " + rewardText(rewards);
+  notice(label);
+  if ($("siteResult")) setText($("siteResult"), label);
+}
+
 function progress(i) {
   const n = stages[i + 1];
   return n
@@ -248,6 +258,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
     runtime.pendingWorldUnlock = null;
   }
   wheelHUD();
+  renderSites();
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
   if (runtime.modalType === "forge") updateForge();
@@ -309,4 +320,5 @@ export {
   render,
   renderChests,
   replaceRun,
+  showSiteRewards,
 };

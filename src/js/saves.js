@@ -1,3 +1,4 @@
+import { normalizeSites } from "./sites.js";
 import {
   builds,
   legendary,
@@ -50,6 +51,7 @@ function normalizeRun(o) {
   f.lootRules = normalizeLootRules(o.lootRules);
   f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
   f.total = num(o.total, Number.MAX_VALUE);
+  normalizeSites(f, o.sites);
   for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
   for (const k of ["earned", "runs"])
     f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
@@ -203,6 +205,7 @@ function normalizeRun(o) {
 }
 const KEY = "treasure-grove-v3";
 const preForgeSaveKey = KEY + "-before-forge";
+const preSitesSaveKey = KEY + "-before-farming-mining";
 const preExpansionSaveKey = KEY + "-before-equipment-expansion";
 const preFoundationSaveKey = KEY + "-before-foundation";
 let saveWarning = "";
@@ -218,6 +221,10 @@ function readBackup(key) {
 
 function readPreForgeSave() {
   return readBackup(preForgeSaveKey);
+}
+
+function readPreSitesSave() {
+  return readBackup(preSitesSaveKey);
 }
 
 function readPreExpansionSave() {
@@ -288,7 +295,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preExpansionSaveKey, raw);
+      preserveBackup(preSitesSaveKey, raw);
+      if (version < 2) preserveBackup(preExpansionSaveKey, raw);
       if (version < 1) preserveBackup(preFoundationSaveKey, raw);
       if (!Object.hasOwn(payload, "scrap"))
         preserveBackup(preForgeSaveKey, raw);
@@ -327,6 +335,7 @@ export {
   readBlockedSave,
   readPreForgeSave,
   readPreExpansionSave,
+  readPreSitesSave,
   readPreFoundationSave,
   resumeSaving,
   save,

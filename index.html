@@ -48,6 +48,7 @@ span {
   -webkit-tap-highlight-color: transparent;
 }
 #game {
+  --field-site-space: 0px;
   max-width: 1600px;
   margin: auto;
   min-height: 100dvh;
@@ -142,7 +143,7 @@ span {
   position: relative;
   flex: 1;
   min-height: 480px;
-  height: calc(100dvh - 134px);
+  height: calc(100dvh - 134px - var(--field-site-space));
   border: 5px solid #07181f;
   box-shadow:
     0 0 0 2px #38545a,
@@ -849,7 +850,7 @@ textarea {
   }
   .board-frame {
     min-height: 365px;
-    height: calc(100dvh - 188px);
+    height: calc(100dvh - 188px - var(--field-site-space));
     border-width: 3px;
   }
   .board-top {
@@ -2490,6 +2491,110 @@ textarea {
   box-shadow: 3px 4px #071423;
   pointer-events: none;
 }
+
+/* Reserve room for the site strip once it becomes available. */
+#game:has(.field-sites:not([hidden])) {
+  --field-site-space: 64px;
+}
+.field-sites {
+  display: flex;
+  gap: 8px;
+  border: 2px solid #456059;
+  border-radius: 5px;
+  background: #162c2d;
+  padding: 5px 7px;
+}
+.field-site {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+  color: #e7ffd6;
+  background: #203b37;
+  border: 2px solid #628976;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+.field-site:hover {
+  background: #294b42;
+}
+.field-site svg {
+  width: 38px;
+  height: 28px;
+  flex: none;
+}
+.field-site strong,
+.field-site small {
+  display: block;
+}
+.field-site small {
+  color: #c1d9c7;
+}
+.site-bloom,
+[data-stage="empty"] .site-crop,
+[data-stage="cooling"] .site-crystal {
+  opacity: 0;
+}
+[data-stage="ripe"] .site-bloom {
+  opacity: 1;
+}
+.site-wallet,
+.site-upgrades {
+  margin-bottom: 12px;
+}
+.site-wallet {
+  color: #e4dfa5;
+}
+.site-upgrades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  gap: 8px;
+}
+.site-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.site-controls select {
+  background: #142436;
+  color: #ecf4ff;
+  border: 1px solid #91a7b8;
+  padding: 6px;
+  max-width: 100%;
+}
+.site-upgrades button,
+.site-plot button,
+.site-controls button,
+#temperGear,
+#craftGatheredGear {
+  white-space: normal;
+}
+.mine-vein {
+  border-color: var(--ore);
+}
+.site-result {
+  min-height: 1em;
+  color: #e7ffc1;
+}
+@media (max-width: 520px) {
+  .field-sites {
+    gap: 5px;
+  }
+  .field-site {
+    gap: 5px;
+    padding: 4px 5px;
+  }
+  .field-site svg {
+    width: 32px;
+  }
+  .item-grid:has(.site-plot, .mine-vein) {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
   </head>
   <body>
@@ -2645,6 +2750,53 @@ textarea {
           </div>
         </div>
       </section>
+      <section
+        class="field-sites"
+        id="fieldSites"
+        aria-label="Field sites"
+        hidden
+      >
+        <button class="field-site" id="farm" hidden>
+          <svg
+            viewBox="0 0 32 22"
+            shape-rendering="crispEdges"
+            aria-hidden="true"
+          >
+            <path fill="#2c1b29" d="M2 12h28v9H2z" />
+            <path fill="#96604a" d="M4 10h24v9H4z" />
+            <path fill="#bb8357" d="M5 11h22v2H5zm0 4h22v2H5z" />
+            <g class="site-crop">
+              <path fill="#39634d" d="M14 6h4v10h-4z" />
+              <path
+                fill="#82d877"
+                d="M8 4h5v3h3v4h-4V9H8zm9 3h3V4h5v5h-4v3h-4z"
+              />
+            </g>
+            <path
+              class="site-bloom"
+              fill="#ffe590"
+              d="M14 0h4v2h3v4h-3v2h-4V6h-3V2h3z"
+            />
+          </svg>
+          <span><strong>Farm</strong><small id="farmStatus"></small></span>
+        </button>
+        <button class="field-site" id="mine" hidden>
+          <svg
+            viewBox="0 0 32 22"
+            shape-rendering="crispEdges"
+            aria-hidden="true"
+          >
+            <path fill="#29303d" d="M2 17h3v-5h4V7h5V4h7v3h5v6h4v8H2z" />
+            <path fill="#636a79" d="M5 17h4v-5h4V8h8v3h5v7h2v2H5z" />
+            <g class="site-crystal">
+              <path fill="#a76fcf" d="M14 3h3V0h4v4h3v6h-4v5h-6z" />
+              <path fill="#dfb5fa" d="M17 3h4v5h-4z" />
+            </g>
+            <path fill="#dd8b64" d="M7 15h4v3H7zm16-2h3v4h-3z" />
+          </svg>
+          <span><strong>Mine</strong><small id="mineStatus"></small></span>
+        </button>
+      </section>
       <footer class="dock">
         <div class="dock-left">
           <span id="saveStatus">Local save</span> · <span>Space to press</span>
@@ -2677,48 +2829,6 @@ textarea {
     <div id="skillTooltip" class="skill-tooltip" role="tooltip" hidden></div>
     <script>
 (() => {
-  // src/js/resources.js
-  var resourceCatalog = Object.freeze({
-    coins: { max: Number.MAX_VALUE },
-    shards: { max: 1e15 },
-    scrap: { max: Number.MAX_SAFE_INTEGER, integer: true },
-    stars: { max: Number.MAX_VALUE, account: "asc", integer: true }
-  });
-  function resourceBalance(state, id) {
-    const { account } = resourceCatalog[id];
-    return (account ? state[account] : state)[id];
-  }
-  function initializeResources(state, source) {
-    for (const [id, { account, max, integer }] of Object.entries(
-      resourceCatalog
-    )) {
-      const ledger = account ? state[account] : state;
-      const value = account ? source?.[account]?.[id] : source?.[id];
-      const amount = Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
-      ledger[id] = integer ? Math.floor(amount) : amount;
-    }
-    return state;
-  }
-  function creditResource(state, id, amount) {
-    if (!(amount > 0)) return;
-    const { max, account } = resourceCatalog[id];
-    const ledger = account ? state[account] : state;
-    ledger[id] = Math.min(max, ledger[id] + amount);
-  }
-  function spendResource(state, id, amount) {
-    if (!Number.isFinite(amount) || amount < 0 || resourceBalance(state, id) < amount)
-      return false;
-    const { account } = resourceCatalog[id];
-    (account ? state[account] : state)[id] -= amount;
-    return true;
-  }
-  function creditCoins(state, amount) {
-    if (!(amount > 0)) return;
-    creditResource(state, "coins", amount);
-    state.total = Math.min(Number.MAX_VALUE, state.total + amount);
-    state.asc.life = Math.min(Number.MAX_VALUE, state.asc.life + amount);
-  }
-
   // src/js/data.js
   var clamp = (n, a, b) => Math.min(b, Math.max(a, n));
   var rarity = [
@@ -3121,6 +3231,432 @@ textarea {
     }
   ];
 
+  // src/js/resources.js
+  var resourceCatalog = Object.freeze({
+    coins: { max: Number.MAX_VALUE },
+    shards: { max: 1e15 },
+    scrap: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    glowleaf: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    rootFiber: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    prismEssence: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    copperOre: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    silverOre: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    starCrystals: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    stars: { max: Number.MAX_VALUE, account: "asc", integer: true }
+  });
+  function resourceBalance(state, id) {
+    const { account } = resourceCatalog[id];
+    return (account ? state[account] : state)[id];
+  }
+  function initializeResources(state, source) {
+    for (const [id, { account, max, integer }] of Object.entries(
+      resourceCatalog
+    )) {
+      const ledger = account ? state[account] : state;
+      const value = account ? source?.[account]?.[id] : source?.[id];
+      const amount = Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
+      ledger[id] = integer ? Math.floor(amount) : amount;
+    }
+    return state;
+  }
+  function creditResource(state, id, amount) {
+    if (!(amount > 0)) return;
+    const { max, account } = resourceCatalog[id];
+    const ledger = account ? state[account] : state;
+    ledger[id] = Math.min(max, ledger[id] + amount);
+  }
+  function spendResource(state, id, amount) {
+    if (!Number.isFinite(amount) || amount < 0 || resourceBalance(state, id) < amount)
+      return false;
+    const { account } = resourceCatalog[id];
+    (account ? state[account] : state)[id] -= amount;
+    return true;
+  }
+  function creditCoins(state, amount) {
+    if (!(amount > 0)) return;
+    creditResource(state, "coins", amount);
+    state.total = Math.min(Number.MAX_VALUE, state.total + amount);
+    state.asc.life = Math.min(Number.MAX_VALUE, state.asc.life + amount);
+  }
+
+  // src/js/sites.js
+  var farmAt = milestones.shards;
+  var mineAt = milestones.helper;
+  var swingMs = 3e3;
+  var materials = {
+    glowleaf: "Glowleaf",
+    rootFiber: "Root Fiber",
+    prismEssence: "Prism Essence",
+    copperOre: "Copper Ore",
+    silverOre: "Silver Ore",
+    starCrystals: "Star Crystals"
+  };
+  var crops = {
+    glowleaf: {
+      name: "Glowleaf",
+      at: farmAt,
+      ms: 12e3,
+      cost: { coins: 25 },
+      material: "glowleaf",
+      yield: 3,
+      effect: "The next three presses give growing crops two bonus seconds instead of one.",
+      color: "#a6f27b"
+    },
+    ironroot: {
+      name: "Ironroot",
+      at: mineAt,
+      ms: 18e3,
+      cost: { coins: 50, copperOre: 1 },
+      material: "rootFiber",
+      yield: 2,
+      effect: "Advance each recovering deposit by six seconds.",
+      color: "#efa478"
+    },
+    prismbloom: {
+      name: "Prismbloom",
+      at: milestones.frozen,
+      ms: 24e3,
+      cost: { coins: 120, silverOre: 1 },
+      material: "prismEssence",
+      yield: 1,
+      effect: "Bank one charge for an extra Star Crystal on your next crystal clear.",
+      color: "#e6b0ff"
+    }
+  };
+  var deposits = {
+    copper: {
+      name: "Copper",
+      rarity: "Common",
+      at: mineAt,
+      tool: 0,
+      hp: 3,
+      ms: 8e3,
+      material: "copperOre",
+      yield: 4,
+      color: "#ed9e6f"
+    },
+    silver: {
+      name: "Silver",
+      rarity: "Uncommon",
+      at: milestones.ascension,
+      tool: 1,
+      hp: 5,
+      ms: 12e3,
+      material: "silverOre",
+      yield: 3,
+      color: "#d8efff"
+    },
+    crystal: {
+      name: "Star Crystal",
+      rarity: "Rare",
+      at: milestones.frozen,
+      tool: 1,
+      hp: 7,
+      ms: 2e4,
+      material: "starCrystals",
+      yield: 2,
+      color: "#c595ff"
+    }
+  };
+  var tools = [
+    { name: "Stone Pick", damage: 1 },
+    {
+      name: "Copper Pick",
+      damage: 2,
+      cost: { coins: 300, copperOre: 6, glowleaf: 3 }
+    },
+    {
+      name: "Resonant Pick",
+      damage: 3,
+      cost: { coins: 2e3, silverOre: 6, starCrystals: 2, rootFiber: 4 }
+    }
+  ];
+  var research = {
+    extraPlot: {
+      name: "Second plot",
+      at: mineAt,
+      cost: { coins: 150, glowleaf: 6, copperOre: 3 },
+      effect: "Plant and grow a second crop."
+    },
+    irrigation: {
+      name: "Irrigation",
+      at: milestones.ascension,
+      cost: { coins: 500, rootFiber: 6, silverOre: 4 },
+      effect: "New crops grow three seconds faster."
+    },
+    harvester: {
+      name: "Auto Harvest",
+      at: milestones.frozen,
+      cost: { coins: 2e3, glowleaf: 8, rootFiber: 6, starCrystals: 2 },
+      effect: "Automatically harvest ripe crops. Planting remains manual."
+    }
+  };
+  var minerUpgrade = {
+    name: "Auto Mining",
+    at: milestones.frozen,
+    cost: { coins: 1800, rootFiber: 6, silverOre: 4, starCrystals: 1 }
+  };
+  var gatheredRecipeCost = { coins: 650, copperOre: 4, glowleaf: 4 };
+  var temperIngredients = [
+    { copperOre: 3, glowleaf: 2 },
+    { silverOre: 2, rootFiber: 2 },
+    { starCrystals: 1, prismEssence: 1 }
+  ];
+  function temperCost(standard, rank) {
+    const ingredients = temperIngredients[rank];
+    return ingredients && {
+      coins: Math.ceil(standard.coins * 0.75),
+      scrap: Math.ceil(standard.scrap * 0.5),
+      ...ingredients
+    };
+  }
+  function hasMaterials(state, cost) {
+    return Object.entries(cost).every(
+      ([resource, amount]) => state[resource] >= amount
+    );
+  }
+  function useMaterials(state, cost) {
+    if (!hasMaterials(state, cost)) return false;
+    for (const [resource, amount] of Object.entries(cost))
+      spendResource(state, resource, amount);
+    return true;
+  }
+  function freshSites() {
+    return {
+      plots: [null, null],
+      research: { extraPlot: false, irrigation: false, harvester: false },
+      growthCharges: 0,
+      crystalFocus: false,
+      autoHarvest: false,
+      pick: 0,
+      veins: Object.fromEntries(
+        Object.entries(deposits).map(([id, def]) => [
+          id,
+          { hp: def.hp, remaining: 0 }
+        ])
+      ),
+      minerOwned: false,
+      autoMine: false,
+      target: "copper",
+      swing: 0
+    };
+  }
+  function depositAccess(state, id) {
+    return typeof id === "string" && Object.hasOwn(deposits, id) && state.total >= deposits[id].at && state.sites.pick >= deposits[id].tool;
+  }
+  function plotCount(state) {
+    return state.total < farmAt ? 0 : state.sites.research.extraPlot ? 2 : 1;
+  }
+  function canPlant(state, index, id) {
+    return Number.isInteger(index) && index >= 0 && index < plotCount(state) && !state.sites.plots[index] && typeof id === "string" && Object.hasOwn(crops, id) && state.total >= crops[id].at && hasMaterials(state, crops[id].cost);
+  }
+  function plant(state, index, id) {
+    if (!canPlant(state, index, id)) return false;
+    const crop = crops[id];
+    useMaterials(state, crop.cost);
+    state.sites.plots[index] = {
+      crop: id,
+      remaining: crop.ms - (state.sites.research.irrigation ? 3e3 : 0)
+    };
+    return true;
+  }
+  function recoverVeins(state, elapsed) {
+    let changed = false;
+    for (const id of Object.keys(deposits)) {
+      const vein = state.sites.veins[id];
+      if (vein.remaining <= 0 || !depositAccess(state, id)) continue;
+      vein.remaining = Math.max(0, vein.remaining - elapsed);
+      if (vein.remaining === 0) vein.hp = deposits[id].hp;
+      changed = true;
+    }
+    return changed;
+  }
+  function harvest(state, index) {
+    const plot = state.sites.plots[index];
+    if (!Number.isInteger(index) || index < 0 || index >= plotCount(state) || !plot || plot.remaining !== 0)
+      return null;
+    state.sites.plots[index] = null;
+    const def = crops[plot.crop];
+    creditResource(state, def.material, def.yield);
+    if (plot.crop === "glowleaf") state.sites.growthCharges = 3;
+    if (plot.crop === "ironroot") recoverVeins(state, 6e3);
+    if (plot.crop === "prismbloom") state.sites.crystalFocus = true;
+    return { material: def.material, amount: def.yield };
+  }
+  function mine(state, id) {
+    if (!depositAccess(state, id)) return null;
+    const site = state.sites;
+    const vein = site.veins[id];
+    if (vein.remaining !== 0 || vein.hp <= 0) return null;
+    vein.hp = Math.max(0, vein.hp - tools[site.pick].damage);
+    if (vein.hp) return { material: deposits[id].material, amount: 0 };
+    const def = deposits[id];
+    vein.remaining = def.ms;
+    if (site.target === id) site.swing = 0;
+    const extra = id === "crystal" && site.crystalFocus;
+    if (extra) site.crystalFocus = false;
+    const amount = def.yield + Number(extra);
+    creditResource(state, def.material, amount);
+    return { material: def.material, amount };
+  }
+  function buyResearch(state, id) {
+    if (typeof id !== "string" || !Object.hasOwn(research, id)) return false;
+    const def = research[id];
+    if (state.total < def.at || state.sites.research[id] || !useMaterials(state, def.cost))
+      return false;
+    state.sites.research[id] = true;
+    return true;
+  }
+  function buyPick(state) {
+    const site = state.sites;
+    const next = tools[site.pick + 1];
+    if (state.total < mineAt || !next || !useMaterials(state, next.cost))
+      return false;
+    site.pick++;
+    return true;
+  }
+  function buyMiner(state) {
+    const site = state.sites;
+    if (state.total < minerUpgrade.at || site.pick < 1 || site.minerOwned || !useMaterials(state, minerUpgrade.cost))
+      return false;
+    site.minerOwned = true;
+    return true;
+  }
+  function setHarvestMode(state, enabled) {
+    if (!state.sites.research.harvester) return false;
+    state.sites.autoHarvest = enabled === true;
+    return true;
+  }
+  function setMiningMode(state, enabled, target) {
+    const site = state.sites;
+    if (!site.minerOwned || !depositAccess(state, target)) return false;
+    const active = enabled === true;
+    if (site.target !== target || site.autoMine !== active) site.swing = 0;
+    site.target = target;
+    site.autoMine = active;
+    return true;
+  }
+  function advanceSites(state, elapsed, press2 = false) {
+    const rewards = [];
+    if (!Number.isFinite(elapsed) || elapsed <= 0 || state.total < farmAt)
+      return { changed: false, rewards };
+    const site = state.sites;
+    const availablePlots = plotCount(state);
+    const grew = site.plots.slice(0, availablePlots).some((plot) => plot?.remaining > 0);
+    let growth = elapsed;
+    if (press2 && grew && site.growthCharges > 0) {
+      growth *= 2;
+      site.growthCharges--;
+    }
+    const targeted = site.veins[site.target];
+    const recoveryBefore = targeted.remaining;
+    let changed = recoverVeins(state, elapsed) || grew;
+    for (let index = 0; index < availablePlots; index++) {
+      const plot = site.plots[index];
+      if (!plot) continue;
+      plot.remaining = Math.max(0, plot.remaining - growth);
+      if (site.autoHarvest && plot.remaining === 0) {
+        rewards.push(harvest(state, index));
+        changed = true;
+      }
+    }
+    if (!press2 && site.autoMine && depositAccess(state, site.target) && targeted.remaining === 0) {
+      const eligible = Math.max(0, elapsed - recoveryBefore);
+      if (eligible > 0) {
+        site.swing += eligible;
+        changed = true;
+        while (site.swing >= swingMs && targeted.remaining === 0) {
+          site.swing -= swingMs;
+          const outcome = mine(state, site.target);
+          if (outcome?.amount) rewards.push(outcome);
+        }
+      }
+    }
+    return { changed, rewards };
+  }
+  function normalizeSites(state, raw) {
+    const site = state.sites;
+    const bounded = (value, cap) => Number.isFinite(value) ? Math.max(0, Math.min(cap, value)) : 0;
+    for (const [id, def] of Object.entries(research))
+      site.research[id] = state.total >= def.at && raw?.research?.[id] === true;
+    for (let i = 0; i < plotCount(state); i++) {
+      const plot = raw?.plots?.[i];
+      if (typeof plot?.crop !== "string" || !Object.hasOwn(crops, plot.crop))
+        continue;
+      const def = crops[plot.crop];
+      if (state.total >= def.at && Number.isFinite(plot.remaining))
+        site.plots[i] = {
+          crop: plot.crop,
+          remaining: bounded(plot.remaining, def.ms)
+        };
+    }
+    if (state.total >= farmAt)
+      site.growthCharges = Math.floor(bounded(raw?.growthCharges, 3));
+    site.autoHarvest = site.research.harvester && raw?.autoHarvest === true;
+    if (state.total < mineAt) return;
+    site.pick = Math.floor(bounded(raw?.pick, tools.length - 1));
+    for (const [id, def] of Object.entries(deposits)) {
+      if (!depositAccess(state, id)) continue;
+      const vein = raw?.veins?.[id];
+      const remaining = bounded(vein?.remaining, def.ms);
+      site.veins[id] = {
+        remaining,
+        hp: remaining > 0 ? 0 : Math.max(1, Math.floor(bounded(vein?.hp ?? def.hp, def.hp)))
+      };
+    }
+    site.crystalFocus = state.total >= crops.prismbloom.at && raw?.crystalFocus === true;
+    site.minerOwned = state.total >= minerUpgrade.at && site.pick >= 1 && raw?.minerOwned === true;
+    site.autoMine = site.minerOwned && raw?.autoMine === true;
+    if (depositAccess(state, raw?.target)) site.target = raw.target;
+    site.swing = site.autoMine && site.veins[site.target].remaining === 0 ? bounded(raw?.swing, swingMs - 1) : 0;
+  }
+
+  // src/js/numbers.js
+  var wholeNumbers = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0
+  });
+  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var suffixes = ["", "K", "M", "B", "T"];
+  function fmt(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
+    if (Math.abs(n) >= 1e15) {
+      const [mantissa, exponent] = n.toExponential().split("e");
+      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
+      return truncated + "e" + exponent;
+    }
+    let unit = suffixes.length - 1;
+    while (Math.abs(n) < 1e3 ** unit) unit--;
+    const scaled = n / 1e3 ** unit;
+    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
+    return Math.trunc(scaled * precision) / precision + suffixes[unit];
+  }
+  function fmtRate(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
+  }
+  function fmtExact(n) {
+    return Number.isFinite(n) ? counts.format(n) : "\u2014";
+  }
+
+  // src/js/runtime.js
+  var runtime = {
+    filter: "all",
+    gearWorldFilter: "all",
+    selectedSkill: "root",
+    treeTab: "skills",
+    ascConfirm: false,
+    chestClock: 0,
+    modalType: "",
+    lastFocus: null,
+    saveDirty: false,
+    wheelResult: null,
+    wheelMoving: false,
+    wheelGeneration: 0,
+    pendingWorldUnlock: null
+  };
+
   // src/js/world-data.js
   var firstWorld = "grasslands";
   var worlds = {
@@ -3434,8 +3970,9 @@ textarea {
       )
     );
   }
-  function buildRecipe(state, set, slot, level2, nextId, put, limit) {
-    if (!Object.hasOwn(builds, set) || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, craftCost))
+  function buildRecipe(state, set, slot, level2, nextId, put, limit, gathered = false) {
+    const cost = gathered ? gatheredRecipeCost : craftCost;
+    if (!Object.hasOwn(builds, set) || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, cost))
       return null;
     const item = {
       id: nextId(state),
@@ -3446,7 +3983,7 @@ textarea {
       value: lootValue(state.world, level2, slot, 4),
       ...worldTag(state.world)
     };
-    pay(state, craftCost);
+    pay(state, cost);
     put(state, item);
     discover(state, item);
     return item;
@@ -3460,11 +3997,11 @@ textarea {
   }
   function evolveGear(state, item) {
     if (!item || !state.items.includes(item)) return false;
-    const offer = evolutionOffer(state, item);
-    if (!offer?.available) return false;
-    pay(state, offer.cost);
+    const offer2 = evolutionOffer(state, item);
+    if (!offer2?.available) return false;
+    pay(state, offer2.cost);
     item.r++;
-    item.value = Math.round(item.value * offer.scale * 100) / 100;
+    item.value = Math.round(item.value * offer2.scale * 100) / 100;
     discover(state, item);
     return true;
   }
@@ -3507,35 +4044,6 @@ textarea {
     return gathered;
   }
 
-  // src/js/numbers.js
-  var wholeNumbers = new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0
-  });
-  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var suffixes = ["", "K", "M", "B", "T"];
-  function fmt(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
-    if (Math.abs(n) >= 1e15) {
-      const [mantissa, exponent] = n.toExponential().split("e");
-      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
-      return truncated + "e" + exponent;
-    }
-    let unit = suffixes.length - 1;
-    while (Math.abs(n) < 1e3 ** unit) unit--;
-    const scaled = n / 1e3 ** unit;
-    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
-    return Math.trunc(scaled * precision) / precision + suffixes[unit];
-  }
-  function fmtRate(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
-  }
-  function fmtExact(n) {
-    return Number.isFinite(n) ? counts.format(n) : "\u2014";
-  }
-
   // src/js/progression.js
   var progressionThresholds = Object.freeze({ ...milestones, firstWheel: 50 });
   var coinUnlocks = [
@@ -3556,13 +4064,13 @@ textarea {
     ],
     [
       progressionThresholds.shards,
-      "Shards and skill tree",
-      "Open chests for shards and spend them on skills."
+      "Shards, skill tree and Farming",
+      "Spend shards on skills and plant your first crop."
     ],
     [
       progressionThresholds.helper,
-      "Garden helper + Set recipes",
-      "Buy automatic income at the Workshop or craft a set piece in Gear."
+      "Garden helper + Set recipes + Mining",
+      "Buy automatic income, craft set gear, and open the mine."
     ],
     [
       progressionThresholds.ascension,
@@ -3744,13 +4252,17 @@ textarea {
       locked
     };
   }
-  function forgeGear(state, item) {
+  function materialOffer(state, item) {
+    const forge = forgeOffer(state, item);
+    const cost = temperCost(forge.cost, forge.rank);
+    return !forge.locked && !forge.maxed && state.total >= mineAt && cost ? { cost, available: hasMaterials(state, cost) } : null;
+  }
+  function forgeGear(state, item, gathered = false) {
     if (!item || gearIndex(state).get(item.id) !== item) return false;
-    const offer = forgeOffer(state, item);
-    if (!offer.available) return false;
-    spendResource(state, "coins", offer.cost.coins);
-    spendResource(state, "scrap", offer.cost.scrap);
-    item.forge = offer.rank + 1;
+    const offer2 = forgeOffer(state, item);
+    const payment = gathered ? materialOffer(state, item) : offer2;
+    if (!payment?.available || !useMaterials(state, payment.cost)) return false;
+    item.forge = offer2.rank + 1;
     return true;
   }
 
@@ -3910,11 +4422,11 @@ textarea {
     if (result.ability) progress2.hammerhand = 0;
     return result;
   }
-  function tickClockwork(state, seconds, rates, pieces, profile, random = Math.random) {
+  function tickClockwork(state, seconds2, rates, pieces, profile, random = Math.random) {
     const { active, count } = profile.clockwork;
-    if (!active || rates.auto <= 0 || seconds <= 0) return null;
+    if (!active || rates.auto <= 0 || seconds2 <= 0) return null;
     const progress2 = state.abilityProgress;
-    progress2.clockwork = Math.min(6e4, progress2.clockwork + seconds * 1e3);
+    progress2.clockwork = Math.min(6e4, progress2.clockwork + seconds2 * 1e3);
     if (progress2.clockwork < (count >= 2 ? 45e3 : 6e4)) return null;
     const chest = spawnChest(state, { forcedRarity: 0, random });
     const oldest = oldestLocalChest(state);
@@ -3994,28 +4506,12 @@ textarea {
     return true;
   }
 
-  // src/js/runtime.js
-  var runtime = {
-    filter: "all",
-    gearWorldFilter: "all",
-    selectedSkill: "root",
-    treeTab: "skills",
-    ascConfirm: false,
-    chestClock: 0,
-    modalType: "",
-    lastFocus: null,
-    saveDirty: false,
-    wheelResult: null,
-    wheelMoving: false,
-    wheelGeneration: 0,
-    pendingWorldUnlock: null
-  };
-
   // src/js/state.js
-  var schemaVersion = 2;
+  var schemaVersion = 3;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
+    sites: freshSites(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),
     world: firstWorld,
@@ -4108,6 +4604,232 @@ textarea {
     ][i.slot];
   }
 
+  // src/js/ui-dom.js
+  var $ = (id) => document.getElementById(id);
+  function setValue(target, property, value) {
+    if (target[property] !== value) target[property] = value;
+  }
+  function setText(element, value) {
+    setValue(element, "textContent", String(value));
+  }
+
+  // src/js/site-view.js
+  var seconds = (ms) => Math.ceil(ms / 1e3) + "s";
+  var costText = (cost) => Object.entries(cost).map(([id, amount]) => fmtExact(amount) + " " + (materials[id] || id)).join(" + ");
+  var rewardText = (rewards) => rewards.map(({ amount, material }) => "+" + amount + " " + materials[material]).join(" \xB7 ");
+  function wallet(ids) {
+    return [
+      fmtExact(s.coins) + " coins",
+      ...ids.map((id) => fmtExact(s[id]) + " " + materials[id])
+    ].join(" \xB7 ");
+  }
+  function farmMarkup() {
+    const cropOptions = Object.entries(crops).map(([id, crop]) => `<option value="${id}">${crop.name}</option>`).join("");
+    const plots = s.sites.plots.map(
+      (_, index) => `<article class="up-card site-plot" id="plot-${index}">
+    <h3>Plot ${index + 1}</h3><p id="plotStatus-${index}"></p>
+    <div class="site-controls" id="plantControls-${index}">
+      <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}</select>
+      <button class="action gold" data-site-action="plant" data-plot="${index}" id="plant-${index}">Plant</button>
+    </div><p id="seedInfo-${index}"></p>
+    <button class="action gold" data-site-action="harvest" data-plot="${index}" id="harvest-${index}">Harvest</button>
+    </article>`
+    ).join("");
+    return `<p class="subtext">Grow crops while the game is visible. Red-button presses speed them up.</p>
+    <p id="farmWallet" class="site-wallet"></p>
+    <div class="item-grid">${plots}</div>
+    <h3>Research</h3><div class="site-upgrades">${Object.entries(research).map(
+      ([id, def]) => `<div class="up-card"><strong>${def.name}</strong><p>${def.effect}</p>
+      <button class="action secondary" data-site-action="research" data-site-id="${id}" id="research-${id}"></button></div>`
+    ).join("")}</div>
+    <label id="harvestMode"><input type="checkbox" id="autoHarvest"> Auto Harvest ripe crops</label>
+    <p id="farmCharge" class="subtext"></p><p class="subtext site-result" id="siteResult" role="status"></p>`;
+  }
+  function mineMarkup() {
+    return `<p class="subtext">Chip a deposit to gather materials. Red-button presses speed up recovery.</p>
+    <p id="mineWallet" class="site-wallet"></p><p id="pickStatus"></p>
+    <div class="item-grid">${Object.entries(deposits).map(
+      ([
+        id,
+        def
+      ]) => `<article class="up-card mine-vein" style="--ore:${def.color}">
+      <h3>${def.name}</h3><p>${def.rarity} \xB7 ${def.yield} ${materials[def.material]} per clear</p><p id="vein-${id}"></p>
+      <button class="action gold" data-site-action="mine" data-site-id="${id}" id="mine-${id}">Mine</button></article>`
+    ).join("")}</div>
+    <h3>Mining upgrades</h3><div class="site-upgrades">
+    <div class="up-card"><strong>Pick upgrade</strong><p id="pickUpgradeInfo"></p>
+      <button class="action secondary" data-site-action="pick" id="buyPick"></button></div>
+    <div class="up-card"><strong>Auto Mining</strong><p>Automatically swings at one available deposit every three visible seconds.</p>
+      <button class="action secondary" data-site-action="miner" id="buyMiner"></button>
+      <div class="site-controls" id="minerControls">
+        <label><input type="checkbox" id="autoMine"> Enabled</label>
+        <label>Target <select id="mineTarget">${Object.entries(deposits).map(([id, def]) => `<option value="${id}">${def.name}</option>`).join("")}</select></label>
+      </div><p id="minerStatus"></p></div></div>
+    <p class="subtext site-result" id="siteResult" role="status"></p>`;
+  }
+  function offer(button, at, cost, owned2, extra = true) {
+    setValue(
+      button,
+      "disabled",
+      owned2 || s.total < at || !extra || !hasMaterials(s, cost)
+    );
+    setText(
+      button,
+      owned2 ? "Purchased" : s.total < at ? "Unlocks at " + fmtExact(at) + " earned" : !extra ? "Requires Copper Pick" : "Buy \xB7 " + costText(cost)
+    );
+  }
+  function updateFarm() {
+    const site = s.sites;
+    setText(
+      $("farmWallet"),
+      wallet([
+        "glowleaf",
+        "rootFiber",
+        "prismEssence",
+        "copperOre",
+        "silverOre",
+        "starCrystals"
+      ])
+    );
+    setText($("farmCharge"), "Glowleaf presses \xB7 " + site.growthCharges + " / 3");
+    for (let index = 0; index < site.plots.length; index++) {
+      setValue($("plot-" + index), "hidden", index >= plotCount(s));
+      const plot = site.plots[index];
+      const select = $("seed-" + index);
+      for (const option of select.options) {
+        const locked = s.total < crops[option.value].at;
+        setValue(option, "hidden", locked);
+        setValue(option, "disabled", locked);
+      }
+      const def = crops[select.value] || crops.glowleaf;
+      const status = plot ? crops[plot.crop].name + (plot.remaining ? " \xB7 " + seconds(plot.remaining) : " \xB7 Ripe") : "Empty soil";
+      setText($("plotStatus-" + index), status);
+      setValue($("plantControls-" + index), "hidden", Boolean(plot));
+      setValue($("seedInfo-" + index), "hidden", Boolean(plot));
+      setText(
+        $("seedInfo-" + index),
+        seconds(def.ms - (site.research.irrigation ? 3e3 : 0)) + " \xB7 " + def.yield + " " + materials[def.material] + " \xB7 " + def.effect
+      );
+      setText($("plant-" + index), "Plant \xB7 " + costText(def.cost));
+      setValue(
+        $("plant-" + index),
+        "disabled",
+        !canPlant(s, index, select.value)
+      );
+      setValue($("harvest-" + index), "hidden", !plot || plot.remaining > 0);
+    }
+    for (const [id, def] of Object.entries(research))
+      offer($("research-" + id), def.at, def.cost, site.research[id]);
+    setValue($("harvestMode"), "hidden", !site.research.harvester);
+    setValue($("autoHarvest"), "checked", site.autoHarvest);
+  }
+  function updateMine() {
+    const site = s.sites;
+    const pick = tools[site.pick];
+    const next = tools[site.pick + 1];
+    setText(
+      $("mineWallet"),
+      wallet(["copperOre", "silverOre", "starCrystals", "glowleaf", "rootFiber"])
+    );
+    setText($("pickStatus"), pick.name + " \xB7 " + pick.damage + " damage per hit");
+    setText(
+      $("pickUpgradeInfo"),
+      next ? next.name + " \xB7 " + next.damage + " damage per hit" : "Best pick equipped."
+    );
+    offer($("buyPick"), mineAt, next?.cost || {}, !next);
+    offer(
+      $("buyMiner"),
+      minerUpgrade.at,
+      minerUpgrade.cost,
+      site.minerOwned,
+      site.pick >= 1
+    );
+    for (const [id, def] of Object.entries(deposits)) {
+      const vein = site.veins[id];
+      const accessible = depositAccess(s, id);
+      const status = accessible ? vein.remaining > 0 ? "Recovering \xB7 " + seconds(vein.remaining) : "Available \xB7 " + vein.hp + " / " + def.hp + " toughness" : s.total < def.at ? "Unlocks at " + fmtExact(def.at) + " earned" : "Requires Copper Pick";
+      setText($("vein-" + id), status);
+      setValue($("mine-" + id), "disabled", !accessible || vein.remaining > 0);
+    }
+    setValue($("minerControls"), "hidden", !site.minerOwned);
+    setValue($("autoMine"), "checked", site.autoMine);
+    const target = $("mineTarget");
+    for (const option of target.options) {
+      setValue(option, "hidden", !depositAccess(s, option.value));
+      setValue(option, "disabled", option.hidden);
+    }
+    setValue(target, "value", site.target);
+    setText(
+      $("minerStatus"),
+      site.autoMine ? site.veins[site.target].remaining ? "Waiting for deposit recovery." : "Next hit \xB7 " + seconds(3e3 - site.swing) : ""
+    );
+  }
+  function renderSites() {
+    const farm = s.total >= farmAt;
+    const mining = s.total >= mineAt;
+    setValue($("fieldSites"), "hidden", !farm && !mining);
+    setValue($("farm"), "hidden", !farm);
+    setValue($("mine"), "hidden", !mining);
+    if (!farm && !mining) return;
+    const plots = s.sites.plots.slice(0, plotCount(s));
+    const planted = plots.filter(Boolean);
+    const ripe = planted.filter((plot) => plot.remaining === 0).length;
+    const farmButton = $("farm");
+    setText(
+      $("farmStatus"),
+      ripe ? ripe + " ripe" : planted.length ? planted.length + " growing" : "Ready to plant"
+    );
+    setValue(
+      farmButton.dataset,
+      "stage",
+      ripe ? "ripe" : planted.length ? "growing" : "empty"
+    );
+    if (mining) {
+      const available = Object.keys(deposits).filter(
+        (id) => depositAccess(s, id)
+      );
+      const ready = available.filter(
+        (id) => s.sites.veins[id].remaining === 0
+      ).length;
+      setText($("mineStatus"), ready + " / " + available.length + " available");
+      setValue($("mine").dataset, "stage", ready ? "ready" : "cooling");
+    }
+    if (runtime.modalType === "farm") updateFarm();
+    if (runtime.modalType === "mine") updateMine();
+  }
+  function siteButtonAction(button) {
+    const { siteAction: action, siteId: id } = button.dataset;
+    const index = +button.dataset.plot;
+    if (runtime.modalType === "farm") {
+      if (action === "plant" && plant(s, index, $("seed-" + index).value))
+        return "Crop planted.";
+      if (action === "harvest") {
+        const reward = harvest(s, index);
+        if (reward) return "Harvested \xB7 " + rewardText([reward]);
+      }
+      if (action === "research" && buyResearch(s, id))
+        return research[id].name + " researched.";
+    }
+    if (runtime.modalType === "mine") {
+      if (action === "mine") {
+        const hit = mine(s, id);
+        if (hit)
+          return hit.amount ? "Mined \xB7 " + rewardText([hit]) : "Deposit chipped.";
+      }
+      if (action === "pick" && buyPick(s))
+        return tools[s.sites.pick].name + " equipped.";
+      if (action === "miner" && buyMiner(s)) return "Auto Mining purchased.";
+    }
+    return null;
+  }
+  function siteControlChange(target) {
+    if (runtime.modalType === "farm" && target.id === "autoHarvest")
+      return setHarvestMode(s, target.checked);
+    if (runtime.modalType === "mine" && ["autoMine", "mineTarget"].includes(target.id))
+      return setMiningMode(s, $("autoMine").checked, $("mineTarget").value);
+    return false;
+  }
+
   // src/js/prestige.js
   function ascensionReward(state) {
     return Math.floor(Math.sqrt(state.total / progressionThresholds.ascension));
@@ -4185,15 +4907,6 @@ textarea {
   function openedChestIcon(r) {
     const a = rarity[r];
     return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
-  }
-
-  // src/js/ui-dom.js
-  var $ = (id) => document.getElementById(id);
-  function setValue(target, property, value) {
-    if (target[property] !== value) target[property] = value;
-  }
-  function setText(element, value) {
-    setValue(element, "textContent", String(value));
   }
 
   // src/js/effects.js
@@ -4399,6 +5112,7 @@ textarea {
     f.lootRules = normalizeLootRules(o.lootRules);
     f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
     f.total = num(o.total, Number.MAX_VALUE);
+    normalizeSites(f, o.sites);
     for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
     for (const k of ["earned", "runs"])
       f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
@@ -4509,6 +5223,7 @@ textarea {
   }
   var KEY = "treasure-grove-v3";
   var preForgeSaveKey = KEY + "-before-forge";
+  var preSitesSaveKey = KEY + "-before-farming-mining";
   var preExpansionSaveKey = KEY + "-before-equipment-expansion";
   var preFoundationSaveKey = KEY + "-before-foundation";
   var saveWarning = "";
@@ -4522,6 +5237,9 @@ textarea {
   }
   function readPreForgeSave() {
     return readBackup(preForgeSaveKey);
+  }
+  function readPreSitesSave() {
+    return readBackup(preSitesSaveKey);
   }
   function readPreExpansionSave() {
     return readBackup(preExpansionSaveKey);
@@ -4579,7 +5297,8 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preExpansionSaveKey, raw);
+        preserveBackup(preSitesSaveKey, raw);
+        if (version < 2) preserveBackup(preExpansionSaveKey, raw);
         if (version < 1) preserveBackup(preFoundationSaveKey, raw);
         if (!Object.hasOwn(payload, "scrap"))
           preserveBackup(preForgeSaveKey, raw);
@@ -4749,7 +5468,7 @@ textarea {
   }
   function ascMarkup() {
     const reward = ascReward(), next = ascCoinGoal(reward + 1), a = s.asc;
-    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses and wheel progress. Keeps Ascension Stars, permanent upgrades, and lifetime records.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your current run will be erased.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
+    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses, wheel progress, farming and mining. Keeps Ascension Stars, permanent upgrades, and lifetime records.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your current run will be erased.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
       const lv = a.up[u.id], cost = ascCost(u), locked = a.runs < u.req;
       return `<article class="asc-card ${locked ? "locked" : ""}">${itemIcon(...u.icon)}<h4>${u.name}</h4><p>${u.desc}</p><span class="asc-level">Level ${lv} / ${u.max}</span><span class="requirement">${locked ? "Requires " + u.req + " ascensions" : "Persists through every reset"}</span><button class="tree-buy" data-asc-buy="${u.id}" ${locked || lv >= u.max || a.stars < cost ? "disabled" : ""}>${locked ? "Locked" : lv >= u.max ? "Max level" : "Upgrade \xB7 " + fmtExact(cost) + " \u2605"}</button></article>`;
     }).join(
@@ -5077,6 +5796,7 @@ textarea {
     recordEarnings(totalBefore);
     if (chest) revealChest(chest);
     if (opened) showOpenedChest(opened);
+    showSiteRewards(advanceSites(s, 1e3, true).rewards);
     directionalFloat(
       (effect || ability ? (effect || ability) + " \xB7 " : "") + "+" + fmtRate(coins),
       effect
@@ -5125,6 +5845,12 @@ textarea {
       action + itemName(item) + (gathered ? " \xB7 Forager +" + gathered + " scrap." : "!")
     );
   }
+  function showSiteRewards(rewards) {
+    if (!rewards.length) return;
+    const label = "Gathered \xB7 " + rewardText(rewards);
+    notice(label);
+    if ($("siteResult")) setText($("siteResult"), label);
+  }
   function progress(i) {
     const n = stages[i + 1];
     return n ? clamp((s.total - stages[i].at) / (n.at - stages[i].at) * 100, 0, 100) : 100;
@@ -5170,6 +5896,7 @@ textarea {
       runtime.pendingWorldUnlock = null;
     }
     wheelHUD();
+    renderSites();
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
     if (runtime.modalType === "forge") updateForge();
@@ -5316,6 +6043,8 @@ textarea {
     ).join("");
   }
   function openModal(type, id) {
+    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt)
+      return;
     if (type === "wheel" && !wheelReady()) return;
     hideSkillTip();
     hideComparison();
@@ -5367,6 +6096,11 @@ textarea {
       b.innerHTML = forgeMarkup(item);
       b.closest(".window").scrollTop = 0;
       updateForge();
+    } else if (type === "farm" || type === "mine") {
+      t.textContent = type === "farm" ? "Farming" : "Mining";
+      b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
+      b.closest(".window").scrollTop = 0;
+      renderSites();
     } else if (type === "recipes") {
       t.textContent = "Set recipes";
       b.innerHTML = recipesMarkup();
@@ -5412,6 +6146,7 @@ textarea {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
@@ -5637,6 +6372,7 @@ textarea {
     <p class="subtext">Each rank adds 12% of the current base stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
     <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+    <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
     <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button><button class="action secondary" data-open="recipes">Set recipes</button><button class="action secondary" data-open="inventory">Back to Gear</button></div>
     <p class="subtext" id="forgeResult" role="status"></p>`;
   }
@@ -5645,16 +6381,16 @@ textarea {
     if (!button) return;
     const item = getGearItem(+button.dataset.forge);
     if (!item) return;
-    const offer = forgeOffer(s, item);
+    const offer2 = forgeOffer(s, item);
     setText($("forgeStat"), itemStat(item));
-    setText($("forgeRank"), "Forge rank " + offer.rank + "/" + maxForgeRank);
+    setText($("forgeRank"), "Forge rank " + offer2.rank + "/" + maxForgeRank);
     setText(
       $("forgeBalance"),
       "Available \xB7 " + fmt(s.coins) + " coins and " + fmt(s.scrap) + " scrap"
     );
     setText(
       $("forgeNext"),
-      offer.maxed ? "Maximum rank reached." : "Next rank \xB7 " + itemStat({ ...item, forge: offer.rank + 1 })
+      offer2.maxed ? "Maximum rank reached." : "Next rank \xB7 " + itemStat({ ...item, forge: offer2.rank + 1 })
     );
     const step = evolutionOffer(s, item);
     const evolve = $("evolveBuy");
@@ -5673,10 +6409,15 @@ textarea {
         item.r === 6 ? "Highest evolution tier." : "Evolution starts with Rare gear."
       );
     }
-    setValue(button, "disabled", !offer.available);
+    const temper = materialOffer(s, item);
+    setValue($("temperGear"), "hidden", !temper);
+    setValue($("temperGear"), "disabled", !temper?.available);
+    if (temper)
+      setText($("temperGear"), "Material temper \xB7 " + costText(temper.cost));
+    setValue(button, "disabled", !offer2.available);
     setText(
       button,
-      offer.maxed ? "Fully forged" : offer.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Forge \xB7 " + fmtExact(offer.cost.coins) + " coins + " + fmtExact(offer.cost.scrap) + " scrap"
+      offer2.maxed ? "Fully forged" : offer2.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Forge \xB7 " + fmtExact(offer2.cost.coins) + " coins + " + fmtExact(offer2.cost.scrap) + " scrap"
     );
   }
   function costLabel(cost) {
@@ -5711,6 +6452,8 @@ textarea {
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
     </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
     <button id="craftGear" class="action gold">Craft \xB7 ${costLabel(craftCost)}</button>
+    <button id="craftGatheredGear" class="action gold">Craft with materials \xB7 ${costText(gatheredRecipeCost)}</button>
+    <p id="gatheredBalance"></p>
     </div><p id="recipeResult" role="status"></p><button class="action secondary" data-open="inventory">Back to Gear</button>`;
   }
   function updateRecipes() {
@@ -5721,6 +6464,15 @@ textarea {
     setText(
       $("recipeBalance"),
       full ? "Gear bag is full." : "Available \xB7 " + costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards })
+    );
+    setText(
+      $("gatheredBalance"),
+      "Gathered materials \xB7 " + costText({ copperOre: s.copperOre, glowleaf: s.glowleaf })
+    );
+    setValue(
+      $("craftGatheredGear"),
+      "disabled",
+      !unlocked || full || !canPay(s, gatheredRecipeCost)
     );
     setValue(
       $("craftGear"),
@@ -5830,6 +6582,8 @@ textarea {
   });
   for (const id of [
     "worlds",
+    "farm",
+    "mine",
     "progressionGuide",
     "inventory",
     "upgrades",
@@ -5845,6 +6599,15 @@ textarea {
   });
   $("modalBody").addEventListener("change", (e) => {
     const { id, value } = e.target;
+    if (siteControlChange(e.target)) {
+      renderSites();
+      save();
+      return;
+    }
+    if (e.target.matches("[data-seed-choice]")) {
+      renderSites();
+      return;
+    }
     if (id === "collectionWorld") {
       showCollection(value);
       return;
@@ -5876,6 +6639,16 @@ textarea {
   $("modalBody").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b || b.disabled) return;
+    if (b.dataset.siteAction) {
+      const outcome = siteButtonAction(b);
+      if (outcome) {
+        setText($("siteResult"), outcome);
+        render();
+        if (b.hidden || b.disabled || b.closest("[hidden]")) $("close").focus();
+        save();
+      }
+      return;
+    }
     if (b.dataset.compare) {
       showComparison(b);
       return;
@@ -5890,7 +6663,7 @@ textarea {
       $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
       return;
     }
-    if (b.id === "craftGear" && runtime.modalType === "recipes") {
+    if (["craftGear", "craftGatheredGear"].includes(b.id) && runtime.modalType === "recipes") {
       const item = buildRecipe(
         s,
         $("recipeSet").value,
@@ -5898,7 +6671,8 @@ textarea {
         level(),
         nextEntityId,
         addGearItem,
-        gearBagLimit
+        gearBagLimit,
+        b.id === "craftGatheredGear"
       );
       if (!item) return;
       sound("upgrade");
@@ -5925,7 +6699,7 @@ textarea {
     }
     if (b.dataset.forge) {
       const item = getGearItem(+b.dataset.forge);
-      if (runtime.modalType === "forge" && forgeGear(s, item)) {
+      if (runtime.modalType === "forge" && forgeGear(s, item, b.id === "temperGear")) {
         notice("Forged " + itemName(item) + " to rank " + item.forge + ".");
         sound("upgrade");
         render();
@@ -6049,10 +6823,13 @@ textarea {
         $("saveMsg").textContent = "Copy the pre-forge backup to keep it separately.";
       }
     }
-    if (["exportStoredSave", "exportPreExpansion", "exportPreFoundation"].includes(
-      b.id
-    )) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : readPreFoundationSave();
+    if ([
+      "exportStoredSave",
+      "exportPreSites",
+      "exportPreExpansion",
+      "exportPreFoundation"
+    ].includes(b.id)) {
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
@@ -6140,14 +6917,25 @@ textarea {
   render();
   save();
   var last = performance.now();
+  var sitesLast = last;
+  document.addEventListener("visibilitychange", () => {
+    sitesLast = performance.now();
+    if (document.hidden) savePassiveIncome();
+  });
   setInterval(() => {
     const now = performance.now(), dt = clamp((now - last) / 1e3, 0, 1);
     last = now;
+    const elapsedVisible = document.hidden ? 0 : clamp(now - sitesLast, 0, 1e3);
+    sitesLast = now;
+    const siteTick = advanceSites(s, elapsedVisible);
+    if (siteTick.changed) runtime.saveDirty = true;
+    showSiteRewards(siteTick.rewards);
     const snapshot = fieldSnapshot();
     if (snapshot.rates.auto > 0) {
       earn(snapshot.rates.auto * dt);
       render(snapshot);
-    }
+    } else if (siteTick.changed) renderSites();
+    if (siteTick.rewards.length) save();
     autoChestTick(dt, snapshot);
   }, 250);
   setInterval(savePassiveIncome, 5e3);

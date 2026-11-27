@@ -22,13 +22,13 @@ const coinUnlocks = [
   ],
   [
     progressionThresholds.shards,
-    "Shards and skill tree",
-    "Open chests for shards and spend them on skills.",
+    "Shards, skill tree and Farming",
+    "Spend shards on skills and plant your first crop.",
   ],
   [
     progressionThresholds.helper,
-    "Garden helper + Set recipes",
-    "Buy automatic income at the Workshop or craft a set piece in Gear.",
+    "Garden helper + Set recipes + Mining",
+    "Buy automatic income, craft set gear, and open the mine.",
   ],
   [
     progressionThresholds.ascension,

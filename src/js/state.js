@@ -1,3 +1,4 @@
+import { freshSites } from "./sites.js";
 import {
   builds,
   defaultAbilityProgress,
@@ -25,13 +26,14 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 2;
+const schemaVersion = 3;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
 const fresh = () =>
   initializeResources({
     schemaVersion,
+    sites: freshSites(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),
     world: firstWorld,

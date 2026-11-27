@@ -1,3 +1,6 @@
+import { materialOffer } from "./gear.js";
+import { costText } from "./site-view.js";
+import { gatheredRecipeCost } from "./sites.js";
 import {
   buildProfile,
   builds,
@@ -51,6 +54,7 @@ function forgeMarkup(item) {
     <p class="subtext">Each rank adds 12% of the current base stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
     <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+    <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
     <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button><button class="action secondary" data-open="recipes">Set recipes</button><button class="action secondary" data-open="inventory">Back to Gear</button></div>
     <p class="subtext" id="forgeResult" role="status"></p>`;
 }
@@ -98,6 +102,11 @@ function updateForge() {
         : "Evolution starts with Rare gear.",
     );
   }
+  const temper = materialOffer(s, item);
+  setValue($("temperGear"), "hidden", !temper);
+  setValue($("temperGear"), "disabled", !temper?.available);
+  if (temper)
+    setText($("temperGear"), "Material temper · " + costText(temper.cost));
   setValue(button, "disabled", !offer.available);
   setText(
     button,
@@ -171,6 +180,8 @@ function recipesMarkup() {
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
     </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
     <button id="craftGear" class="action gold">Craft · ${costLabel(craftCost)}</button>
+    <button id="craftGatheredGear" class="action gold">Craft with materials · ${costText(gatheredRecipeCost)}</button>
+    <p id="gatheredBalance"></p>
     </div><p id="recipeResult" role="status"></p><button class="action secondary" data-open="inventory">Back to Gear</button>`;
 }
 
@@ -185,6 +196,16 @@ function updateRecipes() {
       ? "Gear bag is full."
       : "Available · " +
           costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards }),
+  );
+  setText(
+    $("gatheredBalance"),
+    "Gathered materials · " +
+      costText({ copperOre: s.copperOre, glowleaf: s.glowleaf }),
+  );
+  setValue(
+    $("craftGatheredGear"),
+    "disabled",
+    !unlocked || full || !canPay(s, gatheredRecipeCost),
   );
   setValue(
     $("craftGear"),

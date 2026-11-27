@@ -4,7 +4,7 @@ import { after, before, test } from "node:test";
 import { chromium } from "playwright-core";
 
 const saveKey = "treasure-grove-v3";
-const migrationKey = saveKey + "-before-equipment-expansion";
+const migrationKey = saveKey + "-before-farming-mining";
 const documentUrl = "https://button-field.test/";
 const standalone = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const executablePath = process.env.CHROMIUM_PATH ||
@@ -440,16 +440,24 @@ const legacySaves = [
   }],
 ];
 legacySaves.push(["Foundation", { schemaVersion: 1, coins: 8500, total: 10000, items: [equipment(0, { r: 4, forge: 3 })], equip: { 0: 1 }, found: ["0-4"] }]);
+legacySaves.push(["Equipment Expansion", { schemaVersion: 2, total: 10000, coins: 1100,
+  items: [{ ...equipment(0, {r: 2, forge: 3}), set: "hammerhand", locked: true }], equip: {0: 1},
+  found: ["set:hammerhand:0:2"], lootRules: { equip: "off" }, abilityProgress: {hammerhand: 11} }]);
 for (const [release, legacy] of legacySaves) {
   const raw = JSON.stringify(legacy, null, 2);
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 2);
+    assert.equal(migrated.schemaVersion, 3);
     assert.equal(await stored(page, migrationKey), raw);
     assert.equal(migrated.lootRules.equip, "off");
     assert.equal(migrated.lootRules.salvage, false);
     if (legacy.found) assert.deepEqual(migrated.found, legacy.found);
+    if (legacy.abilityProgress) assert.equal(migrated.abilityProgress.hammerhand, legacy.abilityProgress.hammerhand);
+    assert.deepEqual(migrated.sites.plots, [null, null]);
+    assert.equal(migrated.sites.pick, 0);
+    assert.equal(migrated.sites.autoHarvest, false);
+    assert.equal(migrated.sites.autoMine, false);
     for (const field of ["total", "coins", "presses", "scrap", "world", "items", "equip", "chests", "wheelClaims", "wheelNextAt"]) {
       if (field in legacy) assert.deepEqual(migrated[field], legacy[field], field);
     }
@@ -458,7 +466,7 @@ for (const [release, legacy] of legacySaves) {
     await page.reload();
     assert.deepEqual(await saved(page), migrated);
     await click(page, "#settings");
-    await click(page, "#exportPreExpansion");
+    await click(page, "#exportPreSites");
     assert.equal(await page.locator("#saveText").inputValue(), raw);
   }, {
     init: (() => {
@@ -488,7 +496,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 2);
+    assert.equal((await saved(page)).schemaVersion, 3);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -504,7 +512,7 @@ browserTest("backup storage failure suspends automatic writes", async (page) => 
     localStorage.setItem("treasure-grove-v3", '{"coins":12,"total":12}');
     const set = Storage.prototype.setItem;
     Storage.prototype.setItem = function (key, value) {
-      if (key === "treasure-grove-v3-before-equipment-expansion") throw new DOMException("Simulated quota", "QuotaExceededError");
+      if (key === "treasure-grove-v3-before-farming-mining") throw new DOMException("Simulated quota", "QuotaExceededError");
       return set.call(this, key, value);
     };
   },
@@ -743,3 +751,128 @@ browserTest("mixed signatures collect materials and spend a Pathfinder charge on
   assert.equal(run.abilityProgress.charges, 0);
   assert.equal(await page.getByRole("button", { name: "Open Uncommon treasure chest" }).count(), 1);
 });
+
+browserTest("mobile farming and mining gates stay below the board and fund both Forge routes", async (page) => {
+  await importSave(page, { total: 599, coins: 1000, opened: 1 });
+  assert.ok(await page.locator("#fieldSites").isHidden());
+  await fieldPresses(page, 1);
+  assert.ok(await page.locator("#farm").isVisible());
+  assert.ok(await page.locator("#mine").isHidden());
+  await click(page, "#farm");
+  assert.match(await text(page, "#modalTitle"), /Farming/);
+  assert.ok(await page.locator("#plot-1").isHidden());
+  await escape(page);
+
+  await importSave(page, { total: 2500, coins: 1000, opened: 1, scrap: 2 });
+  assert.ok(await page.locator("#mine").isVisible());
+  const geometry = await page.evaluate(() => {
+    const sites = document.getElementById("fieldSites").getBoundingClientRect();
+    const board = document.getElementById("board").getBoundingClientRect();
+    return { below: sites.top >= board.bottom - 1, fits: document.documentElement.scrollWidth <= innerWidth + 1 };
+  });
+  assert.deepEqual(geometry, { below: true, fits: true });
+  for (let i = 0; i < 2; i++) {
+    await click(page, "#farm");
+    await click(page, "#plant-0");
+    await escape(page);
+    const before = (await saved(page)).sites.plots[0].remaining;
+    await fieldPresses(page, 1);
+    assert.ok((await saved(page)).sites.plots[0].remaining <= before - 1000);
+    await click(page, "#mine");
+    assert.match(await text(page, "#pickStatus"), /Stone Pick/);
+    for (let hit = 0; hit < 3; hit++) await click(page, "#mine-copper");
+    assert.ok(await page.locator("#mine-copper").isDisabled());
+    assert.match(await text(page, "#siteResult"), /4 Copper Ore/);
+    await escape(page);
+    await click(page, "#farm");
+    await page.clock.runFor(12500);
+    await click(page, "#harvest-0");
+    assert.match(await text(page, "#siteResult"), /3 Glowleaf/);
+    await escape(page);
+  }
+  let run = await saved(page);
+  assert.equal(run.glowleaf, 6);
+  assert.equal(run.copperOre, 8);
+  assert.equal(run.presses, 2);
+  assert.equal(run.wheelNextAt, 50);
+  await click(page, "#inventory");
+  await click(page, "[data-open=recipes]");
+  assert.ok(await page.locator("#craftGear").isDisabled());
+  await click(page, "#craftGatheredGear");
+  await click(page, "[data-open=inventory]");
+  const id = (await saved(page)).items[0].id;
+  await click(page, `[data-open-forge="${id}"]`);
+  await click(page, "#temperGear");
+  run = await saved(page);
+  assert.deepEqual([run.glowleaf, run.copperOre, run.scrap], [0, 1, 0]);
+  assert.equal(run.items[0].forge, 1);
+}, { viewport: {width: 320, height: 568}, touch: true });
+
+browserTest("visible site timers pause in a hidden tab and retain progress on reload", async (page) => {
+  await importSave(page, { total: 2500, coins: 1000, opened: 1 });
+  await click(page, "#farm");
+  await click(page, "#plant-0");
+  await page.evaluate(() => {
+    window.testHidden = true;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  const remaining = (await saved(page)).sites.plots[0].remaining;
+  await page.clock.runFor(20000);
+  assert.ok(await page.locator("#harvest-0").isHidden());
+  assert.equal((await saved(page)).sites.plots[0].remaining, remaining);
+  await page.reload();
+  assert.equal((await saved(page)).sites.plots[0].remaining, remaining);
+  await click(page, "#farm");
+  await page.clock.runFor(13000);
+  assert.ok(await page.locator("#harvest-0").isVisible());
+}, { init: () => {
+  window.testHidden = false;
+  Object.defineProperty(document, "hidden", { get: () => window.testHidden });
+} });
+
+browserTest("research, tools, automation, travel and Ascension use the same saved sites", async (page) => {
+  await importSave(page, { total: 50000, coins: 10000, glowleaf: 30, rootFiber: 30,
+    silverOre: 30, copperOre: 30, starCrystals: 30 });
+  await click(page, "#farm");
+  for (const id of ["extraPlot", "irrigation", "harvester"]) await click(page, "#research-" + id);
+  assert.ok(await page.locator("#plot-1").isVisible());
+  await page.locator("#autoHarvest").check();
+  await page.locator("#seed-1").selectOption("prismbloom");
+  assert.match(await text(page, "#seedInfo-1"), /21s/);
+  await click(page, "#plant-1");
+  await escape(page);
+  await click(page, "#mine");
+  await click(page, "#buyPick");
+  assert.match(await text(page, "#pickStatus"), /Copper Pick/);
+  await click(page, "#buyPick");
+  assert.match(await text(page, "#pickStatus"), /Resonant Pick/);
+  await click(page, "#buyMiner");
+  await page.locator("#mineTarget").selectOption("copper");
+  await page.locator("#autoMine").check();
+  await page.clock.runFor(3500);
+  assert.match(await text(page, "#siteResult"), /4 Copper Ore/);
+  assert.ok(await page.locator("#mine-copper").isDisabled());
+  await escape(page);
+  await click(page, "#worlds");
+  await click(page, "[data-travel=desert]");
+  assert.equal(await text(page, "#worldName"), "Desert");
+  await click(page, "#farm");
+  await page.clock.runFor(22000);
+  const gathered = await saved(page);
+  assert.equal(gathered.sites.plots[1], null);
+  assert.equal(gathered.prismEssence, 1);
+  assert.equal(gathered.sites.crystalFocus, true);
+  assert.equal(gathered.sites.pick, 2);
+  await escape(page);
+  await click(page, "#skills");
+  await click(page, "[data-tree-tab=ascend]");
+  await click(page, "[data-asc-start]");
+  await click(page, "[data-asc-confirm]");
+  const reset = await saved(page);
+  assert.deepEqual(reset.sites.plots, [null, null]);
+  assert.equal(reset.sites.pick, 0);
+  assert.equal(reset.sites.autoMine, false);
+  assert.equal(reset.prismEssence, 0);
+  assert.equal(reset.copperOre, 0);
+  assert.ok(await page.locator("#fieldSites").isHidden());
+}, { viewport: { width: 1280, height: 800 } });

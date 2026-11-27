@@ -73,3 +73,11 @@ Before each phase, archive the working build and keep representative saves from 
 Use **Forge** on Rare or better equipment to see its evolution path. Evolution requires Forge rank 3 and carries forward the item's identity, build, lock, and rank. Mythic and Celestial are evolution tiers. Chests still roll the original five rarities.
 
 Gear includes a comparison control, inventory filters, item locks, and **Loot automation**. Auto Equip and Auto Salvage start off and affect incoming chest gear. The strongest-stat mode can break a set. Use the default build-protection mode to keep matching gear together. Settings can export the pre-expansion save backup. Ascension carries loot preferences into the next run.
+
+## Farming and Mining
+
+The two sites appear just below the playfield at 600 and 2,500 coins earned in the run. Each red-button press advances growing plants and recovering deposits by one second. The sites also progress on the visible page, including in menus. Travel preserves them and Ascension resets them.
+
+Glowleaf boosts the next three growth presses, Ironroot advances mineral recovery, and Prismbloom saves an extra crystal for the next crystal vein. Research adds a plot, shortens new growth, or harvests ripe crops automatically. Mining upgrades improve damage or automate one selected deposit. Neither upgrade spends materials automatically on planting.
+
+The Forge offers material payment buttons alongside the standard set recipes and rank upgrades. Existing equipment and evolution costs remain compatible. Settings can export the original save from before its first Farming and Mining migration.

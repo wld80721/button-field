@@ -2,6 +2,12 @@ const resourceCatalog = Object.freeze({
   coins: { max: Number.MAX_VALUE },
   shards: { max: 1e15 },
   scrap: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  glowleaf: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  rootFiber: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  prismEssence: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  copperOre: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  silverOre: { max: Number.MAX_SAFE_INTEGER, integer: true },
+  starCrystals: { max: Number.MAX_SAFE_INTEGER, integer: true },
   stars: { max: Number.MAX_VALUE, account: "asc", integer: true },
 });
 

@@ -1,3 +1,9 @@
+import { advanceSites } from "./sites.js";
+import {
+  renderSites,
+  siteButtonAction,
+  siteControlChange,
+} from "./site-view.js";
 import { buildRecipe, evolveGear, normalizeLootRules } from "./build-gear.js";
 import {
   showComparison,
@@ -24,6 +30,7 @@ import {
   render,
   renderChests,
   replaceRun,
+  showSiteRewards,
 } from "./field.js";
 import {
   buyWorkshopUpgrade,
@@ -41,6 +48,7 @@ import {
   readPreForgeSave,
   readPreFoundationSave,
   readPreExpansionSave,
+  readPreSitesSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -82,6 +90,8 @@ $("chests").addEventListener("click", (e) => {
 });
 for (const id of [
   "worlds",
+  "farm",
+  "mine",
   "progressionGuide",
   "inventory",
   "upgrades",
@@ -97,6 +107,15 @@ $("modal").addEventListener("click", (e) => {
 });
 $("modalBody").addEventListener("change", (e) => {
   const { id, value } = e.target;
+  if (siteControlChange(e.target)) {
+    renderSites();
+    save();
+    return;
+  }
+  if (e.target.matches("[data-seed-choice]")) {
+    renderSites();
+    return;
+  }
   if (id === "collectionWorld") {
     showCollection(value);
     return;
@@ -131,6 +150,16 @@ $("modalBody").addEventListener("change", (e) => {
 $("modalBody").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
+  if (b.dataset.siteAction) {
+    const outcome = siteButtonAction(b);
+    if (outcome) {
+      setText($("siteResult"), outcome);
+      render();
+      if (b.hidden || b.disabled || b.closest("[hidden]")) $("close").focus();
+      save();
+    }
+    return;
+  }
   if (b.dataset.compare) {
     showComparison(b);
     return;
@@ -145,7 +174,10 @@ $("modalBody").addEventListener("click", (e) => {
     $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
     return;
   }
-  if (b.id === "craftGear" && runtime.modalType === "recipes") {
+  if (
+    ["craftGear", "craftGatheredGear"].includes(b.id) &&
+    runtime.modalType === "recipes"
+  ) {
     const item = buildRecipe(
       s,
       $("recipeSet").value,
@@ -154,6 +186,7 @@ $("modalBody").addEventListener("click", (e) => {
       nextEntityId,
       addGearItem,
       gearBagLimit,
+      b.id === "craftGatheredGear",
     );
     if (!item) return;
     sound("upgrade");
@@ -180,7 +213,10 @@ $("modalBody").addEventListener("click", (e) => {
   }
   if (b.dataset.forge) {
     const item = getGearItem(+b.dataset.forge);
-    if (runtime.modalType === "forge" && forgeGear(s, item)) {
+    if (
+      runtime.modalType === "forge" &&
+      forgeGear(s, item, b.id === "temperGear")
+    ) {
       notice("Forged " + itemName(item) + " to rank " + item.forge + ".");
       sound("upgrade");
       render();
@@ -315,16 +351,21 @@ $("modalBody").addEventListener("click", (e) => {
     }
   }
   if (
-    ["exportStoredSave", "exportPreExpansion", "exportPreFoundation"].includes(
-      b.id,
-    )
+    [
+      "exportStoredSave",
+      "exportPreSites",
+      "exportPreExpansion",
+      "exportPreFoundation",
+    ].includes(b.id)
   ) {
     const backup =
       b.id === "exportStoredSave"
         ? readBlockedSave()
-        : b.id === "exportPreExpansion"
-          ? readPreExpansionSave()
-          : readPreFoundationSave();
+        : b.id === "exportPreSites"
+          ? readPreSitesSave()
+          : b.id === "exportPreExpansion"
+            ? readPreExpansionSave()
+            : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();
@@ -430,15 +471,26 @@ renderChests();
 render();
 save();
 let last = performance.now();
+let sitesLast = last;
+document.addEventListener("visibilitychange", () => {
+  sitesLast = performance.now();
+  if (document.hidden) savePassiveIncome();
+});
 setInterval(() => {
   const now = performance.now(),
     dt = clamp((now - last) / 1000, 0, 1);
   last = now;
+  const elapsedVisible = document.hidden ? 0 : clamp(now - sitesLast, 0, 1000);
+  sitesLast = now;
+  const siteTick = advanceSites(s, elapsedVisible);
+  if (siteTick.changed) runtime.saveDirty = true;
+  showSiteRewards(siteTick.rewards);
   const snapshot = fieldSnapshot();
   if (snapshot.rates.auto > 0) {
     earn(snapshot.rates.auto * dt);
     render(snapshot);
-  }
+  } else if (siteTick.changed) renderSites();
+  if (siteTick.rewards.length) save();
   autoChestTick(dt, snapshot);
 }, 250);
 setInterval(savePassiveIncome, 5000);

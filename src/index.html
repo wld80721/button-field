@@ -162,6 +162,53 @@
           </div>
         </div>
       </section>
+      <section
+        class="field-sites"
+        id="fieldSites"
+        aria-label="Field sites"
+        hidden
+      >
+        <button class="field-site" id="farm" hidden>
+          <svg
+            viewBox="0 0 32 22"
+            shape-rendering="crispEdges"
+            aria-hidden="true"
+          >
+            <path fill="#2c1b29" d="M2 12h28v9H2z" />
+            <path fill="#96604a" d="M4 10h24v9H4z" />
+            <path fill="#bb8357" d="M5 11h22v2H5zm0 4h22v2H5z" />
+            <g class="site-crop">
+              <path fill="#39634d" d="M14 6h4v10h-4z" />
+              <path
+                fill="#82d877"
+                d="M8 4h5v3h3v4h-4V9H8zm9 3h3V4h5v5h-4v3h-4z"
+              />
+            </g>
+            <path
+              class="site-bloom"
+              fill="#ffe590"
+              d="M14 0h4v2h3v4h-3v2h-4V6h-3V2h3z"
+            />
+          </svg>
+          <span><strong>Farm</strong><small id="farmStatus"></small></span>
+        </button>
+        <button class="field-site" id="mine" hidden>
+          <svg
+            viewBox="0 0 32 22"
+            shape-rendering="crispEdges"
+            aria-hidden="true"
+          >
+            <path fill="#29303d" d="M2 17h3v-5h4V7h5V4h7v3h5v6h4v8H2z" />
+            <path fill="#636a79" d="M5 17h4v-5h4V8h8v3h5v7h2v2H5z" />
+            <g class="site-crystal">
+              <path fill="#a76fcf" d="M14 3h3V0h4v4h3v6h-4v5h-6z" />
+              <path fill="#dfb5fa" d="M17 3h4v5h-4z" />
+            </g>
+            <path fill="#dd8b64" d="M7 15h4v3H7zm16-2h3v4h-3z" />
+          </svg>
+          <span><strong>Mine</strong><small id="mineStatus"></small></span>
+        </button>
+      </section>
       <footer class="dock">
         <div class="dock-left">
           <span id="saveStatus">Local save</span> · <span>Space to press</span>

@@ -1,3 +1,5 @@
+import { farmMarkup, mineMarkup, renderSites } from "./site-view.js";
+import { farmAt, mineAt } from "./sites.js";
 import { builds, craftAt, designKey } from "./build-gear.js";
 import { ascCoinGoal } from "./prestige.js";
 import { gearValue, salvageYield } from "./gear.js";
@@ -29,6 +31,7 @@ import {
   readPreForgeSave,
   readPreFoundationSave,
   readPreExpansionSave,
+  readPreSitesSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -207,6 +210,11 @@ function showCollection(id) {
 }
 
 function openModal(type, id) {
+  if (
+    (type === "farm" && s.total < farmAt) ||
+    (type === "mine" && s.total < mineAt)
+  )
+    return;
   if (type === "wheel" && !wheelReady()) return;
   hideSkillTip();
   hideComparison();
@@ -262,6 +270,11 @@ function openModal(type, id) {
     b.innerHTML = forgeMarkup(item);
     b.closest(".window").scrollTop = 0;
     updateForge();
+  } else if (type === "farm" || type === "mine") {
+    t.textContent = type === "farm" ? "Farming" : "Mining";
+    b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
+    b.closest(".window").scrollTop = 0;
+    renderSites();
   } else if (type === "recipes") {
     t.textContent = "Set recipes";
     b.innerHTML = recipesMarkup();
@@ -313,6 +326,7 @@ function openModal(type, id) {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}

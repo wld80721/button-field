@@ -1,3 +1,4 @@
+import { gatheredRecipeCost } from "./sites.js";
 import { creditCoins, creditResource, spendResource } from "./resources.js";
 import { recordWorld, worldTag, worlds, discoveryKey } from "./world-data.js";
 import { milestones, slots } from "./data.js";
@@ -163,7 +164,17 @@ function lootValue(world, level, slot, scale, roll = 1) {
   );
 }
 
-function buildRecipe(state, set, slot, level, nextId, put, limit) {
+function buildRecipe(
+  state,
+  set,
+  slot,
+  level,
+  nextId,
+  put,
+  limit,
+  gathered = false,
+) {
+  const cost = gathered ? gatheredRecipeCost : craftCost;
   if (
     !Object.hasOwn(builds, set) ||
     !Number.isInteger(slot) ||
@@ -171,7 +182,7 @@ function buildRecipe(state, set, slot, level, nextId, put, limit) {
     slot >= slots.length ||
     state.total < craftAt ||
     state.items.length >= limit ||
-    !canPay(state, craftCost)
+    !canPay(state, cost)
   )
     return null;
   const item = {
@@ -183,7 +194,7 @@ function buildRecipe(state, set, slot, level, nextId, put, limit) {
     value: lootValue(state.world, level, slot, 4),
     ...worldTag(state.world),
   };
-  pay(state, craftCost);
+  pay(state, cost);
   put(state, item);
   discover(state, item);
   return item;

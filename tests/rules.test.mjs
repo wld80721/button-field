@@ -96,7 +96,7 @@ test("old and current saves normalize without reusing gear or chest IDs", () => 
     equip: { 0: item.id, 1: item.id },
     chests: [{ id: item.id, r: 0, level: 1, x: 28, y: 40 }],
   });
-  assert.equal(run.schemaVersion, 2);
+  assert.equal(run.schemaVersion, 3);
   assert.equal(run.coins, 2e16);
   assert.deepEqual(run.items, [item]);
   assert.deepEqual(run.equip, { 0: item.id });
@@ -106,7 +106,7 @@ test("old and current saves normalize without reusing gear or chest IDs", () => 
   assert.deepEqual(normalize(JSON.parse(JSON.stringify(run))), run);
   for (const invalid of [{}, [], { coins: "2" }, { coins: 2, items: {} }])
     assert.throws(() => normalize(invalid), /Invalid save/);
-  assert.throws(() => normalize({ ...run, schemaVersion: 3 }), /newer version/);
+  assert.throws(() => normalize({ ...run, schemaVersion: 4 }), /newer version/);
 });
 
 test("Ascension builds a new run and preserves only the permanent records", () => {

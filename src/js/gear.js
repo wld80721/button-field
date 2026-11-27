@@ -1,5 +1,6 @@
+import { hasMaterials, mineAt, temperCost, useMaterials } from "./sites.js";
 import { hasRunCoins, progressionThresholds } from "./progression.js";
-import { creditCoins, creditResource, spendResource } from "./resources.js";
+import { creditCoins, creditResource } from "./resources.js";
 import { worlds } from "./world-data.js";
 
 const gearIndexes = new WeakMap();
@@ -112,12 +113,19 @@ function forgeOffer(state, item) {
   };
 }
 
-function forgeGear(state, item) {
+function materialOffer(state, item) {
+  const forge = forgeOffer(state, item);
+  const cost = temperCost(forge.cost, forge.rank);
+  return !forge.locked && !forge.maxed && state.total >= mineAt && cost
+    ? { cost, available: hasMaterials(state, cost) }
+    : null;
+}
+
+function forgeGear(state, item, gathered = false) {
   if (!item || gearIndex(state).get(item.id) !== item) return false;
   const offer = forgeOffer(state, item);
-  if (!offer.available) return false;
-  spendResource(state, "coins", offer.cost.coins);
-  spendResource(state, "scrap", offer.cost.scrap);
+  const payment = gathered ? materialOffer(state, item) : offer;
+  if (!payment?.available || !useMaterials(state, payment.cost)) return false;
   item.forge = offer.rank + 1;
   return true;
 }
@@ -127,6 +135,7 @@ export {
   gearIndex,
   forgeGear,
   forgeOffer,
+  materialOffer,
   forgeUnlock,
   gearValue,
   maxForgeRank,

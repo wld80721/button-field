@@ -38,6 +38,7 @@ span {
   -webkit-tap-highlight-color: transparent;
 }
 #game {
+  --field-site-space: 0px;
   max-width: 1600px;
   margin: auto;
   min-height: 100dvh;
@@ -132,7 +133,7 @@ span {
   position: relative;
   flex: 1;
   min-height: 480px;
-  height: calc(100dvh - 134px);
+  height: calc(100dvh - 134px - var(--field-site-space));
   border: 5px solid #07181f;
   box-shadow:
     0 0 0 2px #38545a,
@@ -839,7 +840,7 @@ textarea {
   }
   .board-frame {
     min-height: 365px;
-    height: calc(100dvh - 188px);
+    height: calc(100dvh - 188px - var(--field-site-space));
     border-width: 3px;
   }
   .board-top {
@@ -2479,4 +2480,108 @@ textarea {
   color: #ecf4ff;
   box-shadow: 3px 4px #071423;
   pointer-events: none;
+}
+
+/* Reserve room for the site strip once it becomes available. */
+#game:has(.field-sites:not([hidden])) {
+  --field-site-space: 64px;
+}
+.field-sites {
+  display: flex;
+  gap: 8px;
+  border: 2px solid #456059;
+  border-radius: 5px;
+  background: #162c2d;
+  padding: 5px 7px;
+}
+.field-site {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+  color: #e7ffd6;
+  background: #203b37;
+  border: 2px solid #628976;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+.field-site:hover {
+  background: #294b42;
+}
+.field-site svg {
+  width: 38px;
+  height: 28px;
+  flex: none;
+}
+.field-site strong,
+.field-site small {
+  display: block;
+}
+.field-site small {
+  color: #c1d9c7;
+}
+.site-bloom,
+[data-stage="empty"] .site-crop,
+[data-stage="cooling"] .site-crystal {
+  opacity: 0;
+}
+[data-stage="ripe"] .site-bloom {
+  opacity: 1;
+}
+.site-wallet,
+.site-upgrades {
+  margin-bottom: 12px;
+}
+.site-wallet {
+  color: #e4dfa5;
+}
+.site-upgrades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  gap: 8px;
+}
+.site-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.site-controls select {
+  background: #142436;
+  color: #ecf4ff;
+  border: 1px solid #91a7b8;
+  padding: 6px;
+  max-width: 100%;
+}
+.site-upgrades button,
+.site-plot button,
+.site-controls button,
+#temperGear,
+#craftGatheredGear {
+  white-space: normal;
+}
+.mine-vein {
+  border-color: var(--ore);
+}
+.site-result {
+  min-height: 1em;
+  color: #e7ffc1;
+}
+@media (max-width: 520px) {
+  .field-sites {
+    gap: 5px;
+  }
+  .field-site {
+    gap: 5px;
+    padding: 4px 5px;
+  }
+  .field-site svg {
+    width: 32px;
+  }
+  .item-grid:has(.site-plot, .mine-vein) {
+    grid-template-columns: 1fr;
+  }
 }
