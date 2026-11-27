@@ -1,8 +1,20 @@
+import { buildRecipe, evolveGear, normalizeLootRules } from "./build-gear.js";
+import {
+  showComparison,
+  hideComparison,
+  positionComparison,
+  updateLootRuleSummary,
+} from "./equipment.js";
 import { buyAscensionUpgrade } from "./prestige.js";
 import { ascUpgrades, clamp, upgrades } from "./data.js";
-import { closeModal, openModal, showCollection } from "./dialogs.js";
+import {
+  closeModal,
+  openModal,
+  showCollection,
+  inventoryFilters,
+} from "./dialogs.js";
 import { initFieldEffects, toast } from "./effects.js";
-import { forgeGear, salvageGear } from "./gear.js";
+import { addGearItem, forgeGear, salvageGear } from "./gear.js";
 import {
   autoChestTick,
   fieldSnapshot,
@@ -13,7 +25,13 @@ import {
   renderChests,
   replaceRun,
 } from "./field.js";
-import { buyWorkshopUpgrade, equipItem, learnSkill } from "./gameplay.js";
+import {
+  buyWorkshopUpgrade,
+  equipItem,
+  learnSkill,
+  gearBagLimit,
+  nextEntityId,
+} from "./gameplay.js";
 import { hasAscensionAccess } from "./progression.js";
 import { runtime } from "./runtime.js";
 import {
@@ -22,6 +40,7 @@ import {
   readBlockedSave,
   readPreForgeSave,
   readPreFoundationSave,
+  readPreExpansionSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -34,7 +53,15 @@ import {
 } from "./skills.js";
 import { initSound, sound } from "./sound.js";
 import { coin, itemIcon } from "./sprites.js";
-import { earn, fresh, getGearItem, itemName, recordEarnings, s } from "./state.js";
+import {
+  earn,
+  fresh,
+  getGearItem,
+  itemName,
+  recordEarnings,
+  level,
+  s,
+} from "./state.js";
 import { $, setText } from "./ui-dom.js";
 import { collectWheel, placeReel } from "./wheel.js";
 import { travel } from "./worlds.js";
@@ -74,6 +101,26 @@ $("modalBody").addEventListener("change", (e) => {
     showCollection(value);
     return;
   }
+  if (
+    runtime.modalType === "inventory" &&
+    ["lootEquip", "lootSalvage", "lootCeiling", "lootDuplicates"].includes(id)
+  ) {
+    s.lootRules = normalizeLootRules({
+      equip: $("lootEquip").value,
+      salvage: $("lootSalvage").checked,
+      ceiling: +$("lootCeiling").value,
+      duplicates: $("lootDuplicates").checked,
+    });
+    updateLootRuleSummary();
+    save();
+    return;
+  }
+  if (inventoryFilters.includes(id)) {
+    runtime[id] = value;
+    openModal("inventory");
+    $(id).focus();
+    return;
+  }
   if (id === "filter" || id === "gearWorldFilter") {
     if (id === "filter") runtime.filter = value;
     else runtime.gearWorldFilter = value;
@@ -84,6 +131,49 @@ $("modalBody").addEventListener("change", (e) => {
 $("modalBody").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
+  if (b.dataset.compare) {
+    showComparison(b);
+    return;
+  }
+  if (b.dataset.lock) {
+    const item = getGearItem(+b.dataset.lock);
+    if (!item) return;
+    if (item.locked) delete item.locked;
+    else item.locked = true;
+    save();
+    openModal("inventory");
+    $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
+    return;
+  }
+  if (b.id === "craftGear" && runtime.modalType === "recipes") {
+    const item = buildRecipe(
+      s,
+      $("recipeSet").value,
+      +$("recipeSlot").value,
+      level(),
+      nextEntityId,
+      addGearItem,
+      gearBagLimit,
+    );
+    if (!item) return;
+    sound("upgrade");
+    notice("Crafted " + itemName(item) + ".");
+    setText($("recipeResult"), "Crafted " + itemName(item) + ".");
+    render();
+    save();
+    return;
+  }
+  if (b.dataset.evolve && runtime.modalType === "forge") {
+    const item = getGearItem(+b.dataset.evolve);
+    if (!evolveGear(s, item)) return;
+    sound("upgrade");
+    notice("Gear evolved.");
+    save();
+    openModal("forge", item.id);
+    setText($("forgeResult"), "Gear evolved. Forge rank and lock retained.");
+    render();
+    return;
+  }
   if (b.dataset.openForge) {
     openModal("forge", +b.dataset.openForge);
     return;
@@ -224,9 +314,17 @@ $("modalBody").addEventListener("click", (e) => {
         "Copy the pre-forge backup to keep it separately.";
     }
   }
-  if (b.id === "exportStoredSave" || b.id === "exportPreFoundation") {
+  if (
+    ["exportStoredSave", "exportPreExpansion", "exportPreFoundation"].includes(
+      b.id,
+    )
+  ) {
     const backup =
-      b.id === "exportStoredSave" ? readBlockedSave() : readPreFoundationSave();
+      b.id === "exportStoredSave"
+        ? readBlockedSave()
+        : b.id === "exportPreExpansion"
+          ? readPreExpansionSave()
+          : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();
@@ -259,6 +357,23 @@ $("modalBody").addEventListener("click", (e) => {
     closeModal();
   }
 });
+const comparisonButtons = $("modalBody");
+comparisonButtons.addEventListener("pointerover", (event) => {
+  const button = event.target.closest("[data-compare]");
+  if (button && event.pointerType !== "touch") showComparison(button);
+});
+comparisonButtons.addEventListener("focusin", (event) => {
+  if (event.target.matches("[data-compare]")) showComparison(event.target);
+});
+comparisonButtons.addEventListener("focusout", (event) => {
+  if (event.target.matches("[data-compare]")) hideComparison();
+});
+comparisonButtons.addEventListener("pointerout", (event) => {
+  const button = event.target.closest("[data-compare]");
+  if (button && document.activeElement !== button) hideComparison();
+});
+$("modal").addEventListener("scroll", positionComparison, true);
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "Tab" && !$("modal").hidden) {
     const targets = [
@@ -285,7 +400,8 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (e.key === "Escape" && !$("modal").hidden) {
-    closeModal();
+    if ($("gearComparison") && !$("gearComparison").hidden) hideComparison();
+    else closeModal();
     return;
   }
   if (
@@ -303,6 +419,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 window.addEventListener("resize", () => {
+  positionComparison();
   if (runtime.modalType === "wheel" && !runtime.wheelMoving) placeReel();
 });
 function savePassiveIncome() {
@@ -322,6 +439,6 @@ setInterval(() => {
     earn(snapshot.rates.auto * dt);
     render(snapshot);
   }
-  autoChestTick(dt);
+  autoChestTick(dt, snapshot);
 }, 250);
 setInterval(savePassiveIncome, 5000);

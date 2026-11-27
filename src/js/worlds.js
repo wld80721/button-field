@@ -16,7 +16,7 @@ function worldChests(id = s.world) {
 function worldGearCount(id, gear = equippedGear()) {
   let count = 0;
   for (const item of gear) {
-    if (item && recordWorld(item) === id) count++;
+    if (item && !item.set && recordWorld(item) === id) count++;
   }
   return count;
 }

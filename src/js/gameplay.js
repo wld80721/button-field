@@ -1,18 +1,26 @@
+import {
+  buildProfile,
+  discover,
+  legendary,
+  lootValue,
+  resolveLoot,
+  trackOpening,
+} from "./build-gear.js";
 import { rarity, slots } from "./data.js";
-import { addGearItem, gearIndex, worldChargeGoal } from "./gear.js";
+import {
+  addGearItem,
+  gearIndex,
+  gearValue,
+  salvageYield,
+  worldChargeGoal,
+} from "./gear.js";
 import {
   hasSkill,
   hasUpgradeAccess,
   progressionAccess,
 } from "./progression.js";
 import { creditCoins, creditResource, spendResource } from "./resources.js";
-import {
-  discoveryKey,
-  firstWorld,
-  recordWorld,
-  worldTag,
-  worlds,
-} from "./world-data.js";
+import { firstWorld, recordWorld, worldTag, worlds } from "./world-data.js";
 
 const gearBagLimit = 300;
 const worldChestLimit = 12;
@@ -40,11 +48,11 @@ function nextEntityId(state) {
 
 function rollRarity(random) {
   let roll = random() * 100;
-  for (const [index, grade] of rarity.entries()) {
-    roll -= grade.weight;
+  for (let index = 0; index <= legendary; index++) {
+    roll -= rarity[index].weight;
     if (roll < 0) return index;
   }
-  return rarity.length - 1;
+  return legendary;
 }
 
 function spawnChest(
@@ -65,7 +73,7 @@ function spawnChest(
     x: x + (random() - 0.5) * 3,
     y: y + (random() - 0.5) * 3,
     id: nextEntityId(state),
-    r: forcedRarity ?? Math.min(rarity.length - 1, rollRarity(random) + boost),
+    r: forcedRarity ?? Math.min(legendary, rollRarity(random) + boost),
     level: fieldLevel(state),
     ...worldTag(state.world),
   };
@@ -115,14 +123,15 @@ function finiteEarnings(value) {
   return value > 0 ? Math.min(value, Number.MAX_VALUE) : 0;
 }
 
-function applyPress(state, rates, pieces, random = Math.random) {
+function basePress(state, rates, pieces, random, profile) {
   const id = state.world;
   const goal = worldChargeGoal(id, pieces);
   const {
     coins,
-    bonus,
     extraChance = 0,
+    ...award
   } = advanceWorldPress(state, rates, pieces, goal);
+  let { bonus } = award;
   creditCoins(state, coins);
   state.presses++;
   state.misses++;
@@ -149,6 +158,16 @@ function applyPress(state, rates, pieces, random = Math.random) {
     random,
   });
   if (!chest) return { coins, bonus };
+  if (
+    !starlight &&
+    profile.pathfinder.active &&
+    state.abilityProgress.charges > 0 &&
+    chest.r < legendary
+  ) {
+    chest.r++;
+    state.abilityProgress.charges--;
+    bonus = bonus || "Pathfinder";
+  }
   state.misses = 0;
   if (growth || starlight) {
     state.worldProgress[id] = 0;
@@ -157,22 +176,90 @@ function applyPress(state, rates, pieces, random = Math.random) {
   return { chest, coins, bonus };
 }
 
-function collectChest(state, id, pieces, random = Math.random) {
+function getBuild(state) {
+  const index = gearIndex(state);
+  return buildProfile(slots.map((_, slot) => index.get(state.equip[slot])));
+}
+
+function oldestLocalChest(state) {
+  return state.chests.find((chest) => recordWorld(chest) === state.world);
+}
+
+function applyPress(
+  state,
+  rates,
+  pieces,
+  random = Math.random,
+  profile = getBuild(state),
+) {
+  const oldest = profile.hammerhand.active && oldestLocalChest(state);
+  const result = basePress(state, rates, pieces, random, profile);
+  const { active, count } = profile.hammerhand;
+  if (!active) return result;
+  const progress = state.abilityProgress;
+  const target = count >= 2 ? 15 : 20;
+  progress.hammerhand = Math.min(20, progress.hammerhand + 1);
+  if (progress.hammerhand < target) return result;
+  if (oldest && state.items.length < gearBagLimit) {
+    result.opened = collectChest(
+      state,
+      oldest.id,
+      pieces,
+      random,
+      "ability",
+      profile,
+    );
+    result.ability = "Hammerhand";
+  } else if (count >= 4 && !oldestLocalChest(state)) {
+    result.chest = spawnChest(state, { forcedRarity: 0, random });
+    if (result.chest) result.ability = "Hammerhand";
+  }
+  if (result.ability) progress.hammerhand = 0;
+  return result;
+}
+
+function tickClockwork(
+  state,
+  seconds,
+  rates,
+  pieces,
+  profile,
+  random = Math.random,
+) {
+  const { active, count } = profile.clockwork;
+  if (!active || rates.auto <= 0 || seconds <= 0) return null;
+  const progress = state.abilityProgress;
+  progress.clockwork = Math.min(60000, progress.clockwork + seconds * 1000);
+  if (progress.clockwork < (count >= 2 ? 45000 : 60000)) return null;
+  const chest = spawnChest(state, { forcedRarity: 0, random });
+  const oldest = oldestLocalChest(state);
+  const opened =
+    !chest && count >= 4 && oldest && state.items.length < gearBagLimit
+      ? collectChest(state, oldest.id, pieces, random, "ability", profile)
+      : null;
+  if (!chest && !opened) return null;
+  progress.clockwork = 0;
+  return { chest, opened };
+}
+
+function collectChest(
+  state,
+  id,
+  pieces,
+  random = Math.random,
+  source = "manual",
+  profile = getBuild(state),
+) {
   const chest = state.chests.find((entry) => entry.id === id);
   if (!chest || recordWorld(chest) !== state.world) return null;
   if (state.items.length >= gearBagLimit) return { full: true };
   const slot = Math.floor(random() * slots.length);
-  const world = worlds[state.world];
-  const base = [1, 8, 1, 2][slot];
-  const value = Math.max(
-    1,
-    Math.round(
-      base *
-        rarity[chest.r].scale *
-        (world.gearScale || 1) *
-        (1 + Math.min(50, chest.level - 1) * 0.18) *
-        (0.85 + random() * 0.3),
-    ),
+  const value = lootValue(
+    state.world,
+    chest.level,
+    slot,
+    rarity[chest.r].scale,
+    0.85 + random() * 0.3,
   );
   const item = {
     id: nextEntityId(state),
@@ -182,7 +269,13 @@ function collectChest(state, id, pieces, random = Math.random) {
     value,
     ...worldTag(state.world),
   };
-  addGearItem(state, item);
+  const first = discover(state, item);
+  const disposition = resolveLoot(state, item, first, {
+    lookup: (id) => gearIndex(state).get(id),
+    put: addGearItem,
+    value: gearValue,
+    payout: salvageYield,
+  });
   state.chests = state.chests.filter((entry) => entry.id !== id);
   state.opened++;
   if (state.world === "volcano") {
@@ -191,11 +284,11 @@ function collectChest(state, id, pieces, random = Math.random) {
       8 + 2 * pieces,
     );
   }
-  const key = discoveryKey(slot, chest.r, state.world);
-  if (!state.found.includes(key)) state.found.push(key);
-  if (progressionAccess(state).shards)
+  const shards = progressionAccess(state).shards;
+  const gathered = trackOpening(state, profile, source, shards);
+  if (shards)
     creditResource(state, "shards", (1 + chest.r) * (1 + state.asc.up.wisdom));
-  return { chest, item };
+  return { chest, item, disposition, gathered };
 }
 
 function equipItem(state, item, toggle) {
@@ -244,6 +337,8 @@ function learnSkill(state, skill) {
 
 export {
   applyPress,
+  getBuild,
+  tickClockwork,
   buyWorkshopUpgrade,
   collectChest,
   equipItem,

@@ -1,4 +1,10 @@
 import {
+  builds,
+  defaultAbilityProgress,
+  defaultLootRules,
+  legendary,
+} from "./build-gear.js";
+import {
   ascUpgrades,
   clamp,
   names,
@@ -19,13 +25,15 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 1;
+const schemaVersion = 2;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
 const fresh = () =>
   initializeResources({
     schemaVersion,
+    lootRules: defaultLootRules(),
+    abilityProgress: defaultAbilityProgress(),
     world: firstWorld,
     worldProgress: Object.fromEntries(Object.keys(worlds).map((id) => [id, 0])),
     total: 0,
@@ -138,7 +146,10 @@ function recordEarnings(before) {
 }
 function itemName(i) {
   const gear = worlds[recordWorld(i)].gear;
-  return gear ? rarity[i.r].name + " " + gear[i.slot] : names[i.slot][i.r];
+  if (i.set) return builds[i.set].name + " " + slots[i.slot];
+  if (gear) return rarity[i.r].name + " " + gear[i.slot];
+  const base = names[i.slot][Math.min(i.r, legendary)];
+  return i.r > legendary ? rarity[i.r].name + " " + base : base;
 }
 function itemStat(i) {
   const value = fmtRate(gearValue(i));

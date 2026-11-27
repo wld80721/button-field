@@ -68,12 +68,14 @@ function gearValue(item) {
 }
 
 function salvageYield(item) {
-  return { coins: 2 + item.r * 3, scrap: 1 + item.r };
+  const rank = Math.min(4, item.r);
+  return { coins: 2 + rank * 3, scrap: 1 + rank };
 }
 
 function salvageGear(state, item) {
   if (
     !item ||
+    item.locked ||
     state.equip[item.slot] === item.id ||
     !removeGearItem(state, item.id)
   )

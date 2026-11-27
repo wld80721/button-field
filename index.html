@@ -2461,6 +2461,35 @@ textarea {
     flex-wrap: wrap;
   }
 }
+
+/* Equipment expansion */
+.recipe-controls {
+  margin: 0.8rem 0;
+}
+.recipe-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.recipe-controls select {
+  max-width: 100%;
+  background: #142436;
+  color: #ecf4ff;
+  padding: 0.35rem;
+  border: 1px solid #91a7b8;
+}
+.gear-comparison {
+  position: fixed;
+  z-index: 20;
+  max-width: min(22rem, calc(100vw - 16px));
+  padding: 0.7rem;
+  border: 2px solid #91a7b8;
+  background: #142436;
+  color: #ecf4ff;
+  box-shadow: 3px 4px #071423;
+  pointer-events: none;
+}
 </style>
   </head>
   <body>
@@ -2648,6 +2677,48 @@ textarea {
     <div id="skillTooltip" class="skill-tooltip" role="tooltip" hidden></div>
     <script>
 (() => {
+  // src/js/resources.js
+  var resourceCatalog = Object.freeze({
+    coins: { max: Number.MAX_VALUE },
+    shards: { max: 1e15 },
+    scrap: { max: Number.MAX_SAFE_INTEGER, integer: true },
+    stars: { max: Number.MAX_VALUE, account: "asc", integer: true }
+  });
+  function resourceBalance(state, id) {
+    const { account } = resourceCatalog[id];
+    return (account ? state[account] : state)[id];
+  }
+  function initializeResources(state, source) {
+    for (const [id, { account, max, integer }] of Object.entries(
+      resourceCatalog
+    )) {
+      const ledger = account ? state[account] : state;
+      const value = account ? source?.[account]?.[id] : source?.[id];
+      const amount = Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
+      ledger[id] = integer ? Math.floor(amount) : amount;
+    }
+    return state;
+  }
+  function creditResource(state, id, amount) {
+    if (!(amount > 0)) return;
+    const { max, account } = resourceCatalog[id];
+    const ledger = account ? state[account] : state;
+    ledger[id] = Math.min(max, ledger[id] + amount);
+  }
+  function spendResource(state, id, amount) {
+    if (!Number.isFinite(amount) || amount < 0 || resourceBalance(state, id) < amount)
+      return false;
+    const { account } = resourceCatalog[id];
+    (account ? state[account] : state)[id] -= amount;
+    return true;
+  }
+  function creditCoins(state, amount) {
+    if (!(amount > 0)) return;
+    creditResource(state, "coins", amount);
+    state.total = Math.min(Number.MAX_VALUE, state.total + amount);
+    state.asc.life = Math.min(Number.MAX_VALUE, state.asc.life + amount);
+  }
+
   // src/js/data.js
   var clamp = (n, a, b) => Math.min(b, Math.max(a, n));
   var rarity = [
@@ -2695,6 +2766,22 @@ textarea {
       wood: "#ad6223",
       light: "#ffe05f",
       metal: "#fff2ba"
+    },
+    {
+      name: "Mythic",
+      color: "#ffa3c8",
+      weight: 0,
+      wood: "#933c63",
+      light: "#f486b6",
+      metal: "#ffe1ef"
+    },
+    {
+      name: "Celestial",
+      color: "#bdeaff",
+      weight: 0,
+      wood: "#3a579c",
+      light: "#87b1fa",
+      metal: "#ebfaff"
     }
   ];
   var slots = ["Gloves", "Ring", "Boots", "Charm"];
@@ -3034,35 +3121,6 @@ textarea {
     }
   ];
 
-  // src/js/numbers.js
-  var wholeNumbers = new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0
-  });
-  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var suffixes = ["", "K", "M", "B", "T"];
-  function fmt(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
-    if (Math.abs(n) >= 1e15) {
-      const [mantissa, exponent] = n.toExponential().split("e");
-      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
-      return truncated + "e" + exponent;
-    }
-    let unit = suffixes.length - 1;
-    while (Math.abs(n) < 1e3 ** unit) unit--;
-    const scaled = n / 1e3 ** unit;
-    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
-    return Math.trunc(scaled * precision) / precision + suffixes[unit];
-  }
-  function fmtRate(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
-  }
-  function fmtExact(n) {
-    return Number.isFinite(n) ? counts.format(n) : "\u2014";
-  }
-
   // src/js/world-data.js
   var firstWorld = "grasslands";
   var worlds = {
@@ -3239,6 +3297,245 @@ textarea {
     return id === firstWorld ? design : id + ":" + design;
   }
 
+  // src/js/build-gear.js
+  var legendary = 4;
+  var craftAt = milestones.helper;
+  var craftCost = { coins: 800, scrap: 10, shards: 4 };
+  var slotBases = [1, 8, 1, 2];
+  var builds = {
+    hammerhand: {
+      name: "Hammerhand",
+      slot: 0,
+      style: "Clicking",
+      ability: "After 20 presses, open the oldest chest already on the field.",
+      two: "Charge in 15 presses.",
+      four: "Place a Common chest if the field is empty after the normal drop attempt."
+    },
+    clockwork: {
+      name: "Clockwork",
+      slot: 2,
+      style: "Automation",
+      ability: "After 60 seconds on the open field with passive income, place a Common chest.",
+      two: "Charge in 45 seconds.",
+      four: "Open the oldest local chest if placement is blocked and the bag has room."
+    },
+    forager: {
+      name: "Forager",
+      slot: 3,
+      style: "Resources",
+      ability: "Earn 2 scrap every three manual chest openings.",
+      two: "Auto Chest openings count too.",
+      four: "Each payout also grants 1 shard once shards are unlocked."
+    },
+    pathfinder: {
+      name: "Pathfinder",
+      slot: 1,
+      style: "Treasure",
+      ability: "Every six manual or Auto Chest openings banks a one-tier boost to a natural chest drop, up to Legendary.",
+      two: "Earn a charge every five openings.",
+      four: "Bank up to two charges."
+    }
+  };
+  var evolution = {
+    2: { at: 1e4, cost: { coins: 3e3, scrap: 16, shards: 8 }, scale: 1.5 },
+    3: { at: 5e4, cost: { coins: 12e3, scrap: 32, shards: 16 }, scale: 1.5 },
+    4: {
+      at: 1e6,
+      cost: { coins: 1e5, scrap: 60, shards: 40 },
+      scale: 1.2
+    },
+    5: {
+      at: 1e7,
+      cost: { coins: 1e6, scrap: 120, shards: 80 },
+      scale: 1.2
+    }
+  };
+  var defaultLootRules = () => ({
+    equip: "off",
+    salvage: false,
+    ceiling: 0,
+    duplicates: true
+  });
+  var defaultAbilityProgress = () => ({
+    hammerhand: 0,
+    clockwork: 0,
+    forager: 0,
+    pathfinder: 0,
+    charges: 0
+  });
+  function normalizeLootRules(raw) {
+    return {
+      equip: ["off", "protect", "strongest"].includes(raw?.equip) ? raw.equip : "off",
+      salvage: raw?.salvage === true,
+      ceiling: Number.isInteger(raw?.ceiling) ? Math.max(0, Math.min(3, raw.ceiling)) : 0,
+      duplicates: raw?.duplicates !== false
+    };
+  }
+  function normalizeAbilityProgress(raw) {
+    const caps = {
+      hammerhand: 20,
+      clockwork: 6e4,
+      forager: 2,
+      pathfinder: 5,
+      charges: 2
+    };
+    return Object.fromEntries(
+      Object.entries(caps).map(([key, max]) => [
+        key,
+        Number.isFinite(raw?.[key]) ? Math.min(
+          max,
+          Math.max(0, key === "clockwork" ? raw[key] : Math.floor(raw[key]))
+        ) : 0
+      ])
+    );
+  }
+  function setId(item) {
+    return item?.set || "";
+  }
+  function signature(item) {
+    return item?.set && builds[item.set]?.slot === item.slot ? item.set : "";
+  }
+  function buildProfile(gear) {
+    const pieces = {};
+    const signatures = /* @__PURE__ */ new Set();
+    for (const item of gear) {
+      if (!item?.set) continue;
+      pieces[item.set] = (pieces[item.set] || 0) + 1;
+      if (signature(item)) signatures.add(item.set);
+    }
+    return Object.fromEntries(
+      Object.keys(builds).map((id) => {
+        const count = pieces[id] || 0;
+        return [id, { count, active: count >= 2 || signatures.has(id) }];
+      })
+    );
+  }
+  function designKey(item) {
+    return item.set ? `set:${item.set}:${item.slot}:${item.r}` : discoveryKey(item.slot, item.r, recordWorld(item));
+  }
+  function discover(state, item) {
+    const key = designKey(item);
+    if (state.found.includes(key)) return false;
+    state.found.push(key);
+    return true;
+  }
+  function canPay(state, cost) {
+    return Object.entries(cost).every(([id, amount]) => state[id] >= amount);
+  }
+  function pay(state, cost) {
+    for (const [id, amount] of Object.entries(cost))
+      spendResource(state, id, amount);
+  }
+  function lootValue(world, level2, slot, scale, roll = 1) {
+    return Math.max(
+      1,
+      Math.round(
+        slotBases[slot] * scale * (worlds[world].gearScale || 1) * (1 + Math.min(50, level2 - 1) * 0.18) * roll
+      )
+    );
+  }
+  function buildRecipe(state, set, slot, level2, nextId, put, limit) {
+    if (!Object.hasOwn(builds, set) || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, craftCost))
+      return null;
+    const item = {
+      id: nextId(state),
+      slot,
+      set,
+      r: 2,
+      level: level2,
+      value: lootValue(state.world, level2, slot, 4),
+      ...worldTag(state.world)
+    };
+    pay(state, craftCost);
+    put(state, item);
+    discover(state, item);
+    return item;
+  }
+  function evolutionOffer(state, item) {
+    const step = evolution[item.r];
+    return step && {
+      ...step,
+      available: item.forge === 3 && state.total >= step.at && canPay(state, step.cost)
+    };
+  }
+  function evolveGear(state, item) {
+    if (!item || !state.items.includes(item)) return false;
+    const offer = evolutionOffer(state, item);
+    if (!offer?.available) return false;
+    pay(state, offer.cost);
+    item.r++;
+    item.value = Math.round(item.value * offer.scale * 100) / 100;
+    discover(state, item);
+    return true;
+  }
+  function resolveLoot(state, item, firstDiscovery, { lookup, put, value, payout }) {
+    const rules = state.lootRules;
+    const equipped2 = lookup(state.equip[item.slot]);
+    const strong = value(item) > value(equipped2);
+    const sameBuild = !equipped2 || recordWorld(equipped2) === recordWorld(item) && setId(equipped2) === setId(item) && signature(equipped2) === signature(item);
+    const equip = rules.equip !== "off" && !equipped2?.locked && strong && (rules.equip === "strongest" || sameBuild);
+    const matches = (gear) => gear.slot === item.slot && recordWorld(gear) === recordWorld(item) && !gear.set;
+    const salvage = !equip && !strong && rules.salvage && !firstDiscovery && !item.locked && !item.set && item.r <= rules.ceiling && (!rules.duplicates || state.items.some((gear) => designKey(gear) === designKey(item))) && state.items.some((gear) => matches(gear) && value(gear) >= value(item));
+    if (salvage) {
+      const reward = payout(item);
+      creditCoins(state, reward.coins);
+      creditResource(state, "scrap", reward.scrap);
+      return "salvaged";
+    }
+    put(state, item);
+    if (equip) state.equip[item.slot] = item.id;
+    return equip ? "equipped" : "kept";
+  }
+  function trackOpening(state, profile, source, shardsUnlocked) {
+    const progress2 = state.abilityProgress;
+    const natural = source === "manual" || source === "auto";
+    let gathered = 0;
+    if (profile.forager.active && (source === "manual" || source === "auto" && profile.forager.count >= 2)) {
+      if (++progress2.forager >= 3) {
+        progress2.forager = 0;
+        gathered = 2;
+        creditResource(state, "scrap", gathered);
+        if (profile.forager.count >= 4 && shardsUnlocked)
+          creditResource(state, "shards", 1);
+      }
+    }
+    const cap = profile.pathfinder.count >= 4 ? 2 : 1;
+    if (natural && profile.pathfinder.active && progress2.charges < cap && ++progress2.pathfinder >= (profile.pathfinder.count >= 2 ? 5 : 6)) {
+      progress2.pathfinder = 0;
+      progress2.charges++;
+    }
+    return gathered;
+  }
+
+  // src/js/numbers.js
+  var wholeNumbers = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0
+  });
+  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var suffixes = ["", "K", "M", "B", "T"];
+  function fmt(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
+    if (Math.abs(n) >= 1e15) {
+      const [mantissa, exponent] = n.toExponential().split("e");
+      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
+      return truncated + "e" + exponent;
+    }
+    let unit = suffixes.length - 1;
+    while (Math.abs(n) < 1e3 ** unit) unit--;
+    const scaled = n / 1e3 ** unit;
+    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
+    return Math.trunc(scaled * precision) / precision + suffixes[unit];
+  }
+  function fmtRate(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
+  }
+  function fmtExact(n) {
+    return Number.isFinite(n) ? counts.format(n) : "\u2014";
+  }
+
   // src/js/progression.js
   var progressionThresholds = Object.freeze({ ...milestones, firstWheel: 50 });
   var coinUnlocks = [
@@ -3264,8 +3561,8 @@ textarea {
     ],
     [
       progressionThresholds.helper,
-      "Garden helper",
-      "Buy a source of automatic coins at the Workshop."
+      "Garden helper + Set recipes",
+      "Buy automatic income at the Workshop or craft a set piece in Gear."
     ],
     [
       progressionThresholds.ascension,
@@ -3357,48 +3654,6 @@ textarea {
     return null;
   }
 
-  // src/js/resources.js
-  var resourceCatalog = Object.freeze({
-    coins: { max: Number.MAX_VALUE },
-    shards: { max: 1e15 },
-    scrap: { max: Number.MAX_SAFE_INTEGER, integer: true },
-    stars: { max: Number.MAX_VALUE, account: "asc", integer: true }
-  });
-  function resourceBalance(state, id) {
-    const { account } = resourceCatalog[id];
-    return (account ? state[account] : state)[id];
-  }
-  function initializeResources(state, source) {
-    for (const [id, { account, max, integer }] of Object.entries(
-      resourceCatalog
-    )) {
-      const ledger = account ? state[account] : state;
-      const value = account ? source?.[account]?.[id] : source?.[id];
-      const amount = Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
-      ledger[id] = integer ? Math.floor(amount) : amount;
-    }
-    return state;
-  }
-  function creditResource(state, id, amount) {
-    if (!(amount > 0)) return;
-    const { max, account } = resourceCatalog[id];
-    const ledger = account ? state[account] : state;
-    ledger[id] = Math.min(max, ledger[id] + amount);
-  }
-  function spendResource(state, id, amount) {
-    if (!Number.isFinite(amount) || amount < 0 || resourceBalance(state, id) < amount)
-      return false;
-    const { account } = resourceCatalog[id];
-    (account ? state[account] : state)[id] -= amount;
-    return true;
-  }
-  function creditCoins(state, amount) {
-    if (!(amount > 0)) return;
-    creditResource(state, "coins", amount);
-    state.total = Math.min(Number.MAX_VALUE, state.total + amount);
-    state.asc.life = Math.min(Number.MAX_VALUE, state.asc.life + amount);
-  }
-
   // src/js/gear.js
   var gearIndexes = /* @__PURE__ */ new WeakMap();
   function gearIndex(run) {
@@ -3458,10 +3713,11 @@ textarea {
     return Math.round(item.value * (100 + 12 * item.forge)) / 100;
   }
   function salvageYield(item) {
-    return { coins: 2 + item.r * 3, scrap: 1 + item.r };
+    const rank = Math.min(4, item.r);
+    return { coins: 2 + rank * 3, scrap: 1 + rank };
   }
   function salvageGear(state, item) {
-    if (!item || state.equip[item.slot] === item.id || !removeGearItem(state, item.id))
+    if (!item || item.locked || state.equip[item.slot] === item.id || !removeGearItem(state, item.id))
       return null;
     const payout = salvageYield(item);
     creditCoins(state, payout.coins);
@@ -3515,11 +3771,11 @@ textarea {
   }
   function rollRarity(random) {
     let roll = random() * 100;
-    for (const [index, grade] of rarity.entries()) {
-      roll -= grade.weight;
+    for (let index = 0; index <= legendary; index++) {
+      roll -= rarity[index].weight;
       if (roll < 0) return index;
     }
-    return rarity.length - 1;
+    return legendary;
   }
   function spawnChest(state, { forcedRarity, boost = 0, random = Math.random } = {}) {
     const local = state.chests.filter(
@@ -3535,7 +3791,7 @@ textarea {
       x: x + (random() - 0.5) * 3,
       y: y + (random() - 0.5) * 3,
       id: nextEntityId(state),
-      r: forcedRarity ?? Math.min(rarity.length - 1, rollRarity(random) + boost),
+      r: forcedRarity ?? Math.min(legendary, rollRarity(random) + boost),
       level: fieldLevel(state),
       ...worldTag(state.world)
     };
@@ -3581,14 +3837,15 @@ textarea {
   function finiteEarnings(value) {
     return value > 0 ? Math.min(value, Number.MAX_VALUE) : 0;
   }
-  function applyPress(state, rates, pieces, random = Math.random) {
+  function basePress(state, rates, pieces, random, profile) {
     const id = state.world;
     const goal = worldChargeGoal(id, pieces);
     const {
       coins,
-      bonus,
-      extraChance = 0
+      extraChance = 0,
+      ...award
     } = advanceWorldPress(state, rates, pieces, goal);
+    let { bonus } = award;
     creditCoins(state, coins);
     state.presses++;
     state.misses++;
@@ -3608,6 +3865,11 @@ textarea {
       random
     });
     if (!chest) return { coins, bonus };
+    if (!starlight && profile.pathfinder.active && state.abilityProgress.charges > 0 && chest.r < legendary) {
+      chest.r++;
+      state.abilityProgress.charges--;
+      bonus = bonus || "Pathfinder";
+    }
     state.misses = 0;
     if (growth || starlight) {
       state.worldProgress[id] = 0;
@@ -3615,18 +3877,63 @@ textarea {
     }
     return { chest, coins, bonus };
   }
-  function collectChest(state, id, pieces, random = Math.random) {
+  function getBuild(state) {
+    const index = gearIndex(state);
+    return buildProfile(slots.map((_, slot) => index.get(state.equip[slot])));
+  }
+  function oldestLocalChest(state) {
+    return state.chests.find((chest) => recordWorld(chest) === state.world);
+  }
+  function applyPress(state, rates, pieces, random = Math.random, profile = getBuild(state)) {
+    const oldest = profile.hammerhand.active && oldestLocalChest(state);
+    const result = basePress(state, rates, pieces, random, profile);
+    const { active, count } = profile.hammerhand;
+    if (!active) return result;
+    const progress2 = state.abilityProgress;
+    const target = count >= 2 ? 15 : 20;
+    progress2.hammerhand = Math.min(20, progress2.hammerhand + 1);
+    if (progress2.hammerhand < target) return result;
+    if (oldest && state.items.length < gearBagLimit) {
+      result.opened = collectChest(
+        state,
+        oldest.id,
+        pieces,
+        random,
+        "ability",
+        profile
+      );
+      result.ability = "Hammerhand";
+    } else if (count >= 4 && !oldestLocalChest(state)) {
+      result.chest = spawnChest(state, { forcedRarity: 0, random });
+      if (result.chest) result.ability = "Hammerhand";
+    }
+    if (result.ability) progress2.hammerhand = 0;
+    return result;
+  }
+  function tickClockwork(state, seconds, rates, pieces, profile, random = Math.random) {
+    const { active, count } = profile.clockwork;
+    if (!active || rates.auto <= 0 || seconds <= 0) return null;
+    const progress2 = state.abilityProgress;
+    progress2.clockwork = Math.min(6e4, progress2.clockwork + seconds * 1e3);
+    if (progress2.clockwork < (count >= 2 ? 45e3 : 6e4)) return null;
+    const chest = spawnChest(state, { forcedRarity: 0, random });
+    const oldest = oldestLocalChest(state);
+    const opened = !chest && count >= 4 && oldest && state.items.length < gearBagLimit ? collectChest(state, oldest.id, pieces, random, "ability", profile) : null;
+    if (!chest && !opened) return null;
+    progress2.clockwork = 0;
+    return { chest, opened };
+  }
+  function collectChest(state, id, pieces, random = Math.random, source = "manual", profile = getBuild(state)) {
     const chest = state.chests.find((entry) => entry.id === id);
     if (!chest || recordWorld(chest) !== state.world) return null;
     if (state.items.length >= gearBagLimit) return { full: true };
     const slot = Math.floor(random() * slots.length);
-    const world = worlds[state.world];
-    const base = [1, 8, 1, 2][slot];
-    const value = Math.max(
-      1,
-      Math.round(
-        base * rarity[chest.r].scale * (world.gearScale || 1) * (1 + Math.min(50, chest.level - 1) * 0.18) * (0.85 + random() * 0.3)
-      )
+    const value = lootValue(
+      state.world,
+      chest.level,
+      slot,
+      rarity[chest.r].scale,
+      0.85 + random() * 0.3
     );
     const item = {
       id: nextEntityId(state),
@@ -3636,7 +3943,13 @@ textarea {
       value,
       ...worldTag(state.world)
     };
-    addGearItem(state, item);
+    const first = discover(state, item);
+    const disposition = resolveLoot(state, item, first, {
+      lookup: (id2) => gearIndex(state).get(id2),
+      put: addGearItem,
+      value: gearValue,
+      payout: salvageYield
+    });
     state.chests = state.chests.filter((entry) => entry.id !== id);
     state.opened++;
     if (state.world === "volcano") {
@@ -3645,11 +3958,11 @@ textarea {
         8 + 2 * pieces
       );
     }
-    const key = discoveryKey(slot, chest.r, state.world);
-    if (!state.found.includes(key)) state.found.push(key);
-    if (progressionAccess(state).shards)
+    const shards = progressionAccess(state).shards;
+    const gathered = trackOpening(state, profile, source, shards);
+    if (shards)
       creditResource(state, "shards", (1 + chest.r) * (1 + state.asc.up.wisdom));
-    return { chest, item };
+    return { chest, item, disposition, gathered };
   }
   function equipItem(state, item, toggle) {
     if (!item || gearIndex(state).get(item.id) !== item) return false;
@@ -3699,10 +4012,12 @@ textarea {
   };
 
   // src/js/state.js
-  var schemaVersion = 1;
+  var schemaVersion = 2;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
+    lootRules: defaultLootRules(),
+    abilityProgress: defaultAbilityProgress(),
     world: firstWorld,
     worldProgress: Object.fromEntries(Object.keys(worlds).map((id) => [id, 0])),
     total: 0,
@@ -3778,7 +4093,10 @@ textarea {
   }
   function itemName(i) {
     const gear = worlds[recordWorld(i)].gear;
-    return gear ? rarity[i.r].name + " " + gear[i.slot] : names[i.slot][i.r];
+    if (i.set) return builds[i.set].name + " " + slots[i.slot];
+    if (gear) return rarity[i.r].name + " " + gear[i.slot];
+    const base = names[i.slot][Math.min(i.r, legendary)];
+    return i.r > legendary ? rarity[i.r].name + " " + base : base;
   }
   function itemStat(i) {
     const value = fmtRate(gearValue(i));
@@ -3815,6 +4133,7 @@ textarea {
     const stars = ascensionReward(state);
     if (stars < 1) return null;
     const run = fresh();
+    run.lootRules = { ...state.lootRules };
     run.asc = {
       ...state.asc,
       runs: state.asc.runs + 1,
@@ -3824,66 +4143,6 @@ textarea {
     creditResource(run, "stars", stars);
     run.coins = run.asc.up.seed * 250;
     return { run, stars };
-  }
-
-  // src/js/ui-dom.js
-  var $ = (id) => document.getElementById(id);
-  function setValue(target, property, value) {
-    if (target[property] !== value) target[property] = value;
-  }
-  function setText(element, value) {
-    setValue(element, "textContent", String(value));
-  }
-
-  // src/js/equipment.js
-  function equippedSetsMarkup() {
-    const counts2 = /* @__PURE__ */ new Map();
-    for (const slot of slots.keys()) {
-      const gear = equipped(slot);
-      if (!gear) continue;
-      const id = recordWorld(gear);
-      counts2.set(id, (counts2.get(id) || 0) + 1);
-    }
-    const entries = [...counts2].sort(([a], [b]) => Number(b === s.world) - Number(a === s.world)).map(([id, pieces]) => {
-      const here = id === s.world;
-      const set = regionalSets[id];
-      return `<li><strong style="color:${worlds[id].accent}">${worlds[id].name} \xB7 ${pieces}/4</strong>${here ? "" : " \xB7 activates in its home field"}
-        <div class="${here && pieces >= 2 ? "set-active" : ""}">2 pieces \xB7 ${set.two}</div>
-        <div class="${here && pieces >= 4 ? "set-active" : ""}">4 pieces \xB7 ${set.four}</div></li>`;
-    });
-    return entries.length ? `<details class="gear-sets"><summary>Equipped world sets</summary><ul>${entries.join("")}</ul></details>` : "";
-  }
-  function forgeMarkup(item) {
-    return `<div class="reward-preview" style="--rarity:${rarity[item.r].color}">${iconMarkup(item)}
-    <div><div class="rarity">${worlds[recordWorld(item)].name} \xB7 ${rarity[item.r].name} \xB7 ${slots[item.slot]}</div>
-    <h3>${itemName(item)}</h3><div id="forgeStat" class="item-stat"></div></div></div>
-    <p class="subtext">Each rank adds 12% of the original stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
-    <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p></div>
-    <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
-    <button class="action secondary" data-open="inventory">Back to Gear</button></div>
-    <p class="subtext" id="forgeResult" role="status"></p>`;
-  }
-  function updateForge() {
-    const button = $("forgeBuy");
-    if (!button) return;
-    const item = getGearItem(+button.dataset.forge);
-    if (!item) return;
-    const offer = forgeOffer(s, item);
-    setText($("forgeStat"), itemStat(item));
-    setText($("forgeRank"), "Forge rank " + offer.rank + "/" + maxForgeRank);
-    setText(
-      $("forgeBalance"),
-      "Available \xB7 " + fmt(s.coins) + " coins and " + fmt(s.scrap) + " scrap"
-    );
-    setText(
-      $("forgeNext"),
-      offer.maxed ? "Maximum rank reached." : "Next rank \xB7 " + itemStat({ ...item, forge: offer.rank + 1 })
-    );
-    setValue(button, "disabled", !offer.available);
-    setText(
-      button,
-      offer.maxed ? "Fully forged" : offer.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Forge \xB7 " + fmtExact(offer.cost.coins) + " coins + " + fmtExact(offer.cost.scrap) + " scrap"
-    );
   }
 
   // src/js/sprites.js
@@ -3926,6 +4185,15 @@ textarea {
   function openedChestIcon(r) {
     const a = rarity[r];
     return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
+  }
+
+  // src/js/ui-dom.js
+  var $ = (id) => document.getElementById(id);
+  function setValue(target, property, value) {
+    if (target[property] !== value) target[property] = value;
+  }
+  function setText(element, value) {
+    setValue(element, "textContent", String(value));
   }
 
   // src/js/effects.js
@@ -4128,6 +4396,8 @@ textarea {
   }
   function normalizeRun(o) {
     const f = initializeResources(fresh(), o), num = (n, max = 1e15) => typeof n === "number" && Number.isFinite(n) ? clamp(n, 0, max) : 0;
+    f.lootRules = normalizeLootRules(o.lootRules);
+    f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
     f.total = num(o.total, Number.MAX_VALUE);
     for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
     for (const k of ["earned", "runs"])
@@ -4165,7 +4435,7 @@ textarea {
       f.up[id] = Math.floor(num(o.up?.[id], max));
     for (const k of Object.keys(f.skills))
       f.skills[k] = Math.floor(num(o.skills?.[k], 50));
-    const validItem = (i) => i && Number.isInteger(i.id) && i.id > 0 && Number.isInteger(i.slot) && i.slot >= 0 && i.slot < slots.length && Number.isInteger(i.r) && i.r >= 0 && i.r < rarity.length && Number.isInteger(i.level) && i.level >= 1 && i.level <= 1e3 && Number.isFinite(i.value) && i.value > 0 && i.value < 1e8;
+    const validItem = (i) => i && Number.isInteger(i.id) && i.id > 0 && Number.isInteger(i.slot) && i.slot >= 0 && i.slot < slots.length && Number.isInteger(i.r) && i.r >= 0 && i.r < rarity.length && Number.isInteger(i.level) && i.level >= 1 && i.level <= 1e3 && Number.isFinite(i.value) && i.value > 0 && i.value < 4e8;
     const usedIds = /* @__PURE__ */ new Set();
     function uniqueId(entry) {
       if (!Number.isSafeInteger(entry.id) || entry.id < 1 || entry.id >= Number.MAX_SAFE_INTEGER || usedIds.has(entry.id))
@@ -4185,7 +4455,9 @@ textarea {
             level: level2,
             value,
             ...worldTag(recordWorld(item)),
-            ...forge ? { forge } : {}
+            ...forge ? { forge } : {},
+            ...typeof item.set === "string" && Object.hasOwn(builds, item.set) && r >= 2 ? { set: item.set } : {},
+            ...item.locked === true ? { locked: true } : {}
           });
         }
         if (f.items.length === gearBagLimit) break;
@@ -4202,12 +4474,16 @@ textarea {
         )
       )
     );
+    for (const id of Object.keys(builds))
+      for (const slot of slots.keys())
+        for (let r = 2; r < rarity.length; r++)
+          validDesigns.add(`set:${id}:${slot}:${r}`);
     if (Array.isArray(o.found))
       f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
     const chestCounts = /* @__PURE__ */ Object.create(null);
     if (Array.isArray(o.chests)) {
       for (const chest of o.chests) {
-        if (!chest || !Number.isInteger(chest.r) || chest.r < 0 || chest.r >= rarity.length || !Number.isFinite(chest.x) || !Number.isFinite(chest.y) || !Number.isInteger(chest.level) || chest.level < 1 || chest.level > 1e3)
+        if (!chest || !Number.isInteger(chest.r) || chest.r < 0 || chest.r > legendary || !Number.isFinite(chest.x) || !Number.isFinite(chest.y) || !Number.isInteger(chest.level) || chest.level < 1 || chest.level > 1e3)
           continue;
         const id = recordWorld(chest);
         if (f.total < worlds[id].at || chestCounts[id] === worldChestLimit || !uniqueId(chest))
@@ -4233,6 +4509,7 @@ textarea {
   }
   var KEY = "treasure-grove-v3";
   var preForgeSaveKey = KEY + "-before-forge";
+  var preExpansionSaveKey = KEY + "-before-equipment-expansion";
   var preFoundationSaveKey = KEY + "-before-foundation";
   var saveWarning = "";
   var blockedSave = null;
@@ -4245,6 +4522,9 @@ textarea {
   }
   function readPreForgeSave() {
     return readBackup(preForgeSaveKey);
+  }
+  function readPreExpansionSave() {
+    return readBackup(preExpansionSaveKey);
   }
   function readPreFoundationSave() {
     return readBackup(preFoundationSaveKey);
@@ -4299,7 +4579,8 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preFoundationSaveKey, raw);
+        preserveBackup(preExpansionSaveKey, raw);
+        if (version < 1) preserveBackup(preFoundationSaveKey, raw);
         if (!Object.hasOwn(payload, "scrap"))
           preserveBackup(preForgeSaveKey, raw);
       } catch {
@@ -4715,98 +4996,6 @@ textarea {
     setTimeout(finish, duration + 40);
   }
 
-  // src/js/worlds.js
-  function worldChests(id = s.world) {
-    return s.chests.filter((chest) => recordWorld(chest) === id);
-  }
-  function worldGearCount(id, gear = equippedGear()) {
-    let count = 0;
-    for (const item of gear) {
-      if (item && recordWorld(item) === id) count++;
-    }
-    return count;
-  }
-  function worldReadout(pieces) {
-    const id = s.world;
-    const world = worlds[id];
-    const charge = s.worldProgress[id];
-    const goal = worldChargeGoal(id, pieces);
-    const status = id === "volcano" ? charge ? charge + " presses left" : "Open a chest to charge" : charge >= goal ? "Ready" : charge + "/" + goal;
-    setText($("worldName"), world.name);
-    setText($("worldStatus"), world.mechanic + " \xB7 " + status);
-    setValue(
-      $("worldFill").style,
-      "width",
-      Math.min(100, charge / goal * 100) + "%"
-    );
-    if ($("board").dataset.world !== id) {
-      $("board").dataset.world = id;
-      $("board").style.setProperty("--world-accent", world.accent);
-      terrain();
-    }
-  }
-  function isKnownWorld(state, id) {
-    const world = worlds[id];
-    return hasRunCoins(state, world.at) || state.items.some((item) => recordWorld(item) === id) || state.found.some((key) => key.startsWith(id + ":"));
-  }
-  function worldOptions() {
-    return Object.entries(worlds).filter(([id]) => isKnownWorld(s, id)).map(([id, world]) => `<option value="${id}">${world.name}</option>`).join("");
-  }
-  function worldsMarkup() {
-    return `<p class="subtext">Unlock fields with coins earned this run. Travel is free. Chests stay where they land, and Auto Chest works in the field you\u2019re visiting.</p>
-    <div class="world-grid"></div>`;
-  }
-  function worldCard(id, world) {
-    return `<article class="up-card world-card" style="--world-accent:${world.accent}">
-    <h3>${world.name}</h3>
-    <p><strong>${world.mechanic}</strong> \xB7 ${world.description}</p>
-    <p>${world.gearBonus || "Find the original Treasure Grove equipment here."}</p>
-    <details class="world-set-rules"><summary>World set bonuses</summary><p>2 pieces \xB7 ${regionalSets[id].two}</p><p>4 pieces \xB7 ${regionalSets[id].four}</p></details>
-    <button class="action" data-travel="${id}"></button>
-  </article>`;
-  }
-  function updateWorlds() {
-    const grid = $("modalBody").querySelector(".world-grid");
-    const next = nextWorld(s);
-    const key = next?.[0] || "all-unlocked";
-    if (grid.dataset.next !== key) {
-      const focused = document.activeElement?.dataset.travel;
-      const available = Object.entries(worlds).filter(
-        ([, world]) => hasRunCoins(s, world.at)
-      );
-      grid.dataset.next = key;
-      grid.innerHTML = available.map(([id, world]) => worldCard(id, world)).join("") + (next ? `<article class="up-card world-card world-undiscovered"><h3>${next[1].name}</h3>
-        <p>Explore this field once you reach its coin milestone.</p>
-        <button class="action" data-travel="${next[0]}" disabled></button>
-      </article>` : "");
-      if (focused)
-        [...grid.querySelectorAll("[data-travel]")].find((button) => button.dataset.travel === focused)?.focus();
-    }
-    for (const button of grid.querySelectorAll("[data-travel]")) {
-      const id = button.dataset.travel;
-      const world = worlds[id];
-      const here = id === s.world;
-      const locked = !hasRunCoins(s, world.at);
-      setValue(button, "disabled", here || locked);
-      setText(
-        button,
-        here ? "Current field" : locked ? fmtExact(world.at) + " coins earned to unlock" : "Travel to " + world.name
-      );
-    }
-  }
-  function travel(id) {
-    const world = Object.hasOwn(worlds, id) && worlds[id];
-    if (!world || !hasRunCoins(s, world.at) || s.world === id) return;
-    s.world = id;
-    clearFieldEffects();
-    renderChests();
-    notice("Arrived in " + world.name + ".");
-    render();
-    save();
-    closeModal();
-    $("press").focus();
-  }
-
   // src/js/field.js
   var pressTimer;
   function replaceRun(run) {
@@ -4861,7 +5050,11 @@ textarea {
   }
   function fieldSnapshot() {
     const gear = equippedGear();
-    return { rates: stats(gear), pieces: worldGearCount(s.world, gear) };
+    return {
+      rates: stats(gear),
+      pieces: worldGearCount(s.world, gear),
+      profile: buildProfile(gear)
+    };
   }
   function press() {
     sound("tap");
@@ -4871,12 +5064,21 @@ textarea {
     const {
       coins,
       bonus: effect,
-      chest
-    } = applyPress(s, snapshot.rates, snapshot.pieces);
+      chest,
+      opened,
+      ability
+    } = applyPress(
+      s,
+      snapshot.rates,
+      snapshot.pieces,
+      Math.random,
+      snapshot.profile
+    );
     recordEarnings(totalBefore);
     if (chest) revealChest(chest);
+    if (opened) showOpenedChest(opened);
     directionalFloat(
-      (effect ? effect + " \xB7 " : "") + "+" + fmtRate(coins),
+      (effect || ability ? (effect || ability) + " \xB7 " : "") + "+" + fmtRate(coins),
       effect
     );
     burst(50, 47, effect ? worlds[s.world].accent : "#ffe5a2");
@@ -4885,18 +5087,30 @@ textarea {
     pressTimer = setTimeout(() => $("press").classList.remove("pressed"), 90);
     if (stageIndex() > before)
       toast("New discovery: " + stages[stageIndex()].title);
-    render(snapshot);
+    render(opened?.disposition === "equipped" ? void 0 : snapshot);
     save();
   }
-  function openChest(id) {
-    const outcome = collectChest(s, id, worldGearCount(s.world));
+  function openChest(id, source = "manual") {
+    const before = s.total;
+    const outcome = collectChest(
+      s,
+      id,
+      worldGearCount(s.world),
+      Math.random,
+      source
+    );
     if (!outcome) return;
     if (outcome.full) {
       toast("Gear bag is full. Salvage an unused item first.");
       return;
     }
-    const { chest: c, item } = outcome;
-    const el = $("chests").querySelector(`[data-chest="${id}"]`);
+    if (s.total !== before) recordEarnings(before);
+    showOpenedChest(outcome);
+    render();
+    save();
+  }
+  function showOpenedChest({ chest: c, item, disposition, gathered }) {
+    const el = $("chests").querySelector(`[data-chest="${c.id}"]`);
     if (el) {
       el.innerHTML = openedChestIcon(c.r);
       el.classList.add("opening");
@@ -4905,10 +5119,11 @@ textarea {
     }
     sound("chest");
     burst(c.x, c.y, rarity[c.r].color);
-    popGroundLoot(c, item);
-    notice("Collected " + itemName(item) + "! Open Gear to equip it.");
-    render();
-    save();
+    if (disposition !== "salvaged") popGroundLoot(c, item);
+    const action = disposition === "salvaged" ? "Auto-salvaged " : disposition === "equipped" ? "Auto-equipped " : "Collected ";
+    notice(
+      action + itemName(item) + (gathered ? " \xB7 Forager +" + gathered + " scrap." : "!")
+    );
   }
   function progress(i) {
     const n = stages[i + 1];
@@ -4958,13 +5173,35 @@ textarea {
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
     if (runtime.modalType === "forge") updateForge();
+    if (runtime.modalType === "recipes") updateRecipes();
     if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
       updateBuyButtons();
   }
   function chestInterval() {
     return 5 / (1 + 0.45 * s.up.chestSpeed);
   }
-  function autoChestTick(dt) {
+  function autoChestTick(dt, snapshot) {
+    if (!runtime.modalType && !document.hidden) {
+      const before = s.total;
+      const clock = tickClockwork(
+        s,
+        dt,
+        snapshot.rates,
+        snapshot.pieces,
+        snapshot.profile
+      );
+      if (clock) {
+        if (clock.chest) {
+          revealChest(clock.chest);
+          notice("Clockwork placed a Common chest.");
+        }
+        if (clock.opened) showOpenedChest(clock.opened);
+        if (s.total !== before) recordEarnings(before);
+        render();
+        save();
+        return;
+      }
+    }
     const chest = s.chests.find((c) => recordWorld(c) === s.world);
     if (!owned("autoChest") || !chest || s.items.length >= gearBagLimit || runtime.modalType) {
       runtime.chestClock = 0;
@@ -4973,7 +5210,7 @@ textarea {
     runtime.chestClock += dt;
     if (runtime.chestClock >= chestInterval()) {
       runtime.chestClock = 0;
-      openChest(chest.id);
+      openChest(chest.id, "auto");
     }
   }
 
@@ -4994,24 +5231,73 @@ textarea {
     const world = worlds[recordWorld(i)];
     const eq = equipped(i.slot), on = eq?.id === i.id, diff = eq ? Math.round((gearValue(i) - gearValue(eq)) * 100) / 100 : null;
     const salvage = salvageYield(i);
-    return `<article class="item-card" style="--rarity:${rarity[i.r].color}"><div class="item-top">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} \xB7 Lv ${i.level}${i.forge ? " \xB7 Forge " + i.forge : ""}</div><h3>${itemName(i)}</h3><p>${slots[i.slot]} \xB7 ${world.name}</p></div></div><div class="item-stat">${itemStat(i)}</div>${world.gearBonus ? `<div class="gear-bonus">${world.gearBonus}</div>` : ""}<div class="compare">${on ? "Currently equipped" : diff === null ? "Empty equipment slot" : diff === 0 ? "Same stat as equipped" : (diff > 0 ? "+" : "") + diff + " compared with equipped"}</div><div class="actions"><button class="action gold" data-equip="${i.id}">${on ? "Unequip" : "Equip"}</button><button class="action secondary" data-salvage="${i.id}" ${on ? "disabled" : ""}>Salvage<span class="salvage-yield">${salvage.coins} coins + ${salvage.scrap} scrap</span></button></div><button class="action secondary" data-open-forge="${i.id}">Forge</button></article>`;
+    return `<article class="item-card" style="--rarity:${rarity[i.r].color}"><div class="item-top">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} \xB7 Lv ${i.level}${i.forge ? " \xB7 Forge " + i.forge : ""}</div><h3>${itemName(i)}</h3><p>${slots[i.slot]} \xB7 ${world.name}${i.locked ? " \xB7 Locked" : ""}</p></div></div><div class="item-stat">${itemStat(i)}</div>${i.set ? `<div class="gear-bonus">${builds[i.set].name} \xB7 ${builds[i.set].style}${builds[i.set].slot === i.slot ? " \xB7 Signature" : ""}</div>` : world.gearBonus ? `<div class="gear-bonus">${world.gearBonus}</div>` : ""}<div class="compare">${on ? "Currently equipped" : diff === null ? "Empty equipment slot" : diff === 0 ? "Same stat as equipped" : (diff > 0 ? "+" : "") + diff + " compared with equipped"}</div><div class="actions"><button class="action gold" data-equip="${i.id}">${on ? "Unequip" : "Equip"}</button><button class="action secondary" data-salvage="${i.id}" ${on || i.locked ? "disabled" : ""}>Salvage<span class="salvage-yield">${salvage.coins} coins + ${salvage.scrap} scrap</span></button></div><div class="actions"><button class="action secondary" data-open-forge="${i.id}">Forge</button>
+<button class="action secondary" data-lock="${i.id}" aria-pressed="${Boolean(i.locked)}">${i.locked ? "Unlock" : "Lock"}</button>
+<button class="action secondary" data-compare="${i.id}">Compare</button></div></article>`;
+  }
+  var inventoryOptions = {
+    gearRarity: ["All rarities", ...rarity.map((grade) => grade.name)],
+    gearSet: {
+      all: "All sets",
+      regional: "Regional sets",
+      ...Object.fromEntries(
+        Object.entries(builds).map(([id, set]) => [id, set.name])
+      )
+    },
+    gearEquipped: {
+      all: "Any equipment status",
+      yes: "Equipped",
+      no: "Unequipped"
+    },
+    gearLocked: { all: "Any lock status", yes: "Locked", no: "Unlocked" },
+    gearSort: {
+      rarity: "Sort by rarity",
+      stat: "Sort by effective stat",
+      newest: "Sort by newest"
+    }
+  };
+  var inventoryFilters = Object.keys(inventoryOptions);
+  function inventoryControls() {
+    return Object.entries(inventoryOptions).map(([id, options]) => {
+      const entries = Array.isArray(options) ? options.map((name, i) => [i === 0 ? "all" : String(i - 1), name]) : Object.entries(options);
+      const current = runtime[id] || entries[0][0];
+      const label = {
+        gearRarity: "Filter rarity",
+        gearSet: "Filter set",
+        gearEquipped: "Filter equipped",
+        gearLocked: "Filter locked",
+        gearSort: "Sort gear"
+      }[id];
+      return `<select id="${id}" aria-label="${label}">${entries.map(([id2, name]) => `<option value="${id2}" ${id2 === current ? "selected" : ""}>${name}</option>`).join("")}</select>`;
+    }).join("");
+  }
+  function statusMatch(filter, value) {
+    return !filter || filter === "all" || filter === "yes" === Boolean(value);
   }
   function inventory() {
     const list = s.items.filter(
-      (i) => (runtime.filter === "all" || String(i.slot) === runtime.filter) && (runtime.gearWorldFilter === "all" || recordWorld(i) === runtime.gearWorldFilter)
-    ).sort((a, b) => b.r - a.r || gearValue(b) - gearValue(a) || b.id - a.id);
+      (i) => (runtime.filter === "all" || String(i.slot) === runtime.filter) && (runtime.gearWorldFilter === "all" || recordWorld(i) === runtime.gearWorldFilter) && (!runtime.gearRarity || runtime.gearRarity === "all" || runtime.gearRarity === String(i.r)) && (!runtime.gearSet || runtime.gearSet === "all" || runtime.gearSet === (i.set || "regional")) && statusMatch(runtime.gearEquipped, s.equip[i.slot] === i.id) && statusMatch(runtime.gearLocked, i.locked)
+    ).sort((a, b) => {
+      if (runtime.gearSort === "newest") return b.id - a.id;
+      if (runtime.gearSort === "stat")
+        return gearValue(b) - gearValue(a) || b.r - a.r || b.id - a.id;
+      return b.r - a.r || gearValue(b) - gearValue(a) || b.id - a.id;
+    });
     return `<p class="subtext">Wear one item in each slot. Replacing gear keeps the previous item in your bag.</p><div class="slots">${slots.map((k, j) => {
       const i = equipped(j);
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>\u2014 Empty \u2014</b>"}</div>`;
-    }).join(
-      ""
-    )}</div>${equippedSetsMarkup()}<div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select></div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
+    }).join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
+    <button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " \xB7 " + fmtExact(craftAt) + " coins earned" : ""}</button>
+    <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
+    <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
   }
   function showCollection(id) {
+    const set = Object.hasOwn(builds, id) ? id : null;
     const designs = slots.flatMap(
       (slotName, slot) => rarity.map((grade, r) => {
-        const item = { slot, r, world: id };
-        const found = s.found.includes(discoveryKey(slot, r, id));
+        if (set && r < 2) return null;
+        const item = set ? { slot, r, set } : { slot, r, world: id };
+        const found = s.found.includes(designKey(item));
         return {
           item,
           found,
@@ -5019,11 +5305,11 @@ textarea {
           grade
         };
       })
-    );
+    ).filter(Boolean);
     const discovered = designs.filter((design) => design.found).length;
     setText(
       $("collectionCount"),
-      discovered + "/" + designs.length + " item designs discovered in " + worlds[id].name + ". " + s.found.length + "/" + designs.length * Object.keys(worlds).length + " across all worlds."
+      discovered + "/" + designs.length + " item designs discovered in " + (set ? builds[set].name : worlds[id].name) + ". " + s.found.length + "/" + (rarity.length * slots.length * Object.keys(worlds).length + (rarity.length - 2) * slots.length * Object.keys(builds).length) + " across all fields and sets."
     );
     $("collectionGrid").innerHTML = designs.map(
       ({ item, found, name, grade }) => `<div class="up-card" style="border-color:${found ? grade.color : "#3b6262"}"><div class="item-top" style="opacity:${found ? 1 : 0.45}">${iconMarkup(item)}<div><div class="rarity" style="--rarity:${grade.color}">${grade.name}</div><h3>${name}</h3></div></div></div>`
@@ -5032,6 +5318,7 @@ textarea {
   function openModal(type, id) {
     if (type === "wheel" && !wheelReady()) return;
     hideSkillTip();
+    hideComparison();
     sound("menu");
     if ($("modal").hidden) runtime.lastFocus = document.activeElement;
     runtime.modalType = type;
@@ -5069,6 +5356,7 @@ textarea {
       b.innerHTML = inventory();
       $("filter").value = runtime.filter;
       $("gearWorldFilter").value = runtime.gearWorldFilter;
+      updateLootRuleSummary();
     } else if (type === "forge") {
       const item = getGearItem(id);
       if (!item) {
@@ -5079,6 +5367,10 @@ textarea {
       b.innerHTML = forgeMarkup(item);
       b.closest(".window").scrollTop = 0;
       updateForge();
+    } else if (type === "recipes") {
+      t.textContent = "Set recipes";
+      b.innerHTML = recipesMarkup();
+      updateRecipes();
     } else if (type === "worlds") {
       t.textContent = "Worlds";
       b.innerHTML = worldsMarkup();
@@ -5107,7 +5399,7 @@ textarea {
       updateBuyButtons();
     } else if (type === "collection") {
       t.textContent = "Treasure collection";
-      b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world">${worldOptions()}</select></div>
+      b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world or set">${worldOptions()}${s.total >= craftAt || s.found.some((key) => key.startsWith("set:")) ? `<optgroup label="Crafted sets">${Object.entries(builds).map(([id2, set]) => `<option value="${id2}">${set.name}</option>`).join("")}</optgroup>` : ""}</select></div>
       <p class="subtext">Base chest rarities: Common 60%, Uncommon 26%, Rare 10%, Epic 3.5%, Legendary 0.5%.</p><div id="collectionGrid" class="item-grid"></div>`;
       $("collectionWorld").value = s.world;
       showCollection(s.world);
@@ -5120,6 +5412,7 @@ textarea {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
@@ -5136,6 +5429,7 @@ textarea {
   }
   function closeModal() {
     hideSkillTip();
+    hideComparison();
     runtime.ascConfirm = false;
     sound("menu");
     runtime.wheelGeneration++;
@@ -5226,6 +5520,300 @@ textarea {
     );
   }
 
+  // src/js/worlds.js
+  function worldChests(id = s.world) {
+    return s.chests.filter((chest) => recordWorld(chest) === id);
+  }
+  function worldGearCount(id, gear = equippedGear()) {
+    let count = 0;
+    for (const item of gear) {
+      if (item && !item.set && recordWorld(item) === id) count++;
+    }
+    return count;
+  }
+  function worldReadout(pieces) {
+    const id = s.world;
+    const world = worlds[id];
+    const charge = s.worldProgress[id];
+    const goal = worldChargeGoal(id, pieces);
+    const status = id === "volcano" ? charge ? charge + " presses left" : "Open a chest to charge" : charge >= goal ? "Ready" : charge + "/" + goal;
+    setText($("worldName"), world.name);
+    setText($("worldStatus"), world.mechanic + " \xB7 " + status);
+    setValue(
+      $("worldFill").style,
+      "width",
+      Math.min(100, charge / goal * 100) + "%"
+    );
+    if ($("board").dataset.world !== id) {
+      $("board").dataset.world = id;
+      $("board").style.setProperty("--world-accent", world.accent);
+      terrain();
+    }
+  }
+  function isKnownWorld(state, id) {
+    const world = worlds[id];
+    return hasRunCoins(state, world.at) || state.items.some((item) => recordWorld(item) === id) || state.found.some((key) => key.startsWith(id + ":"));
+  }
+  function worldOptions() {
+    return Object.entries(worlds).filter(([id]) => isKnownWorld(s, id)).map(([id, world]) => `<option value="${id}">${world.name}</option>`).join("");
+  }
+  function worldsMarkup() {
+    return `<p class="subtext">Unlock fields with coins earned this run. Travel is free. Chests stay where they land, and Auto Chest works in the field you\u2019re visiting.</p>
+    <div class="world-grid"></div>`;
+  }
+  function worldCard(id, world) {
+    return `<article class="up-card world-card" style="--world-accent:${world.accent}">
+    <h3>${world.name}</h3>
+    <p><strong>${world.mechanic}</strong> \xB7 ${world.description}</p>
+    <p>${world.gearBonus || "Find the original Treasure Grove equipment here."}</p>
+    <details class="world-set-rules"><summary>World set bonuses</summary><p>2 pieces \xB7 ${regionalSets[id].two}</p><p>4 pieces \xB7 ${regionalSets[id].four}</p></details>
+    <button class="action" data-travel="${id}"></button>
+  </article>`;
+  }
+  function updateWorlds() {
+    const grid = $("modalBody").querySelector(".world-grid");
+    const next = nextWorld(s);
+    const key = next?.[0] || "all-unlocked";
+    if (grid.dataset.next !== key) {
+      const focused = document.activeElement?.dataset.travel;
+      const available = Object.entries(worlds).filter(
+        ([, world]) => hasRunCoins(s, world.at)
+      );
+      grid.dataset.next = key;
+      grid.innerHTML = available.map(([id, world]) => worldCard(id, world)).join("") + (next ? `<article class="up-card world-card world-undiscovered"><h3>${next[1].name}</h3>
+        <p>Explore this field once you reach its coin milestone.</p>
+        <button class="action" data-travel="${next[0]}" disabled></button>
+      </article>` : "");
+      if (focused)
+        [...grid.querySelectorAll("[data-travel]")].find((button) => button.dataset.travel === focused)?.focus();
+    }
+    for (const button of grid.querySelectorAll("[data-travel]")) {
+      const id = button.dataset.travel;
+      const world = worlds[id];
+      const here = id === s.world;
+      const locked = !hasRunCoins(s, world.at);
+      setValue(button, "disabled", here || locked);
+      setText(
+        button,
+        here ? "Current field" : locked ? fmtExact(world.at) + " coins earned to unlock" : "Travel to " + world.name
+      );
+    }
+  }
+  function travel(id) {
+    const world = Object.hasOwn(worlds, id) && worlds[id];
+    if (!world || !hasRunCoins(s, world.at) || s.world === id) return;
+    s.world = id;
+    clearFieldEffects();
+    renderChests();
+    notice("Arrived in " + world.name + ".");
+    render();
+    save();
+    closeModal();
+    $("press").focus();
+  }
+
+  // src/js/equipment.js
+  function equippedSetsMarkup() {
+    const counts2 = /* @__PURE__ */ new Map();
+    for (const slot of slots.keys()) {
+      const gear = equipped(slot);
+      if (!gear || gear.set) continue;
+      const id = recordWorld(gear);
+      counts2.set(id, (counts2.get(id) || 0) + 1);
+    }
+    const entries = [...counts2].sort(([a], [b]) => Number(b === s.world) - Number(a === s.world)).map(([id, pieces]) => {
+      const here = id === s.world;
+      const set = regionalSets[id];
+      return `<li><strong style="color:${worlds[id].accent}">${worlds[id].name} \xB7 ${pieces}/4</strong>${here ? "" : " \xB7 activates in its home field"}
+        <div class="${here && pieces >= 2 ? "set-active" : ""}">2 pieces \xB7 ${set.two}</div>
+        <div class="${here && pieces >= 4 ? "set-active" : ""}">4 pieces \xB7 ${set.four}</div></li>`;
+    });
+    return buildSummary() + (entries.length ? `<details class="gear-sets"><summary>Equipped world sets</summary><ul>${entries.join("")}</ul></details>` : "");
+  }
+  function forgeMarkup(item) {
+    return `<div class="reward-preview" style="--rarity:${rarity[item.r].color}">${iconMarkup(item)}
+    <div><div class="rarity">${worlds[recordWorld(item)].name} \xB7 ${rarity[item.r].name} \xB7 ${slots[item.slot]}</div>
+    <h3>${itemName(item)}</h3><div id="forgeStat" class="item-stat"></div></div></div>
+    <p class="subtext">Each rank adds 12% of the current base stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
+    <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
+    <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button><button class="action secondary" data-open="recipes">Set recipes</button><button class="action secondary" data-open="inventory">Back to Gear</button></div>
+    <p class="subtext" id="forgeResult" role="status"></p>`;
+  }
+  function updateForge() {
+    const button = $("forgeBuy");
+    if (!button) return;
+    const item = getGearItem(+button.dataset.forge);
+    if (!item) return;
+    const offer = forgeOffer(s, item);
+    setText($("forgeStat"), itemStat(item));
+    setText($("forgeRank"), "Forge rank " + offer.rank + "/" + maxForgeRank);
+    setText(
+      $("forgeBalance"),
+      "Available \xB7 " + fmt(s.coins) + " coins and " + fmt(s.scrap) + " scrap"
+    );
+    setText(
+      $("forgeNext"),
+      offer.maxed ? "Maximum rank reached." : "Next rank \xB7 " + itemStat({ ...item, forge: offer.rank + 1 })
+    );
+    const step = evolutionOffer(s, item);
+    const evolve = $("evolveBuy");
+    setValue(evolve, "hidden", !step);
+    if (step) {
+      const next = rarity[item.r + 1].name;
+      setText(
+        $("evolutionInfo"),
+        "Evolve to " + next + " at Forge rank 3 and " + fmtExact(step.at) + " coins earned this run. Base stat \xD7" + step.scale + ". Keeps your forge rank and equipment slot."
+      );
+      setValue(evolve, "disabled", !step.available);
+      setText(evolve, "Evolve \xB7 " + costLabel(step.cost));
+    } else {
+      setText(
+        $("evolutionInfo"),
+        item.r === 6 ? "Highest evolution tier." : "Evolution starts with Rare gear."
+      );
+    }
+    setValue(button, "disabled", !offer.available);
+    setText(
+      button,
+      offer.maxed ? "Fully forged" : offer.locked ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned" : "Forge \xB7 " + fmtExact(offer.cost.coins) + " coins + " + fmtExact(offer.cost.scrap) + " scrap"
+    );
+  }
+  function costLabel(cost) {
+    return Object.entries(cost).map(([id, amount]) => fmtExact(amount) + " " + id).join(" + ");
+  }
+  function buildSummary() {
+    const profile = buildProfile(equippedGear());
+    const charge = s.abilityProgress;
+    return Object.entries(profile).filter(([, info]) => info.count).map(([id, info]) => {
+      const set = builds[id];
+      const cap = info.count >= 2;
+      const current = {
+        hammerhand: Math.min(charge.hammerhand, cap ? 15 : 20) + "/" + (cap ? 15 : 20) + " presses",
+        clockwork: Math.floor(Math.min(charge.clockwork, cap ? 45e3 : 6e4) / 1e3) + "/" + (cap ? 45 : 60) + " seconds",
+        forager: charge.forager + "/3 chest openings",
+        pathfinder: Math.min(charge.pathfinder, cap ? 5 : 6) + "/" + (cap ? 5 : 6) + " openings \xB7 " + charge.charges + " banked"
+      }[id];
+      return `<details class="gear-sets"><summary>${set.name} \xB7 ${info.count}/4 \xB7 ${info.active ? current : "Ability inactive"}</summary>
+      <p>${slots[set.slot]} or 2 pieces \xB7 ${set.ability}</p><p>2 pieces \xB7 ${set.two}</p><p>4 pieces \xB7 ${set.four}</p></details>`;
+    }).join("");
+  }
+  function recipesMarkup() {
+    const available = s.total >= craftAt;
+    return `<p class="subtext" id="recipeGate" ${available ? "hidden" : ""}>Unlocks at ${fmtExact(craftAt)} coins earned this run.</p>
+    <div id="recipeForm" ${available ? "" : "hidden"}><div class="forge-details">${Object.values(
+      builds
+    ).map(
+      (set) => `<details><summary>${set.name} \xB7 ${set.style}</summary><p>${slots[set.slot]} or 2 pieces \xB7 ${set.ability}</p><p>2 pieces \xB7 ${set.two}</p><p>4 pieces \xB7 ${set.four}</p></details>`
+    ).join("")}</div>
+    <div class="gear-filters recipe-controls">
+    <label>Set <select id="recipeSet">${Object.entries(builds).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
+    <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
+    </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
+    <button id="craftGear" class="action gold">Craft \xB7 ${costLabel(craftCost)}</button>
+    </div><p id="recipeResult" role="status"></p><button class="action secondary" data-open="inventory">Back to Gear</button>`;
+  }
+  function updateRecipes() {
+    const unlocked = s.total >= craftAt;
+    setValue($("recipeForm"), "hidden", !unlocked);
+    setValue($("recipeGate"), "hidden", unlocked);
+    const full = s.items.length >= gearBagLimit;
+    setText(
+      $("recipeBalance"),
+      full ? "Gear bag is full." : "Available \xB7 " + costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards })
+    );
+    setValue(
+      $("craftGear"),
+      "disabled",
+      !unlocked || full || !canPay(s, craftCost)
+    );
+  }
+  var equipModes = {
+    off: "Off",
+    protect: "Protect current build",
+    strongest: "Strongest stat"
+  };
+  function lootRuleMarkup() {
+    const rules = s.lootRules;
+    return `<details class="gear-sets" id="lootRules"><summary>Loot automation</summary>
+    <div class="gear-filters recipe-controls">
+      <label>Auto Equip <select id="lootEquip">${Object.entries(equipModes).map(
+      ([id, label]) => `<option value="${id}" ${id === rules.equip ? "selected" : ""}>${label}</option>`
+    ).join("")}</select></label>
+      <label><input type="checkbox" id="lootSalvage" ${rules.salvage ? "checked" : ""}> Auto Salvage</label>
+      <label>Rarity ceiling <select id="lootCeiling">${rarity.slice(0, 4).map(
+      (r, i) => `<option value="${i}" ${i === rules.ceiling ? "selected" : ""}>${r.name}</option>`
+    ).join("")}</select></label>
+      <label><input type="checkbox" id="lootDuplicates" ${rules.duplicates ? "checked" : ""}> Duplicates only</label>
+    </div>
+    <p id="lootRuleSummary"></p>
+    <p class="subtext">Rules apply to incoming chest loot. Auto Equip runs first. First discoveries and strict stat upgrades are kept.</p>
+    </details>`;
+  }
+  function updateLootRuleSummary() {
+    const rules = s.lootRules;
+    setText(
+      $("lootRuleSummary"),
+      "Auto Equip \xB7 " + equipModes[rules.equip] + " \xB7 Auto Salvage \xB7 " + (rules.salvage ? "Up to " + rarity[rules.ceiling].name + (rules.duplicates ? ", duplicates only" : "") : "Off")
+    );
+  }
+  function effectsFor(gear) {
+    const profile = buildProfile(gear);
+    const effects = Object.entries(profile).filter(([, info]) => info.active).map(
+      ([id, info]) => builds[id].name + (info.count >= 2 ? " \xB7 " + (info.count >= 4 ? 4 : 2) + "-piece" : " \xB7 Signature")
+    );
+    const pieces = worldGearCount(s.world, gear);
+    if (pieces >= 2)
+      effects.push(
+        worlds[s.world].name + " \xB7 " + (pieces >= 4 ? 4 : 2) + "-piece"
+      );
+    return effects;
+  }
+  var comparisonAnchor;
+  function hideComparison() {
+    comparisonAnchor?.removeAttribute("aria-describedby");
+    comparisonAnchor = null;
+    const tip = $("gearComparison");
+    if (tip) tip.hidden = true;
+  }
+  function showComparison(button) {
+    const item = getGearItem(+button.dataset.compare);
+    const tip = $("gearComparison");
+    if (!item || !tip) return;
+    hideComparison();
+    comparisonAnchor = button;
+    button.setAttribute("aria-describedby", tip.id);
+    const before = equippedGear();
+    const next = before.slice();
+    next[item.slot] = item;
+    const a = calculateStats(s, before);
+    const b = calculateStats(s, next);
+    const from = (name, first, second) => `<div>${name} \xB7 ${fmtRate(first)} \u2192 ${fmtRate(second)}</div>`;
+    const old = effectsFor(before);
+    const newEffects = effectsFor(next);
+    const lost = old.filter((name) => !newEffects.includes(name));
+    const gained = newEffects.filter((name) => !old.includes(name));
+    tip.innerHTML = `<strong>${itemName(item)}</strong><div>${before[item.slot] ? itemName(before[item.slot]) : "Empty slot"} equipped</div>
+    ${from("Slot stat", gearValue(before[item.slot]), gearValue(item))}
+    ${from("Coins per press", a.tap, b.tap)}${from("Coins per second", a.auto, b.auto)}
+    ${from("Chest chance (%)", a.chance * 100, b.chance * 100)}
+    ${lost.length ? "<div>Replaces \xB7 " + lost.join(", ") + "</div>" : ""}
+    ${gained.length ? "<div>Adds \xB7 " + gained.join(", ") + "</div>" : ""}`;
+    tip.hidden = false;
+    positionComparison();
+  }
+  function positionComparison() {
+    const tip = $("gearComparison");
+    if (!tip || tip.hidden || !comparisonAnchor?.isConnected) return;
+    const rect = comparisonAnchor.getBoundingClientRect();
+    const width = tip.offsetWidth;
+    tip.style.left = Math.max(8, Math.min(rect.left, innerWidth - width - 8)) + "px";
+    tip.style.top = Math.max(
+      8,
+      rect.bottom + tip.offsetHeight + 8 <= innerHeight ? rect.bottom + 6 : rect.top - tip.offsetHeight - 6
+    ) + "px";
+  }
+
   // src/js/main.js
   loadStoredRun();
   initSound();
@@ -5261,6 +5849,23 @@ textarea {
       showCollection(value);
       return;
     }
+    if (runtime.modalType === "inventory" && ["lootEquip", "lootSalvage", "lootCeiling", "lootDuplicates"].includes(id)) {
+      s.lootRules = normalizeLootRules({
+        equip: $("lootEquip").value,
+        salvage: $("lootSalvage").checked,
+        ceiling: +$("lootCeiling").value,
+        duplicates: $("lootDuplicates").checked
+      });
+      updateLootRuleSummary();
+      save();
+      return;
+    }
+    if (inventoryFilters.includes(id)) {
+      runtime[id] = value;
+      openModal("inventory");
+      $(id).focus();
+      return;
+    }
     if (id === "filter" || id === "gearWorldFilter") {
       if (id === "filter") runtime.filter = value;
       else runtime.gearWorldFilter = value;
@@ -5271,6 +5876,49 @@ textarea {
   $("modalBody").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b || b.disabled) return;
+    if (b.dataset.compare) {
+      showComparison(b);
+      return;
+    }
+    if (b.dataset.lock) {
+      const item = getGearItem(+b.dataset.lock);
+      if (!item) return;
+      if (item.locked) delete item.locked;
+      else item.locked = true;
+      save();
+      openModal("inventory");
+      $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
+      return;
+    }
+    if (b.id === "craftGear" && runtime.modalType === "recipes") {
+      const item = buildRecipe(
+        s,
+        $("recipeSet").value,
+        +$("recipeSlot").value,
+        level(),
+        nextEntityId,
+        addGearItem,
+        gearBagLimit
+      );
+      if (!item) return;
+      sound("upgrade");
+      notice("Crafted " + itemName(item) + ".");
+      setText($("recipeResult"), "Crafted " + itemName(item) + ".");
+      render();
+      save();
+      return;
+    }
+    if (b.dataset.evolve && runtime.modalType === "forge") {
+      const item = getGearItem(+b.dataset.evolve);
+      if (!evolveGear(s, item)) return;
+      sound("upgrade");
+      notice("Gear evolved.");
+      save();
+      openModal("forge", item.id);
+      setText($("forgeResult"), "Gear evolved. Forge rank and lock retained.");
+      render();
+      return;
+    }
     if (b.dataset.openForge) {
       openModal("forge", +b.dataset.openForge);
       return;
@@ -5401,8 +6049,10 @@ textarea {
         $("saveMsg").textContent = "Copy the pre-forge backup to keep it separately.";
       }
     }
-    if (b.id === "exportStoredSave" || b.id === "exportPreFoundation") {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : readPreFoundationSave();
+    if (["exportStoredSave", "exportPreExpansion", "exportPreFoundation"].includes(
+      b.id
+    )) {
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
@@ -5432,6 +6082,22 @@ textarea {
       closeModal();
     }
   });
+  var comparisonButtons = $("modalBody");
+  comparisonButtons.addEventListener("pointerover", (event) => {
+    const button = event.target.closest("[data-compare]");
+    if (button && event.pointerType !== "touch") showComparison(button);
+  });
+  comparisonButtons.addEventListener("focusin", (event) => {
+    if (event.target.matches("[data-compare]")) showComparison(event.target);
+  });
+  comparisonButtons.addEventListener("focusout", (event) => {
+    if (event.target.matches("[data-compare]")) hideComparison();
+  });
+  comparisonButtons.addEventListener("pointerout", (event) => {
+    const button = event.target.closest("[data-compare]");
+    if (button && document.activeElement !== button) hideComparison();
+  });
+  $("modal").addEventListener("scroll", positionComparison, true);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Tab" && !$("modal").hidden) {
       const targets = [
@@ -5451,7 +6117,8 @@ textarea {
       return;
     }
     if (e.key === "Escape" && !$("modal").hidden) {
-      closeModal();
+      if ($("gearComparison") && !$("gearComparison").hidden) hideComparison();
+      else closeModal();
       return;
     }
     if (e.code === "Space" && !e.repeat && $("modal").hidden && (!document.activeElement || document.activeElement === $("press") || !["BUTTON", "INPUT", "TEXTAREA", "SELECT"].includes(
@@ -5462,6 +6129,7 @@ textarea {
     }
   });
   window.addEventListener("resize", () => {
+    positionComparison();
     if (runtime.modalType === "wheel" && !runtime.wheelMoving) placeReel();
   });
   function savePassiveIncome() {
@@ -5480,7 +6148,7 @@ textarea {
       earn(snapshot.rates.auto * dt);
       render(snapshot);
     }
-    autoChestTick(dt);
+    autoChestTick(dt, snapshot);
   }, 250);
   setInterval(savePassiveIncome, 5e3);
 })();

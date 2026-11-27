@@ -1,3 +1,4 @@
+import { buildProfile } from "./build-gear.js";
 import { clamp, rarity, stages } from "./data.js";
 import { updateBuyButtons } from "./dialogs.js";
 import {
@@ -7,12 +8,13 @@ import {
   toast,
   toastTimer,
 } from "./effects.js";
-import { updateForge } from "./equipment.js";
+import { updateForge, updateRecipes } from "./equipment.js";
 import {
   applyPress,
   collectChest,
   gearBagLimit,
   spawnChest,
+  tickClockwork,
 } from "./gameplay.js";
 import { updateProgressionGuide } from "./guide.js";
 import { fmt, fmtRate } from "./numbers.js";
@@ -105,7 +107,11 @@ function renderChests() {
 }
 function fieldSnapshot() {
   const gear = equippedGear();
-  return { rates: stats(gear), pieces: worldGearCount(s.world, gear) };
+  return {
+    rates: stats(gear),
+    pieces: worldGearCount(s.world, gear),
+    profile: buildProfile(gear),
+  };
 }
 
 function press() {
@@ -117,11 +123,22 @@ function press() {
     coins,
     bonus: effect,
     chest,
-  } = applyPress(s, snapshot.rates, snapshot.pieces);
+    opened,
+    ability,
+  } = applyPress(
+    s,
+    snapshot.rates,
+    snapshot.pieces,
+    Math.random,
+    snapshot.profile,
+  );
   recordEarnings(totalBefore);
   if (chest) revealChest(chest);
+  if (opened) showOpenedChest(opened);
   directionalFloat(
-    (effect ? effect + " · " : "") + "+" + fmtRate(coins),
+    (effect || ability ? (effect || ability) + " · " : "") +
+      "+" +
+      fmtRate(coins),
     effect,
   );
   burst(50, 47, effect ? worlds[s.world].accent : "#ffe5a2");
@@ -130,18 +147,30 @@ function press() {
   pressTimer = setTimeout(() => $("press").classList.remove("pressed"), 90);
   if (stageIndex() > before)
     toast("New discovery: " + stages[stageIndex()].title);
-  render(snapshot);
+  render(opened?.disposition === "equipped" ? undefined : snapshot);
   save();
 }
-function openChest(id) {
-  const outcome = collectChest(s, id, worldGearCount(s.world));
+function openChest(id, source = "manual") {
+  const before = s.total;
+  const outcome = collectChest(
+    s,
+    id,
+    worldGearCount(s.world),
+    Math.random,
+    source,
+  );
   if (!outcome) return;
   if (outcome.full) {
     toast("Gear bag is full. Salvage an unused item first.");
     return;
   }
-  const { chest: c, item } = outcome;
-  const el = $("chests").querySelector(`[data-chest="${id}"]`);
+  if (s.total !== before) recordEarnings(before);
+  showOpenedChest(outcome);
+  render();
+  save();
+}
+function showOpenedChest({ chest: c, item, disposition, gathered }) {
+  const el = $("chests").querySelector(`[data-chest="${c.id}"]`);
   if (el) {
     el.innerHTML = openedChestIcon(c.r);
     el.classList.add("opening");
@@ -150,10 +179,18 @@ function openChest(id) {
   }
   sound("chest");
   burst(c.x, c.y, rarity[c.r].color);
-  popGroundLoot(c, item);
-  notice("Collected " + itemName(item) + "! Open Gear to equip it.");
-  render();
-  save();
+  if (disposition !== "salvaged") popGroundLoot(c, item);
+  const action =
+    disposition === "salvaged"
+      ? "Auto-salvaged "
+      : disposition === "equipped"
+        ? "Auto-equipped "
+        : "Collected ";
+  notice(
+    action +
+      itemName(item) +
+      (gathered ? " · Forager +" + gathered + " scrap." : "!"),
+  );
 }
 function progress(i) {
   const n = stages[i + 1];
@@ -214,13 +251,35 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
   if (runtime.modalType === "forge") updateForge();
+  if (runtime.modalType === "recipes") updateRecipes();
   if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
     updateBuyButtons();
 }
 function chestInterval() {
   return 5 / (1 + 0.45 * s.up.chestSpeed);
 }
-function autoChestTick(dt) {
+function autoChestTick(dt, snapshot) {
+  if (!runtime.modalType && !document.hidden) {
+    const before = s.total;
+    const clock = tickClockwork(
+      s,
+      dt,
+      snapshot.rates,
+      snapshot.pieces,
+      snapshot.profile,
+    );
+    if (clock) {
+      if (clock.chest) {
+        revealChest(clock.chest);
+        notice("Clockwork placed a Common chest.");
+      }
+      if (clock.opened) showOpenedChest(clock.opened);
+      if (s.total !== before) recordEarnings(before);
+      render();
+      save();
+      return;
+    }
+  }
   const chest = s.chests.find((c) => recordWorld(c) === s.world);
   if (
     !owned("autoChest") ||
@@ -234,7 +293,7 @@ function autoChestTick(dt) {
   runtime.chestClock += dt;
   if (runtime.chestClock >= chestInterval()) {
     runtime.chestClock = 0;
-    openChest(chest.id);
+    openChest(chest.id, "auto");
   }
 }
 

@@ -2451,3 +2451,32 @@ textarea {
     flex-wrap: wrap;
   }
 }
+
+/* Equipment expansion */
+.recipe-controls {
+  margin: 0.8rem 0;
+}
+.recipe-controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.recipe-controls select {
+  max-width: 100%;
+  background: #142436;
+  color: #ecf4ff;
+  padding: 0.35rem;
+  border: 1px solid #91a7b8;
+}
+.gear-comparison {
+  position: fixed;
+  z-index: 20;
+  max-width: min(22rem, calc(100vw - 16px));
+  padding: 0.7rem;
+  border: 2px solid #91a7b8;
+  background: #142436;
+  color: #ecf4ff;
+  box-shadow: 3px 4px #071423;
+  pointer-events: none;
+}

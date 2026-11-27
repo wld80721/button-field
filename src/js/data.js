@@ -46,6 +46,22 @@ const rarity = [
     light: "#ffe05f",
     metal: "#fff2ba",
   },
+  {
+    name: "Mythic",
+    color: "#ffa3c8",
+    weight: 0,
+    wood: "#933c63",
+    light: "#f486b6",
+    metal: "#ffe1ef",
+  },
+  {
+    name: "Celestial",
+    color: "#bdeaff",
+    weight: 0,
+    wood: "#3a579c",
+    light: "#87b1fa",
+    metal: "#ebfaff",
+  },
 ];
 const slots = ["Gloves", "Ring", "Boots", "Charm"];
 const names = [

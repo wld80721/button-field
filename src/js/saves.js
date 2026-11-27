@@ -1,3 +1,9 @@
+import {
+  builds,
+  legendary,
+  normalizeAbilityProgress,
+  normalizeLootRules,
+} from "./build-gear.js";
 import { clamp, rarity, slots, upgrades } from "./data.js";
 import { maxForgeRank } from "./gear.js";
 import { initializeResources } from "./resources.js";
@@ -41,6 +47,8 @@ function normalizeRun(o) {
   const f = initializeResources(fresh(), o),
     num = (n, max = 1e15) =>
       typeof n === "number" && Number.isFinite(n) ? clamp(n, 0, max) : 0;
+  f.lootRules = normalizeLootRules(o.lootRules);
+  f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
   f.total = num(o.total, Number.MAX_VALUE);
   for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
   for (const k of ["earned", "runs"])
@@ -97,7 +105,7 @@ function normalizeRun(o) {
     i.level <= 1000 &&
     Number.isFinite(i.value) &&
     i.value > 0 &&
-    i.value < 1e8;
+    i.value < 4e8;
   const usedIds = new Set();
   function uniqueId(entry) {
     if (
@@ -123,6 +131,12 @@ function normalizeRun(o) {
           value,
           ...worldTag(recordWorld(item)),
           ...(forge ? { forge } : {}),
+          ...(typeof item.set === "string" &&
+          Object.hasOwn(builds, item.set) &&
+          r >= 2
+            ? { set: item.set }
+            : {}),
+          ...(item.locked === true ? { locked: true } : {}),
         });
       }
       if (f.items.length === gearBagLimit) break;
@@ -139,6 +153,10 @@ function normalizeRun(o) {
       ),
     ),
   );
+  for (const id of Object.keys(builds))
+    for (const slot of slots.keys())
+      for (let r = 2; r < rarity.length; r++)
+        validDesigns.add(`set:${id}:${slot}:${r}`);
   if (Array.isArray(o.found))
     f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
 
@@ -149,7 +167,7 @@ function normalizeRun(o) {
         !chest ||
         !Number.isInteger(chest.r) ||
         chest.r < 0 ||
-        chest.r >= rarity.length ||
+        chest.r > legendary ||
         !Number.isFinite(chest.x) ||
         !Number.isFinite(chest.y) ||
         !Number.isInteger(chest.level) ||
@@ -185,6 +203,7 @@ function normalizeRun(o) {
 }
 const KEY = "treasure-grove-v3";
 const preForgeSaveKey = KEY + "-before-forge";
+const preExpansionSaveKey = KEY + "-before-equipment-expansion";
 const preFoundationSaveKey = KEY + "-before-foundation";
 let saveWarning = "";
 let blockedSave = null;
@@ -199,6 +218,10 @@ function readBackup(key) {
 
 function readPreForgeSave() {
   return readBackup(preForgeSaveKey);
+}
+
+function readPreExpansionSave() {
+  return readBackup(preExpansionSaveKey);
 }
 
 function readPreFoundationSave() {
@@ -265,7 +288,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preFoundationSaveKey, raw);
+      preserveBackup(preExpansionSaveKey, raw);
+      if (version < 1) preserveBackup(preFoundationSaveKey, raw);
       if (!Object.hasOwn(payload, "scrap"))
         preserveBackup(preForgeSaveKey, raw);
     } catch {
@@ -302,6 +326,7 @@ export {
   normalize,
   readBlockedSave,
   readPreForgeSave,
+  readPreExpansionSave,
   readPreFoundationSave,
   resumeSaving,
   save,

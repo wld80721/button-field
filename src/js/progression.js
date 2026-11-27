@@ -27,8 +27,8 @@ const coinUnlocks = [
   ],
   [
     progressionThresholds.helper,
-    "Garden helper",
-    "Buy a source of automatic coins at the Workshop.",
+    "Garden helper + Set recipes",
+    "Buy automatic income at the Workshop or craft a set piece in Gear.",
   ],
   [
     progressionThresholds.ascension,

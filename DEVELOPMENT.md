@@ -65,3 +65,11 @@ The first time this version loads an older local save, it keeps a pre-forge copy
 | 10 · Presentation and stats     | Expand sound effects, optional ambient music, and pixel particles and animations. Add detailed run and lifetime statistics, effect density settings, and audio controls. | Check reduced motion, mute and music preferences, mobile layouts, and frame pacing with full fields and bags.                            |
 
 Before each phase, archive the working build and keep representative saves from early, mid, and late game. Run browser checks for new actions, JavaScript errors, save/export/import, and affected older features. Compare an active, idle, and treasure-focused route at similar investment before shipping an economy change. Lucky drops can speed up progress, but deterministic milestones and crafting must keep typical runs moving. Review time to the first useful item, the first Ascension, and the reason to revisit each field after each release.
+
+## Equipment expansion
+
+**Gear → Set recipes** opens at 2,500 coins earned this run. You can craft any of 16 Rare pieces for 800 coins, 10 scrap, and 4 shards each. Hammerhand opens chests through presses, Clockwork makes chests from active-field passive time, Forager yields crafting materials, and Pathfinder boosts eligible drops. A signature piece grants its ability, and matching two- and four-piece bonuses work in every field. Ordinary regional sets keep their home-field bonuses.
+
+Use **Forge** on Rare or better equipment to see its evolution path. Evolution requires Forge rank 3 and carries forward the item's identity, build, lock, and rank. Mythic and Celestial are evolution tiers. Chests still roll the original five rarities.
+
+Gear includes a comparison control, inventory filters, item locks, and **Loot automation**. Auto Equip and Auto Salvage start off and affect incoming chest gear. The strongest-stat mode can break a set. Use the default build-protection mode to keep matching gear together. Settings can export the pre-expansion save backup. Ascension carries loot preferences into the next run.

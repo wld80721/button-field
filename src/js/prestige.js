@@ -34,6 +34,7 @@ function performAscension(state) {
   const stars = ascensionReward(state);
   if (stars < 1) return null;
   const run = fresh();
+  run.lootRules = { ...state.lootRules };
   run.asc = {
     ...state.asc,
     runs: state.asc.runs + 1,

@@ -1,7 +1,17 @@
+import { builds, craftAt, designKey } from "./build-gear.js";
 import { ascCoinGoal } from "./prestige.js";
 import { gearValue, salvageYield } from "./gear.js";
 import { rarity, slots, upgrades } from "./data.js";
-import { equippedSetsMarkup, forgeMarkup, updateForge } from "./equipment.js";
+import {
+  equippedSetsMarkup,
+  forgeMarkup,
+  updateForge,
+  recipesMarkup,
+  updateRecipes,
+  lootRuleMarkup,
+  updateLootRuleSummary,
+  hideComparison,
+} from "./equipment.js";
 import { chestInterval } from "./field.js";
 import { workshopCost } from "./gameplay.js";
 import { progressionGuideMarkup, updateProgressionGuide } from "./guide.js";
@@ -18,6 +28,7 @@ import {
   readBlockedSave,
   readPreForgeSave,
   readPreFoundationSave,
+  readPreExpansionSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -38,7 +49,7 @@ import {
 } from "./state.js";
 import { $, setText, setValue } from "./ui-dom.js";
 import { placeReel, wheelMarkup, wheelReady } from "./wheel.js";
-import { discoveryKey, recordWorld, worlds } from "./world-data.js";
+import { recordWorld, worlds } from "./world-data.js";
 import {
   isKnownWorld,
   updateWorlds,
@@ -72,7 +83,55 @@ function itemCard(i) {
     on = eq?.id === i.id,
     diff = eq ? Math.round((gearValue(i) - gearValue(eq)) * 100) / 100 : null;
   const salvage = salvageYield(i);
-  return `<article class="item-card" style="--rarity:${rarity[i.r].color}"><div class="item-top">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} · Lv ${i.level}${i.forge ? " · Forge " + i.forge : ""}</div><h3>${itemName(i)}</h3><p>${slots[i.slot]} · ${world.name}</p></div></div><div class="item-stat">${itemStat(i)}</div>${world.gearBonus ? `<div class="gear-bonus">${world.gearBonus}</div>` : ""}<div class="compare">${on ? "Currently equipped" : diff === null ? "Empty equipment slot" : diff === 0 ? "Same stat as equipped" : (diff > 0 ? "+" : "") + diff + " compared with equipped"}</div><div class="actions"><button class="action gold" data-equip="${i.id}">${on ? "Unequip" : "Equip"}</button><button class="action secondary" data-salvage="${i.id}" ${on ? "disabled" : ""}>Salvage<span class="salvage-yield">${salvage.coins} coins + ${salvage.scrap} scrap</span></button></div><button class="action secondary" data-open-forge="${i.id}">Forge</button></article>`;
+  return `<article class="item-card" style="--rarity:${rarity[i.r].color}"><div class="item-top">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} · Lv ${i.level}${i.forge ? " · Forge " + i.forge : ""}</div><h3>${itemName(i)}</h3><p>${slots[i.slot]} · ${world.name}${i.locked ? " · Locked" : ""}</p></div></div><div class="item-stat">${itemStat(i)}</div>${i.set ? `<div class="gear-bonus">${builds[i.set].name} · ${builds[i.set].style}${builds[i.set].slot === i.slot ? " · Signature" : ""}</div>` : world.gearBonus ? `<div class="gear-bonus">${world.gearBonus}</div>` : ""}<div class="compare">${on ? "Currently equipped" : diff === null ? "Empty equipment slot" : diff === 0 ? "Same stat as equipped" : (diff > 0 ? "+" : "") + diff + " compared with equipped"}</div><div class="actions"><button class="action gold" data-equip="${i.id}">${on ? "Unequip" : "Equip"}</button><button class="action secondary" data-salvage="${i.id}" ${on || i.locked ? "disabled" : ""}>Salvage<span class="salvage-yield">${salvage.coins} coins + ${salvage.scrap} scrap</span></button></div><div class="actions"><button class="action secondary" data-open-forge="${i.id}">Forge</button>
+<button class="action secondary" data-lock="${i.id}" aria-pressed="${Boolean(i.locked)}">${i.locked ? "Unlock" : "Lock"}</button>
+<button class="action secondary" data-compare="${i.id}">Compare</button></div></article>`;
+}
+
+const inventoryOptions = {
+  gearRarity: ["All rarities", ...rarity.map((grade) => grade.name)],
+  gearSet: {
+    all: "All sets",
+    regional: "Regional sets",
+    ...Object.fromEntries(
+      Object.entries(builds).map(([id, set]) => [id, set.name]),
+    ),
+  },
+  gearEquipped: {
+    all: "Any equipment status",
+    yes: "Equipped",
+    no: "Unequipped",
+  },
+  gearLocked: { all: "Any lock status", yes: "Locked", no: "Unlocked" },
+  gearSort: {
+    rarity: "Sort by rarity",
+    stat: "Sort by effective stat",
+    newest: "Sort by newest",
+  },
+};
+const inventoryFilters = Object.keys(inventoryOptions);
+
+function inventoryControls() {
+  return Object.entries(inventoryOptions)
+    .map(([id, options]) => {
+      const entries = Array.isArray(options)
+        ? options.map((name, i) => [i === 0 ? "all" : String(i - 1), name])
+        : Object.entries(options);
+      const current = runtime[id] || entries[0][0];
+      const label = {
+        gearRarity: "Filter rarity",
+        gearSet: "Filter set",
+        gearEquipped: "Filter equipped",
+        gearLocked: "Filter locked",
+        gearSort: "Sort gear",
+      }[id];
+      return `<select id="${id}" aria-label="${label}">${entries.map(([id, name]) => `<option value="${id}" ${id === current ? "selected" : ""}>${name}</option>`).join("")}</select>`;
+    })
+    .join("");
+}
+
+function statusMatch(filter, value) {
+  return !filter || filter === "all" || (filter === "yes") === Boolean(value);
 }
 
 function inventory() {
@@ -81,31 +140,49 @@ function inventory() {
       (i) =>
         (runtime.filter === "all" || String(i.slot) === runtime.filter) &&
         (runtime.gearWorldFilter === "all" ||
-          recordWorld(i) === runtime.gearWorldFilter),
+          recordWorld(i) === runtime.gearWorldFilter) &&
+        (!runtime.gearRarity ||
+          runtime.gearRarity === "all" ||
+          runtime.gearRarity === String(i.r)) &&
+        (!runtime.gearSet ||
+          runtime.gearSet === "all" ||
+          runtime.gearSet === (i.set || "regional")) &&
+        statusMatch(runtime.gearEquipped, s.equip[i.slot] === i.id) &&
+        statusMatch(runtime.gearLocked, i.locked),
     )
-    .sort((a, b) => b.r - a.r || gearValue(b) - gearValue(a) || b.id - a.id);
+    .sort((a, b) => {
+      if (runtime.gearSort === "newest") return b.id - a.id;
+      if (runtime.gearSort === "stat")
+        return gearValue(b) - gearValue(a) || b.r - a.r || b.id - a.id;
+      return b.r - a.r || gearValue(b) - gearValue(a) || b.id - a.id;
+    });
   return `<p class="subtext">Wear one item in each slot. Replacing gear keeps the previous item in your bag.</p><div class="slots">${slots
     .map((k, j) => {
       const i = equipped(j);
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>— Empty —</b>"}</div>`;
     })
-    .join(
-      "",
-    )}</div>${equippedSetsMarkup()}<div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select></div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
+    .join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
+    <button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " · " + fmtExact(craftAt) + " coins earned" : ""}</button>
+    <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
+    <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
 }
 function showCollection(id) {
-  const designs = slots.flatMap((slotName, slot) =>
-    rarity.map((grade, r) => {
-      const item = { slot, r, world: id };
-      const found = s.found.includes(discoveryKey(slot, r, id));
-      return {
-        item,
-        found,
-        name: found ? itemName(item) : "Undiscovered " + slotName,
-        grade,
-      };
-    }),
-  );
+  const set = Object.hasOwn(builds, id) ? id : null;
+  const designs = slots
+    .flatMap((slotName, slot) =>
+      rarity.map((grade, r) => {
+        if (set && r < 2) return null;
+        const item = set ? { slot, r, set } : { slot, r, world: id };
+        const found = s.found.includes(designKey(item));
+        return {
+          item,
+          found,
+          name: found ? itemName(item) : "Undiscovered " + slotName,
+          grade,
+        };
+      }),
+    )
+    .filter(Boolean);
   const discovered = designs.filter((design) => design.found).length;
   setText(
     $("collectionCount"),
@@ -113,12 +190,13 @@ function showCollection(id) {
       "/" +
       designs.length +
       " item designs discovered in " +
-      worlds[id].name +
+      (set ? builds[set].name : worlds[id].name) +
       ". " +
       s.found.length +
       "/" +
-      designs.length * Object.keys(worlds).length +
-      " across all worlds.",
+      (rarity.length * slots.length * Object.keys(worlds).length +
+        (rarity.length - 2) * slots.length * Object.keys(builds).length) +
+      " across all fields and sets.",
   );
   $("collectionGrid").innerHTML = designs
     .map(
@@ -131,6 +209,7 @@ function showCollection(id) {
 function openModal(type, id) {
   if (type === "wheel" && !wheelReady()) return;
   hideSkillTip();
+  hideComparison();
   sound("menu");
   if ($("modal").hidden) runtime.lastFocus = document.activeElement;
   runtime.modalType = type;
@@ -172,6 +251,7 @@ function openModal(type, id) {
     b.innerHTML = inventory();
     $("filter").value = runtime.filter;
     $("gearWorldFilter").value = runtime.gearWorldFilter;
+    updateLootRuleSummary();
   } else if (type === "forge") {
     const item = getGearItem(id);
     if (!item) {
@@ -182,6 +262,10 @@ function openModal(type, id) {
     b.innerHTML = forgeMarkup(item);
     b.closest(".window").scrollTop = 0;
     updateForge();
+  } else if (type === "recipes") {
+    t.textContent = "Set recipes";
+    b.innerHTML = recipesMarkup();
+    updateRecipes();
   } else if (type === "worlds") {
     t.textContent = "Worlds";
     b.innerHTML = worldsMarkup();
@@ -210,7 +294,13 @@ function openModal(type, id) {
     updateBuyButtons();
   } else if (type === "collection") {
     t.textContent = "Treasure collection";
-    b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world">${worldOptions()}</select></div>
+    b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world or set">${worldOptions()}${
+      s.total >= craftAt || s.found.some((key) => key.startsWith("set:"))
+        ? `<optgroup label="Crafted sets">${Object.entries(builds)
+            .map(([id, set]) => `<option value="${id}">${set.name}</option>`)
+            .join("")}</optgroup>`
+        : ""
+    }</select></div>
       <p class="subtext">Base chest rarities: Common 60%, Uncommon 26%, Rare 10%, Epic 3.5%, Legendary 0.5%.</p><div id="collectionGrid" class="item-grid"></div>`;
     $("collectionWorld").value = s.world;
     showCollection(s.world);
@@ -223,6 +313,7 @@ function openModal(type, id) {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
@@ -239,6 +330,7 @@ function openModal(type, id) {
 }
 function closeModal() {
   hideSkillTip();
+  hideComparison();
   runtime.ascConfirm = false;
   sound("menu");
   runtime.wheelGeneration++;
@@ -345,4 +437,11 @@ function updateBuyButtons() {
   );
 }
 
-export { closeModal, iconMarkup, openModal, showCollection, updateBuyButtons };
+export {
+  inventoryFilters,
+  closeModal,
+  iconMarkup,
+  openModal,
+  showCollection,
+  updateBuyButtons,
+};
