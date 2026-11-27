@@ -223,6 +223,14 @@ const equipModes = {
   strongest: "Strongest stat",
 };
 
+const disposalModes = {
+  off: "Off",
+  salvage: "Auto Salvage",
+  sell: "Auto Sell",
+};
+
+const disposalMode = (rules) => rules.sell ? "sell" : rules.salvage ? "salvage" : "off";
+
 function lootRuleMarkup() {
   const rules = s.lootRules;
   return `<details class="gear-sets" id="lootRules"><summary>Loot automation</summary>
@@ -233,7 +241,9 @@ function lootRuleMarkup() {
             `<option value="${id}" ${id === rules.equip ? "selected" : ""}>${label}</option>`,
         )
         .join("")}</select></label>
-      <label><input type="checkbox" id="lootSalvage" ${rules.salvage ? "checked" : ""}> Auto Salvage</label>
+      <label>Spare gear <select id="lootDisposal">${Object.entries(disposalModes)
+        .map(([id, label]) => `<option value="${id}" ${id === disposalMode(rules) ? "selected" : ""}>${label}</option>`)
+        .join("")}</select></label>
       <label>Rarity ceiling <select id="lootCeiling">${rarity
         .slice(0, 4)
         .map(
@@ -244,7 +254,7 @@ function lootRuleMarkup() {
       <label><input type="checkbox" id="lootDuplicates" ${rules.duplicates ? "checked" : ""}> Duplicates only</label>
     </div>
     <p id="lootRuleSummary"></p>
-    <p class="subtext">Rules apply to incoming chest loot. Auto Equip runs first. First discoveries and strict stat upgrades are kept.</p>
+    <p class="subtext">Applies to new chest loot. Auto Equip runs first. First discoveries and stat upgrades are kept. Auto Sell pays extra coins in place of scrap.</p>
     </details>`;
 }
 
@@ -254,12 +264,12 @@ function updateLootRuleSummary() {
     $("lootRuleSummary"),
     "Auto Equip · " +
       equipModes[rules.equip] +
-      " · Auto Salvage · " +
-      (rules.salvage
-        ? "Up to " +
+      " · " +
+      (disposalMode(rules) !== "off"
+        ? disposalModes[disposalMode(rules)] + " up to " +
           rarity[rules.ceiling].name +
           (rules.duplicates ? ", duplicates only" : "")
-        : "Off"),
+        : "Spare gear kept"),
   );
 }
 

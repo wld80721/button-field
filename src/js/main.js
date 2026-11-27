@@ -189,11 +189,12 @@ $("modalBody").addEventListener("change", (e) => {
   }
   if (
     runtime.modalType === "inventory" &&
-    ["lootEquip", "lootSalvage", "lootCeiling", "lootDuplicates"].includes(id)
+    ["lootEquip", "lootDisposal", "lootCeiling", "lootDuplicates"].includes(id)
   ) {
     s.lootRules = normalizeLootRules({
       equip: $("lootEquip").value,
-      salvage: $("lootSalvage").checked,
+      salvage: $("lootDisposal").value === "salvage",
+      sell: $("lootDisposal").value === "sell",
       ceiling: +$("lootCeiling").value,
       duplicates: $("lootDuplicates").checked,
     });

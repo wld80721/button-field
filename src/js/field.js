@@ -263,13 +263,15 @@ function showOpenedChest({ chest: c, item, disposition, gathered }) {
   }
   sound("chest");
   burst(c.x, c.y, rarity[c.r].color);
-  if (disposition !== "salvaged") popGroundLoot(c, item);
+  if (disposition === "kept" || disposition === "equipped") popGroundLoot(c, item);
   const action =
     disposition === "salvaged"
       ? "Auto-salvaged "
-      : disposition === "equipped"
-        ? "Auto-equipped "
-        : "Collected ";
+      : disposition === "sold"
+        ? "Auto-sold "
+        : disposition === "equipped"
+          ? "Auto-equipped "
+          : "Collected ";
   notice(
     action +
       itemName(item) +
