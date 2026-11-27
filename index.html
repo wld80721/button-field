@@ -1,0 +1,5236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Button Field — Treasure Grove</title>
+    <style>
+:root {
+  --ink: #112c2b;
+  --cream: #fff8dc;
+  --blue: #38b9e6;
+  --green: #54d65c;
+  --gold: #ffd45a;
+  --shadow: #0c2227;
+  --line: #234c40;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #0c2027;
+  color: var(--cream);
+  font:
+    700 14px/1.4 "Trebuchet MS",
+    system-ui,
+    sans-serif;
+}
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+button:focus-visible {
+  outline: 3px solid #fff7a8;
+  outline-offset: 3px;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+button,
+span {
+  -webkit-tap-highlight-color: transparent;
+}
+#game {
+  max-width: 1600px;
+  margin: auto;
+  min-height: 100dvh;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  background: #e93937;
+  border: 3px solid #101d27;
+  box-shadow:
+    0 4px #080e15,
+    inset 0 3px #ff8881;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #fff9d8;
+  font-size: 22px;
+}
+.brand strong {
+  display: block;
+  font-size: 19px;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+}
+.brand small {
+  color: #9eccc2;
+  letter-spacing: 0.17em;
+  font-size: 10px;
+}
+.hud {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.stat {
+  min-width: 96px;
+  background: #153842;
+  border: 2px solid #386879;
+  box-shadow: 0 3px #07191e;
+  padding: 5px 11px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stat b {
+  font-size: 18px;
+  line-height: 1.1;
+  color: #fff6d5;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.stat small {
+  font-size: 10px;
+  display: block;
+  color: #a9d4ce;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.stat .ico {
+  width: 26px;
+  height: 26px;
+}
+.tool {
+  background: #183a42;
+  border: 2px solid #466f70;
+  border-radius: 6px;
+  padding: 7px 10px;
+  box-shadow: 0 3px #07191e;
+}
+.tool:hover {
+  background: #24525b;
+}
+.board-frame {
+  position: relative;
+  flex: 1;
+  min-height: 480px;
+  height: calc(100dvh - 134px);
+  border: 5px solid #07181f;
+  box-shadow:
+    0 0 0 2px #38545a,
+    0 5px 0 #061218;
+  overflow: hidden;
+  background: #206947;
+  border-radius: 5px;
+  isolation: isolate;
+}
+#terrain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 45px 8px #102c32aa;
+  z-index: 1;
+}
+.board-top {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 4;
+  pointer-events: none;
+}
+.quest {
+  max-width: min(390px, 68%);
+  padding: 9px 12px;
+  background: #102b2de8;
+  border: 2px solid #83bf89;
+  box-shadow: 0 4px #0e312b;
+  border-radius: 5px;
+}
+.quest b {
+  display: block;
+  color: #e7ffc1;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.quest span {
+  font-size: 13px;
+  color: #fff8e7;
+}
+.stage-tag {
+  font-size: 12px;
+  background: #14322bdc;
+  color: #d0f6bd;
+  border: 2px solid #82b779;
+  border-radius: 4px;
+  padding: 7px 10px;
+  text-align: center;
+}
+.stage-tag b {
+  color: #fff;
+  display: block;
+  font-size: 15px;
+}
+.altar {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(160px, 25%, 290px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+.altar svg {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 5px 0 #194b334d);
+}
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  z-index: 5;
+  width: clamp(112px, 15vw, 190px);
+}
+#press {
+  border: 0;
+  background: none;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 10px 0 #142a3566);
+  outline-offset: 6px;
+}
+#press svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  image-rendering: pixelated;
+}
+#press .cap {
+  transition: transform 0.075s;
+}
+#press:active .cap,
+#press.pressed .cap {
+  transform: translateY(6px);
+}
+#press:hover .cap {
+  filter: brightness(1.1);
+}
+.power-label {
+  font-size: clamp(18px, 2.5vw, 28px);
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+  text-shadow:
+    2px 2px #132c27,
+    -2px 0 #132c27,
+    0 -2px #132c27;
+  padding: 5px 10px;
+  background: #11282be8;
+  border: 2px solid #e1eac8;
+  border-radius: 4px;
+  box-shadow: 0 3px #0a1b20;
+  margin-top: -2px;
+}
+.power-label small {
+  font-size: 10px;
+  color: #c0dbc1;
+  display: block;
+  text-align: center;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+.chest-layer,
+.effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.effects {
+  z-index: 6;
+}
+.chest {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(56px, 8vw, 91px);
+  aspect-ratio: 1.15;
+  pointer-events: auto;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--rarity);
+  filter: drop-shadow(0 6px 0 #142b2c66);
+  animation: land 0.48s cubic-bezier(0.23, 0.8, 0.33, 1) both;
+}
+.chest svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  image-rendering: pixelated;
+}
+.chest:hover {
+  filter: brightness(1.19) drop-shadow(0 5px 0 #142b2c66);
+}
+.chest .chest-star {
+  position: absolute;
+  right: 3%;
+  top: -5%;
+  font-size: 18px;
+  text-shadow: 1px 2px #122a27;
+}
+.chest .chest-name {
+  position: absolute;
+  left: 50%;
+  top: 92%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  padding: 2px 4px;
+  background: #102a29eb;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+.chest.rareplus::before {
+  content: "";
+  position: absolute;
+  inset: -25%;
+  background: radial-gradient(ellipse, var(--rarity), transparent 65%);
+  opacity: 0.22;
+  z-index: -1;
+}
+.chest.opening {
+  animation: open 0.24s ease forwards;
+  pointer-events: none;
+}
+@keyframes land {
+  0% {
+    transform: translate(-50%, calc(-50% - 250px)) scale(0.86);
+    opacity: 0.5;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(1.09, 0.88);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes open {
+  to {
+    transform: translate(-50%, -65%) scale(1.35);
+    opacity: 0;
+  }
+}
+.float {
+  position: absolute;
+  font-weight: 900;
+  white-space: nowrap;
+  text-shadow:
+    2px 2px #16312d,
+    -1px -1px #16312d;
+  font-size: clamp(15px, 2vw, 22px);
+  animation: float 0.85s ease-out forwards;
+}
+@keyframes float {
+  0% {
+    transform: translate(-50%, -20%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -130%);
+    opacity: 0;
+  }
+}
+.particle {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--c);
+  box-shadow: 0 0 5px var(--c);
+  animation: burst 0.6s ease-out forwards;
+}
+@keyframes burst {
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(90deg);
+    opacity: 0;
+  }
+}
+.progress {
+  position: absolute;
+  right: 12px;
+  top: 88px;
+  bottom: 82px;
+  width: 25px;
+  background: #15352fe8;
+  border: 3px solid #0e242b;
+  box-shadow:
+    0 0 0 2px #d6f4bb,
+    0 4px #0e242b;
+  z-index: 4;
+  border-radius: 3px;
+}
+.progress-fill {
+  position: absolute;
+  bottom: 3px;
+  left: 3px;
+  right: 3px;
+  height: 0;
+  background: linear-gradient(#f7ef8e, #72dc55);
+  box-shadow: inset 2px 0 #fff6a877;
+  transition: height 0.25s;
+}
+.progress:before {
+  content: "★";
+  position: absolute;
+  top: -23px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff6ba;
+  text-shadow: 2px 2px #163128;
+  font-size: 18px;
+}
+.progress-num {
+  position: absolute;
+  left: 50%;
+  bottom: -26px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  background: #142b2b;
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.bottom-board {
+  position: absolute;
+  bottom: 11px;
+  left: 12px;
+  right: 12px;
+  z-index: 4;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  pointer-events: none;
+}
+.ticker {
+  background: #112b2ddd;
+  border: 2px solid #6e9c70;
+  border-radius: 4px;
+  max-width: 68%;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #e0f5c6;
+  min-height: 38px;
+}
+.ticker b {
+  color: #ffe39a;
+}
+.mini {
+  color: #d2f2c0;
+  font-size: 11px;
+  text-align: right;
+  text-shadow: 1px 2px #16342a;
+}
+.dock {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+.dock-left {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #a9c8bd;
+  font-size: 12px;
+}
+.dock-right {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.nav-btn,
+.action {
+  background: linear-gradient(#4ac7ef, #2198c8);
+  border: 2px solid #081d29;
+  border-radius: 5px;
+  box-shadow:
+    0 4px #07141b,
+    inset 0 2px #b6eeff80;
+  padding: 9px 14px;
+  white-space: nowrap;
+  font-weight: 900;
+  text-shadow: 1px 2px #153746;
+}
+.nav-btn:hover,
+.action:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.nav-btn.inventory {
+  background: linear-gradient(#ffda72, #e99b39);
+  color: #382719;
+  text-shadow: none;
+  box-shadow:
+    0 4px #07141b,
+    inset 0 2px #fff4bc;
+}
+.nav-btn.skill {
+  background: linear-gradient(#b495f2, #7853bc);
+}
+.nav-btn .count {
+  padding: 2px 5px;
+  background: #2c2533;
+  color: #fff4ba;
+  border-radius: 3px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+.hidden,
+[hidden] {
+  display: none !important;
+}
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: #071b20bd;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  backdrop-filter: blur(3px);
+}
+.window {
+  width: min(840px, 100%);
+  max-height: 92dvh;
+  overflow: auto;
+  border: 3px solid #071a23;
+  background: #16363c;
+  box-shadow:
+    0 0 0 2px #75a78e,
+    0 10px #06151b;
+  border-radius: 7px;
+}
+.window-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #214f59;
+  padding: 13px 16px;
+  border-bottom: 3px solid #102b32;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.window-head h2 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.025em;
+}
+.window-head button {
+  background: #a84442;
+  border: 2px solid #17262a;
+  border-radius: 4px;
+  padding: 5px 12px;
+  box-shadow: 0 3px #10242b;
+}
+.window-body {
+  padding: 16px;
+}
+.subtext {
+  color: #b7d5ca;
+  margin: 0 0 13px;
+  font-size: 13px;
+}
+.slots {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.slot {
+  min-width: 0;
+  background: #10292e;
+  border: 2px dashed #547b73;
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  min-height: 85px;
+}
+.slot.filled {
+  border-style: solid;
+  border-color: var(--rarity);
+}
+.slot b {
+  display: block;
+  color: var(--rarity, #e1f2d4);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.slot small {
+  color: #a0c0b7;
+  font-size: 11px;
+  display: block;
+}
+.slot .item-icon {
+  width: 36px;
+  height: 36px;
+  margin: auto;
+}
+.inv-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+.inv-head h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.inv-head select {
+  background: #102a31;
+  color: #eee;
+  border: 1px solid #78998a;
+  border-radius: 4px;
+  padding: 6px;
+  font: inherit;
+}
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 9px;
+}
+.item-card {
+  background: #102a31;
+  border: 2px solid var(--rarity, #5a8a87);
+  border-radius: 5px;
+  padding: 11px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 3px #081e25;
+}
+.item-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.item-icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  image-rendering: pixelated;
+}
+.rarity {
+  color: var(--rarity);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.item-card h3 {
+  font-size: 15px;
+  margin: 1px 0;
+  line-height: 1.2;
+}
+.item-card p {
+  color: #b4d2c8;
+  font-size: 12px;
+  margin: 0;
+}
+.item-stat {
+  color: #d9f8b6;
+  font-size: 13px;
+  font-weight: 900;
+}
+.compare {
+  font-size: 11px;
+  color: #ffe5a3;
+  min-height: 15px;
+}
+.actions {
+  display: flex;
+  gap: 5px;
+  margin-top: auto;
+}
+.actions button {
+  flex: 1;
+  min-width: 0;
+  padding: 7px;
+  font-size: 12px;
+}
+.action.secondary {
+  background: #284a50;
+  box-shadow: 0 3px #091d24;
+  text-shadow: none;
+}
+.action.gold {
+  background: linear-gradient(#ffdb74, #dca043);
+  text-shadow: none;
+  color: #312416;
+}
+.empty {
+  padding: 24px;
+  border: 2px dashed #577a70;
+  color: #c2d8cc;
+  text-align: center;
+  border-radius: 6px;
+}
+.reward-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #10292f;
+  border: 2px solid var(--rarity);
+  padding: 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.reward-preview h3 {
+  margin: 0;
+  color: var(--rarity);
+}
+.reward-preview .item-icon {
+  width: 66px;
+  height: 66px;
+}
+.up-card {
+  background: #112e34;
+  border: 2px solid #527d77;
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.up-card h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.up-card p {
+  color: #b7d5ca;
+  margin: 0;
+  font-size: 13px;
+}
+.up-card .action {
+  margin-top: auto;
+}
+.up-card strong {
+  color: #ffd77b;
+}
+.settings-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+textarea {
+  width: 100%;
+  min-height: 95px;
+  background: #0f272c;
+  border: 2px solid #54796f;
+  border-radius: 5px;
+  color: #fff9da;
+  font: 12px monospace;
+  padding: 10px;
+}
+.toast {
+  position: absolute;
+  top: 65px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  padding: 8px 12px;
+  background: #142d2e;
+  border: 2px solid #ffdb82;
+  box-shadow: 0 3px #0f2626;
+  color: #fff4c0;
+  border-radius: 5px;
+  font-size: 13px;
+  pointer-events: none;
+  max-width: 85%;
+  text-align: center;
+}
+.ico svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 650px) {
+  #game {
+    padding: 7px;
+    gap: 7px;
+  }
+  .brand strong {
+    font-size: 16px;
+  }
+  .brand small {
+    font-size: 9px;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    font-size: 17px;
+  }
+  .top {
+    gap: 8px;
+  }
+  .hud {
+    width: 100%;
+    gap: 5px;
+  }
+  .stat {
+    flex: 1;
+    min-width: 0;
+    padding: 5px 7px;
+    gap: 5px;
+  }
+  .stat b {
+    font-size: 16px;
+  }
+  .stat small {
+    font-size: 9px;
+  }
+  .stat .ico {
+    width: 22px;
+    height: 22px;
+  }
+  .board-frame {
+    min-height: 365px;
+    height: calc(100dvh - 188px);
+    border-width: 3px;
+  }
+  .board-top {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+  }
+  .quest {
+    padding: 6px 8px;
+  }
+  .quest span {
+    font-size: 11px;
+  }
+  .quest b {
+    font-size: 10px;
+  }
+  .stage-tag {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+  .stage-tag b {
+    font-size: 12px;
+  }
+  .progress {
+    right: 9px;
+    width: 17px;
+    top: 85px;
+    bottom: 65px;
+  }
+  .center {
+    width: 126px;
+  }
+  .altar {
+    width: 180px;
+  }
+  .chest {
+    width: 59px;
+  }
+  .ticker {
+    font-size: 11px;
+    max-width: 80%;
+    padding: 6px;
+  }
+  .bottom-board {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+  .mini {
+    display: none;
+  }
+  .dock {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .dock-left {
+    font-size: 10px;
+  }
+  .dock-right {
+    width: 100%;
+    justify-content: stretch;
+    gap: 5px;
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 8px 5px;
+    font-size: 12px;
+  }
+  .slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .item-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .item-card {
+    padding: 8px;
+  }
+  .item-icon {
+    width: 38px;
+    height: 38px;
+  }
+  .item-top {
+    gap: 5px;
+  }
+  .item-card h3 {
+    font-size: 13px;
+  }
+  .window-body {
+    padding: 11px;
+  }
+  .window-head {
+    padding: 10px 12px;
+  }
+  .chest-name {
+    display: none;
+  }
+  .toast {
+    top: 68px;
+    font-size: 11px;
+  }
+}
+@media (max-height: 520px) and (min-width: 651px) {
+  .board-frame {
+    min-height: 300px;
+  }
+  .top {
+    gap: 5px;
+  }
+  .center {
+    width: 120px;
+  }
+  .altar {
+    width: 190px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition: none !important;
+  }
+}
+
+.chest.opening {
+  animation: chestOpened 1.45s ease-out both;
+  pointer-events: none;
+  filter: drop-shadow(0 5px #142b2c66);
+}
+@keyframes chestOpened {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  12% {
+    transform: translate(-50%, -50%) scale(1.12, 0.96);
+  }
+  25%,
+  72% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.88);
+    opacity: 0;
+  }
+}
+.ground-loot {
+  position: absolute;
+  width: clamp(46px, 7vw, 80px);
+  height: clamp(46px, 7vw, 80px);
+  pointer-events: none;
+  z-index: 7;
+  transform: translate(-50%, -50%);
+  animation: groundFade 2.6s linear both;
+}
+.ground-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 15%;
+  right: 15%;
+  height: 15%;
+  border-radius: 50%;
+  background: #112c2b80;
+  animation: shadowLand 0.5s ease-out both;
+}
+.ground-sprite {
+  position: absolute;
+  inset: 0 0 8%;
+  filter: drop-shadow(0 3px #15312b) drop-shadow(0 0 6px var(--rarity));
+  animation: lootHop 0.65s ease-out both;
+}
+.ground-sprite svg {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.ground-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: var(--rarity);
+  background: #102a29f0;
+  border: 1px solid var(--rarity);
+  padding: 3px 6px;
+  border-radius: 3px;
+  text-align: center;
+  box-shadow: 0 2px #0b2226;
+  animation: labelLand 2.6s both;
+}
+.ground-label small {
+  display: block;
+  color: #fff8dc;
+  font-size: 10px;
+}
+@keyframes lootHop {
+  0% {
+    transform: translate(var(--from-x), var(--from-y)) scale(0.4) rotate(-22deg);
+  }
+  33% {
+    transform: translate(
+        calc(var(--from-x) * 0.45),
+        calc(var(--from-y) * 0.45 - 75px)
+      )
+      scale(1.13) rotate(16deg);
+  }
+  70% {
+    transform: translate(0, 0) scale(1.06, 0.9) rotate(0);
+  }
+  85% {
+    transform: translateY(-13px) scale(1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes shadowLand {
+  0%,
+  60% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes labelLand {
+  0%,
+  24% {
+    opacity: 0;
+  }
+  30%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes groundFade {
+  0%,
+  79% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ground-sprite {
+    animation: none;
+  }
+  .ground-shadow {
+    animation: none;
+  }
+  .ground-label {
+    animation: none;
+  }
+  .ground-loot {
+    animation: groundFade 2.6s linear both;
+  }
+  .chest.opening {
+    animation: none;
+  }
+}
+
+/* Constellation skill map */
+.modal.constellation {
+  padding: 0;
+  background: #090c19;
+  backdrop-filter: none;
+}
+.constellation .window {
+  width: 100%;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 0% 100%, #144632 0, transparent 48%),
+    radial-gradient(ellipse at 100% 0%, #40182d 0, transparent 48%),
+    radial-gradient(ellipse at 0% 0%, #271648 0, transparent 48%), #090d1b;
+}
+.constellation .window-head {
+  flex: none;
+  position: relative;
+  background: #090d19ad;
+  border-bottom: 2px solid #ffffff14;
+  padding: 10px 22px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  z-index: 3;
+}
+.constellation .window-head h2 {
+  font-size: clamp(13px, 2vw, 21px);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #eee5ff;
+}
+.constellation .window-head #close {
+  grid-column: 2;
+  grid-row: 1;
+  background: #c44ff1;
+  color: #190c24;
+  border: 4px solid #060610;
+  border-radius: 4px;
+  padding: 9px 36px;
+  font-size: 19px;
+  font-weight: 1000;
+  text-transform: uppercase;
+  box-shadow:
+    0 5px #050611,
+    inset 0 3px #e9a0ff;
+  text-shadow: none;
+}
+.constellation .window-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.tree-map-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  overscroll-behavior: contain;
+}
+.tree-map {
+  width: min(100%, 1100px);
+  min-width: 640px;
+  aspect-ratio: 1000/560;
+  position: relative;
+  isolation: isolate;
+  margin: auto;
+  flex: none;
+}
+.tree-back,
+.tree-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.tree-lines line {
+  stroke: #e7e8f1;
+  stroke-width: 7;
+  stroke-dasharray: 15 14;
+  opacity: 0.38;
+  stroke-linecap: butt;
+}
+.tree-lines line.ready {
+  stroke: #fff7d9;
+  opacity: 0.95;
+}
+.tree-lines line.owned {
+  stroke: #9cea4a;
+  stroke-dasharray: none;
+  opacity: 1;
+  filter: drop-shadow(0 0 5px #9cea4a77);
+}
+.tree-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(42px, 5.1vw, 64px);
+  height: clamp(42px, 5.1vw, 64px);
+  padding: 0;
+  border: 0;
+  background: none;
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  overflow: visible;
+  outline: none !important;
+}
+.tree-node::before,
+.tree-node::after {
+  content: "";
+  position: absolute;
+  clip-path: polygon(
+    21% 0,
+    79% 0,
+    100% 21%,
+    100% 79%,
+    79% 100%,
+    21% 100%,
+    0 79%,
+    0 21%
+  );
+  inset: -5px;
+  background: #030710;
+  z-index: -2;
+}
+.tree-node::after {
+  inset: -1px;
+  background: #536346;
+  z-index: -1;
+}
+.tree-node .node-core {
+  width: 100%;
+  height: 100%;
+  background: #202c39;
+  border: 5px solid #101822;
+  clip-path: polygon(
+    19% 0,
+    81% 0,
+    100% 19%,
+    100% 81%,
+    81% 100%,
+    19% 100%,
+    0 81%,
+    0 19%
+  );
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 0 0 3px #788795;
+}
+.tree-node svg {
+  width: 75%;
+  height: 75%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px #05090e);
+}
+.tree-node.locked .node-core {
+  filter: grayscale(0.6) brightness(0.6);
+}
+.tree-node.locked {
+  opacity: 0.78;
+}
+.tree-node.ready::after {
+  background: #ffce35;
+}
+.tree-node.owned::after {
+  background: #9ced4d;
+}
+.tree-node.ready .node-core {
+  background: #463c24;
+  box-shadow: inset 0 0 0 3px #d4bb65;
+}
+.tree-node.owned .node-core {
+  background: #234a36;
+  box-shadow: inset 0 0 0 3px #92cc80;
+}
+.tree-node.selected {
+  filter: drop-shadow(0 0 9px #fff8c9);
+  z-index: 4;
+}
+.tree-node.selected::before {
+  background: #fff6dc;
+  inset: -7px;
+}
+.tree-node:focus-visible {
+  filter: drop-shadow(0 0 6px white);
+}
+.tree-node:hover {
+  filter: brightness(1.25);
+  z-index: 5;
+}
+.node-tag {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  background: #101827;
+  border: 2px solid #05070a;
+  color: #b8f76b;
+  padding: 0 4px;
+  font-size: 12px;
+  line-height: 18px;
+  box-shadow: 0 2px #000;
+  white-space: nowrap;
+}
+.node-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: #e4e7f5;
+  font-size: clamp(9px, 1vw, 12px);
+  white-space: nowrap;
+  text-shadow:
+    0 2px #000,
+    1px 0 #000,
+    -1px 0 #000;
+  pointer-events: none;
+}
+.tree-info {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(115px, 1fr) minmax(210px, 2.2fr) auto;
+  align-items: center;
+  gap: 14px;
+  border-top: 2px solid #77829e44;
+  background: #0d1222ef;
+  padding: 12px clamp(12px, 3vw, 36px);
+  box-shadow: 0 -5px 22px #0003;
+}
+.tree-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e5d4ff;
+  font-size: 12px;
+}
+.tree-balance svg {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+.tree-balance b {
+  display: block;
+  font-size: 24px;
+  color: #e5aaff;
+  line-height: 1.1;
+}
+.tree-detail h3 {
+  margin: 0 0 3px;
+  font-size: 18px;
+  color: #ffdf7b;
+}
+.tree-detail p {
+  margin: 0;
+  font-size: 12px;
+  color: #ccd3e6;
+}
+.tree-detail small {
+  display: block;
+  color: #a8b8cf;
+  margin-top: 3px;
+  font-size: 11px;
+}
+.tree-buy {
+  min-width: 140px;
+  background: linear-gradient(#e9fa91, #9adf43);
+  color: #162711;
+  border: 3px solid #050b10;
+  box-shadow:
+    0 4px #03060a,
+    inset 0 2px #fff9bd;
+  border-radius: 3px;
+  padding: 10px 14px;
+  font-weight: 1000;
+  text-shadow: none;
+}
+.tree-buy:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.tree-legend {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  color: #cbd0e0;
+  font-size: 11px;
+  text-align: right;
+}
+.tree-legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 4px;
+  background: #ffcf40;
+}
+.tree-legend i.green {
+  background: #9ced4d;
+}
+@media (max-width: 650px) {
+  .constellation .window-head {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .constellation .window-head #close {
+    font-size: 15px;
+    padding: 7px 22px;
+  }
+  .tree-legend {
+    font-size: 9px;
+  }
+  .tree-map-scroll {
+    place-items: center start;
+  }
+  .tree-map {
+    min-width: 620px;
+  }
+  .tree-node {
+    width: 40px;
+    height: 40px;
+  }
+  .tree-info {
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    padding: 9px 12px;
+  }
+  .tree-balance {
+    grid-column: 1/-1;
+    font-size: 10px;
+  }
+  .tree-balance b {
+    display: inline;
+    font-size: 17px;
+    margin-left: 6px;
+  }
+  .tree-balance svg {
+    width: 22px;
+    height: 22px;
+  }
+  .tree-detail h3 {
+    font-size: 15px;
+  }
+  .tree-buy {
+    min-width: 104px;
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+}
+
+/* Milestone reward wheel */
+.nav-btn.wheel-btn {
+  background: linear-gradient(#d989ff, #8b43df);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow:
+    0 4px #07141b,
+    inset 0 2px #efd0ff;
+}
+.wheel-mini {
+  width: 23px;
+  height: 23px;
+  border: 2px solid #f9edd9;
+  box-shadow: 0 0 0 2px #171d30;
+  border-radius: 50%;
+  background: conic-gradient(
+    #cb63ed 0 60deg,
+    #f55a47 60deg 120deg,
+    #ffda4c 120deg 180deg,
+    #59d16d 180deg 240deg,
+    #39b7e5 240deg 300deg,
+    #6475ff 300deg
+  );
+}
+.modal.milestone-wheel {
+  background: #091623be;
+  backdrop-filter: blur(2px);
+}
+.milestone-wheel .window {
+  width: min(1000px, 100%);
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  overflow: visible;
+  max-height: 96dvh;
+}
+.milestone-wheel .window-head {
+  background: transparent;
+  border: 0;
+  padding: 0 6px;
+  justify-content: flex-end;
+  position: relative;
+}
+.milestone-wheel .window-head h2 {
+  position: absolute;
+  left: 12px;
+  font-size: 14px;
+  letter-spacing: 0.17em;
+  color: #fff;
+}
+.milestone-wheel .window-body {
+  padding: 0;
+  overflow: visible;
+}
+.wheel-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: min(66dvh, 560px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  gap: 16px;
+}
+.wheel-disc {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(70vw, 64dvh, 530px);
+  aspect-ratio: 1;
+  border: 12px solid #f2f5e8;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 6px #11192b,
+    0 0 0 10px #7996a4,
+    inset 0 0 0 8px #142035;
+  overflow: hidden;
+  background: #101c30;
+}
+.wheel-face {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -30deg,
+    #b64be1 0 60deg,
+    #ff6349 60deg 120deg,
+    #ffcd54 120deg 180deg,
+    #43bf69 180deg 240deg,
+    #32b9e0 240deg 300deg,
+    #6574ed 300deg
+  );
+  box-shadow: inset 0 0 0 10px #12203755;
+  transform: rotate(var(--angle, 0deg));
+}
+.wheel-face:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from -30deg,
+    #101929 0deg 3deg,
+    transparent 3deg 60deg
+  );
+}
+.wheel-face:after {
+  content: "";
+  position: absolute;
+  inset: 42%;
+  border-radius: 50%;
+  background: #f6e9ce;
+  border: 5px solid #131b29;
+}
+.wheel-face.turn {
+  animation: wheelTurn 1.3s cubic-bezier(0.2, 0.65, 0.3, 1) both;
+}
+@keyframes wheelTurn {
+  from {
+    transform: rotate(calc(var(--angle) - 720deg));
+  }
+  to {
+    transform: rotate(var(--angle));
+  }
+}
+.wheel-pointer {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 39px;
+  z-index: 2;
+  background: #eef8ff;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 3px #111);
+}
+.wheel-reel {
+  width: 100%;
+  border: 5px solid #111422;
+  background: #1e1d2a;
+  box-shadow:
+    0 5px #080d18,
+    0 0 0 2px #b25aff;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.wheel-title {
+  background: linear-gradient(#ad50fc, #7c14de);
+  text-align: center;
+  padding: 8px;
+  font-size: 19px;
+  letter-spacing: 0.14em;
+  color: #fff;
+  text-shadow: 2px 2px #251239;
+  border-bottom: 4px solid #131421;
+}
+.wheel-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 26px 16px 18px;
+  background: repeating-radial-gradient(
+    ellipse at center,
+    #292831 0 35px,
+    #34333c 35px 70px
+  );
+  position: relative;
+}
+.wheel-track:before {
+  content: "▼";
+  position: absolute;
+  left: 50%;
+  top: 1px;
+  transform: translateX(-50%);
+  color: #fff4b7;
+  font-size: 22px;
+  text-shadow: 2px 2px #0e111d;
+  z-index: 2;
+}
+.wheel-card {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-height: 110px;
+  padding: 8px 3px;
+  background: #1a2938;
+  border: 4px solid var(--reward-color);
+  box-shadow:
+    0 0 0 3px #101320,
+    inset 0 0 0 3px #ffffff16,
+    0 5px #111;
+  border-radius: 4px;
+  text-align: center;
+  color: #fff3d4;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.wheel-card svg {
+  width: clamp(35px, 7vw, 72px);
+  height: clamp(35px, 7vw, 72px);
+  filter: drop-shadow(0 4px #111822);
+  image-rendering: pixelated;
+}
+.wheel-card:not(.chosen) {
+  opacity: 0.67;
+}
+.wheel-card.chosen {
+  background: #33313b;
+  border-color: #ffe19a;
+  box-shadow:
+    0 0 0 3px #0a1320,
+    0 0 20px #ffe27988,
+    inset 0 0 0 3px #a58a44;
+}
+.wheel-card.chosen.revealed {
+  animation: rewardPop 0.45s ease-out both;
+}
+@keyframes rewardPop {
+  50% {
+    transform: scale(1.06);
+    filter: brightness(1.3);
+  }
+}
+.wheel-info {
+  text-align: center;
+  max-width: 96%;
+  padding: 11px 18px;
+  background: #101d2dee;
+  border: 2px solid #b398e8;
+  border-radius: 5px;
+  box-shadow: 0 4px #090e19;
+  color: #f9eedc;
+}
+.wheel-info strong {
+  color: #ffdf7d;
+  font-size: 18px;
+  display: block;
+}
+.wheel-info small {
+  display: block;
+  color: #d4c6ed;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.wheel-progress {
+  height: 9px;
+  background: #30314b;
+  margin: 9px 0 3px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.wheel-progress i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ad5bef, #f9d563);
+}
+.wheel-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.wheel-claim {
+  background: linear-gradient(#5dd5f4, #2498d0);
+  border: 3px solid #101725;
+  box-shadow:
+    0 5px #090d17,
+    inset 0 2px #c1faff;
+  border-radius: 4px;
+  color: white;
+  text-shadow: 1px 2px #132539;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.wheel-claim:disabled {
+  opacity: 0.7;
+}
+.wheel-controls .action {
+  background: #28364c;
+}
+@media (max-width: 600px) {
+  .wheel-track {
+    gap: 5px;
+    padding: 24px 8px 12px;
+  }
+  .wheel-card {
+    min-height: 85px;
+    border-width: 3px;
+    font-size: 10px;
+  }
+  .wheel-card svg {
+    width: 34px;
+    height: 34px;
+  }
+  .wheel-disc {
+    width: min(82vw, 60dvh);
+  }
+  .wheel-stage {
+    gap: 12px;
+  }
+  .wheel-title {
+    font-size: 15px;
+  }
+  .wheel-info {
+    font-size: 12px;
+  }
+  .wheel-info strong {
+    font-size: 15px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wheel-face.turn,
+  .wheel-card.chosen.revealed {
+    animation: none;
+  }
+}
+.modal.milestone-wheel {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.milestone-wheel .window {
+  min-width: 0;
+  max-width: 100%;
+}
+.wheel-track {
+  display: block;
+  overflow: hidden;
+  padding: 30px 0 18px;
+  --card-width: clamp(76px, 15vw, 150px);
+}
+.wheel-strip {
+  display: flex;
+  width: max-content;
+  position: relative;
+  gap: 10px;
+  will-change: transform;
+}
+.wheel-strip .wheel-card {
+  flex: 0 0 var(--card-width);
+  width: var(--card-width);
+  opacity: 1;
+}
+.wheel-track:before {
+  z-index: 4;
+}
+.wheel-track:after {
+  content: "";
+  position: absolute;
+  inset: 23px 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #181822b0,
+    transparent 12%,
+    transparent 88%,
+    #181822b0
+  );
+  z-index: 2;
+}
+.wheel-strip .wheel-card.chosen {
+  opacity: 1;
+}
+@media (max-width: 600px) {
+  .wheel-track {
+    --card-width: clamp(68px, 20vw, 100px);
+    padding: 26px 0 12px;
+  }
+  .wheel-strip {
+    gap: 7px;
+  }
+}
+
+.float.directional {
+  z-index: 4;
+  animation: directionalCoin 0.82s cubic-bezier(0.15, 0.7, 0.35, 1) forwards;
+  pointer-events: none;
+  font-size: clamp(17px, 2.5vw, 27px);
+  text-shadow:
+    2px 2px #142b24,
+    -2px -1px #142b24,
+    0 3px #142b24;
+}
+@keyframes directionalCoin {
+  0% {
+    transform: translate(-50%, -50%) scale(0.65);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(
+        calc(-50% + var(--dx) * 0.3),
+        calc(-50% + var(--dy) * 0.3)
+      )
+      scale(1.15);
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      scale(0.9);
+    opacity: 0;
+  }
+}
+.tree-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  flex: none;
+  background: #0d1325cc;
+  border-bottom: 1px solid #7988ab33;
+}
+.tree-tab {
+  border: 2px solid #7583a4;
+  background: #1f2943;
+  color: #e4defa;
+  padding: 8px 18px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 3px #05070c;
+}
+.tree-tab.active {
+  background: #bd61ef;
+  border-color: #f0baff;
+  color: #200e31;
+}
+.asc-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 22px clamp(12px, 4vw, 45px) 30px;
+  color: #eee5ff;
+}
+.asc-shell {
+  max-width: 1040px;
+  margin: auto;
+}
+.asc-banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 2px solid #bd7dea;
+  background: linear-gradient(125deg, #301b50, #171d35);
+  box-shadow:
+    0 5px #070911,
+    inset 0 0 26px #b15cf122;
+}
+.asc-banner h3 {
+  font-size: clamp(22px, 4vw, 34px);
+  margin: 0 0 8px;
+  color: #ffdda0;
+}
+.asc-banner p {
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e0d5f1;
+}
+.asc-crystal {
+  font-size: 30px;
+  color: #ffe8a3;
+  text-align: center;
+}
+.asc-crystal small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: #d6b8f3;
+}
+.asc-meter {
+  height: 12px;
+  border: 2px solid #100d1d;
+  background: #0a0b17;
+  margin: 10px 0 5px;
+  overflow: hidden;
+}
+.asc-meter i {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #9561ff, #f5ca72);
+}
+.asc-rebirth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 13px;
+}
+.asc-rebirth button {
+  background: #f3c85e;
+  color: #31200e;
+}
+.asc-warning {
+  color: #f2bfc5 !important;
+  font-size: 12px !important;
+}
+.asc-heading {
+  margin: 26px 0 10px;
+  color: #f6dcae;
+  letter-spacing: 0.05em;
+}
+.asc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.asc-card {
+  border: 2px solid #766699;
+  background: linear-gradient(150deg, #27263d, #151b2e);
+  padding: 14px;
+  box-shadow: 0 4px #070911;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.asc-card h4 {
+  font-size: 17px;
+  color: #f8e4af;
+  margin: 0;
+}
+.asc-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #d7cce7;
+  margin: 0;
+  flex: 1;
+}
+.asc-card .asc-level {
+  font-size: 11px;
+  color: #d6a5ff;
+}
+.asc-card svg {
+  width: 42px;
+  height: 42px;
+}
+.asc-card button {
+  width: 100%;
+}
+.asc-card.locked {
+  border-color: #4f4b63;
+}
+.asc-card .requirement {
+  font-size: 11px;
+  color: #cbb2e2;
+}
+.asc-confirm {
+  border: 2px solid #ea9d83;
+  background: #49263c;
+  padding: 12px;
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.asc-confirm span {
+  flex-basis: 100%;
+  font-size: 13px;
+}
+.asc-confirm button {
+  min-width: 110px;
+}
+.asc-confirm button[data-asc-confirm] {
+  background: #eab158;
+  color: #331c17;
+}
+.asc-card .tree-buy:disabled,
+.asc-rebirth button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+@media (max-width: 650px) {
+  .asc-banner {
+    padding: 14px;
+    gap: 9px;
+  }
+  .asc-crystal {
+    font-size: 23px;
+  }
+  .asc-grid {
+    grid-template-columns: 1fr;
+  }
+  .tree-tabs {
+    padding: 7px;
+  }
+  .tree-tab {
+    padding: 6px 14px;
+  }
+  .asc-scroll {
+    padding-top: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .float.directional {
+    animation: float 0.85s ease-out forwards;
+  }
+}
+
+/* A single field reward marker; it sits above the chest, not in the dock. */
+.field-wheel {
+  position: absolute;
+  z-index: 9;
+  left: 73%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: 46px;
+  height: 46px;
+  padding: 5px;
+  background: #142330;
+  border: 3px solid #ffe5a1;
+  border-radius: 50%;
+  box-shadow:
+    0 3px #0b1720,
+    0 0 0 2px #142330,
+    0 0 15px #fff2a680;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+  animation: wheel-marker-in 0.25s ease-out both;
+}
+.field-wheel:hover {
+  filter: brightness(1.2);
+}
+.field-wheel:active {
+  transform: translate(-50%, -50%) scale(0.93);
+}
+.field-wheel-disc {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #131b2a;
+  border-radius: 50%;
+  background: conic-gradient(
+    #d98cff 0 60deg,
+    #ff574e 60deg 120deg,
+    #ffd64b 120deg 180deg,
+    #61dc70 180deg 240deg,
+    #42c9f4 240deg 300deg,
+    #6c7dff 300deg
+  );
+  position: relative;
+  box-shadow: inset 0 0 0 2px #ffffff66;
+}
+.field-wheel-disc:before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid #fff9de;
+  filter: drop-shadow(0 1px #111);
+}
+.field-wheel-disc:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 7px;
+  height: 7px;
+  background: #fff8df;
+  border: 2px solid #263143;
+  border-radius: 50%;
+}
+@keyframes wheel-marker-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@media (max-width: 600px) {
+  .field-wheel {
+    width: 38px;
+    height: 38px;
+    padding: 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-wheel {
+    animation: none;
+  }
+}
+
+/* Anchor reward marker above the bottom-right chest counter. */
+.bottom-board {
+  z-index: 9;
+}
+.field-status {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 114px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  pointer-events: none;
+}
+.field-status .mini {
+  display: block;
+  white-space: nowrap;
+  text-align: center;
+}
+.field-status .field-wheel {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  pointer-events: auto;
+  animation: corner-wheel-in 0.25s ease-out both;
+}
+.field-status .field-wheel:active {
+  transform: scale(0.93);
+}
+@keyframes corner-wheel-in {
+  from {
+    opacity: 0;
+    transform: translateY(7px) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 650px) {
+  .bottom-board .ticker {
+    max-width: calc(100% - 122px);
+    min-width: 0;
+  }
+  .field-status {
+    min-width: 108px;
+  }
+  .field-status .mini {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-status .field-wheel {
+    animation: none;
+  }
+}
+
+/* Hover card and sound control */
+.top-tools {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.sound-tool {
+  min-width: 42px;
+}
+.sound-tool[aria-pressed="false"] {
+  opacity: 0.65;
+}
+.skill-tooltip {
+  position: fixed;
+  z-index: 100;
+  pointer-events: none;
+  width: min(290px, calc(100vw - 20px));
+  padding: 12px 14px;
+  background: #131b30;
+  border: 2px solid #e1c279;
+  border-radius: 6px;
+  box-shadow:
+    0 5px #030711,
+    0 10px 28px #0009;
+  color: #f5f1e8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.skill-tooltip h3 {
+  font-size: 15px;
+  margin: 0 0 5px;
+  color: #ffe49b;
+}
+.skill-tooltip p {
+  margin: 0 0 8px;
+  color: #e3e9fa;
+}
+.skill-tooltip .tip-meta {
+  border-top: 1px solid #ffffff29;
+  padding-top: 7px;
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  color: #b9c4e4;
+}
+.skill-tooltip .tip-req {
+  font-size: 11px;
+  color: #f8ca9b;
+  margin-top: 5px;
+}
+.skill-tooltip .tip-ready {
+  color: #a8ed80;
+}
+.skill-tooltip .tip-locked {
+  color: #f7c19f;
+}
+.tree-node:focus-visible .node-core {
+  box-shadow: inset 0 0 0 3px #fff3ac;
+}
+
+/* World travel and field bonuses */
+.board-frame {
+  --world-accent: #a3ec82;
+}
+.board-frame[data-world="desert"] {
+  background: #b97945;
+}
+.board-frame[data-world="frozen"] {
+  background: #5d94ac;
+}
+.board-frame[data-world="volcano"] {
+  background: #633e46;
+}
+.board-frame[data-world="celestial"] {
+  background: #473b7d;
+}
+.world-readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 3px 10px;
+  margin-top: 6px;
+}
+.quest .world-readout b {
+  color: var(--world-accent);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+.quest .world-readout span {
+  font-size: 11px;
+  color: #d0e4db;
+}
+.world-meter {
+  grid-column: 1 / -1;
+  background: #071e21;
+  border: 1px solid #a6ced65c;
+  height: 6px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.world-meter i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--world-accent);
+  transition: width 120ms ease-out;
+}
+.float.directional {
+  color: #fff2ad;
+}
+.float.directional.world-bonus {
+  color: var(--world-accent);
+  font-size: clamp(12px, 1.8vw, 19px);
+}
+.worlds-btn {
+  background: linear-gradient(#76c984, #327d59);
+  box-shadow:
+    0 4px #07141b,
+    inset 0 2px #bcf4bb88;
+}
+.world-grid {
+  display: grid;
+  gap: 9px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
+}
+.world-card {
+  border-top: 3px solid var(--world-accent);
+}
+.world-card h3,
+.world-card strong {
+  color: var(--world-accent);
+}
+.world-card .action {
+  white-space: normal;
+}
+.gear-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gear-bonus {
+  color: #b7d5ca;
+  font-size: 11px;
+}
+.collection-count {
+  margin: 0;
+}
+@media (max-width: 650px) {
+  .quest .world-readout b,
+  .quest .world-readout span {
+    font-size: 10px;
+  }
+  .inv-head {
+    flex-wrap: wrap;
+  }
+}
+
+/* Equipment forge and set information */
+.gear-sets,
+.forge-details {
+  background: #10292e;
+  border: 1px solid #547b73;
+  border-radius: 5px;
+  padding: 8px 10px;
+}
+.gear-sets summary,
+.world-set-rules summary {
+  cursor: pointer;
+}
+.gear-sets ul {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  color: #b7d5ca;
+}
+.gear-sets li + li {
+  margin-top: 6px;
+}
+.gear-sets .set-active {
+  color: #d3f998;
+}
+.world-set-rules {
+  color: #deeddf;
+  font-size: 12px;
+}
+.world-set-rules p {
+  margin: 4px 0;
+}
+.salvage-yield {
+  display: block;
+  font-size: 10px;
+  white-space: normal;
+}
+.forge-details p {
+  margin: 3px 0;
+}
+.forge-details p:last-child,
+#scrapBalance {
+  color: #dbebba;
+}
+
+</style>
+  </head>
+  <body>
+    <main id="game">
+      <header class="top">
+        <div class="brand">
+          <div class="brand-mark">●</div>
+          <div><strong>BUTTON FIELD</strong><small>TREASURE GROVE</small></div>
+        </div>
+        <div class="hud">
+          <div class="stat">
+            <span class="ico" id="coinIcon"></span>
+            <div><small>Coins</small><b id="coins">0</b></div>
+          </div>
+          <div class="stat">
+            <span class="ico" id="tapIcon"></span>
+            <div><small>Per press</small><b id="tapValue">1</b></div>
+          </div>
+          <div class="stat" id="autoStat" hidden>
+            <span class="ico" id="autoIcon"></span>
+            <div><small>Per second</small><b id="autoValue">0</b></div>
+          </div>
+          <div class="stat" id="shardStat" hidden>
+            <span class="ico" id="shardIcon"></span>
+            <div><small>Shards</small><b id="shards">0</b></div>
+          </div>
+        </div>
+        <div class="top-tools">
+          <button
+            id="soundToggle"
+            class="tool sound-tool"
+            aria-label="Mute sound"
+            aria-pressed="true"
+            title="Mute sound"
+          >
+            🔊</button
+          ><button id="settings" class="tool" aria-label="Settings">⚙</button>
+        </div>
+      </header>
+      <section class="board-frame" id="board" aria-label="Treasure field">
+        <canvas id="terrain" aria-hidden="true"></canvas>
+        <div class="vignette"></div>
+        <div class="board-top">
+          <div class="quest">
+            <b id="questTitle">Chapter 01 · First steps</b
+            ><span id="questText"
+              >Press the red button. Treasure may fall!</span
+            >
+            <div class="world-readout">
+              <b id="worldName">Grasslands</b>
+              <span id="worldStatus">Wild Growth · 0/25</span>
+              <div class="world-meter" aria-hidden="true">
+                <i id="worldFill"></i>
+              </div>
+            </div>
+          </div>
+          <div class="stage-tag">FIELD LV.<b id="level">01</b></div>
+        </div>
+        <div class="altar">
+          <svg viewBox="0 0 112 112" shape-rendering="crispEdges">
+            <path
+              fill="#174c37"
+              d="M36 2h40v12h18v22h16v40H94v18H76v16H36V94H18V76H2V36h16V14h18z"
+            />
+            <path
+              fill="#b97435"
+              d="M38 4h36v13h18v21h16v36H92v18H74v16H38V92H20V74H4V38h16V17h18z"
+            />
+            <path
+              fill="#eab450"
+              d="M38 6h36v13h16v21h16v32H90v18H72v16H40V90H22V72H6V40h16V19h16z"
+            />
+            <path fill="#fbd47b" d="M40 8h32v13h16v21h16v12H8V42h16V21h16z" />
+            <path fill="#f0be5a" d="M36 29h40v54H36zM29 36h54v40H29z" />
+            <path
+              stroke="#bd8539"
+              stroke-width="1"
+              fill="none"
+              d="M22 40h18V19m32 0v21h18M22 72h18v20m32 0V72h18M6 56h20m60 0h20M56 6v20m0 60v20"
+            />
+            <path
+              fill="#ffe7a3"
+              d="M12 44h4v4h-4zm84 20h4v4h-4zM46 12h4v4h-4zm18 84h4v4h-4z"
+            />
+          </svg>
+        </div>
+        <div class="chest-layer" id="chests"></div>
+        <div class="center">
+          <button id="press" aria-label="Press red button">
+            <svg
+              viewBox="0 0 112 112"
+              shape-rendering="crispEdges"
+              aria-hidden="true"
+            >
+              <ellipse cx="56" cy="81" rx="49" ry="27" fill="#294045" />
+              <path fill="#132a33" d="M22 54h68l15 16v15L90 99H22L7 85V70z" />
+              <path fill="#8eaaa9" d="M22 52h68l14 15v14L89 95H23L8 81V67z" />
+              <path fill="#e7ecdc" d="M25 53h62l12 14v7L87 87H25L13 74v-7z" />
+              <path
+                fill="#5b7379"
+                d="M13 74l12 13h62l12-13v6L86 92H26L13 80z"
+              />
+              <g class="cap">
+                <path fill="#541b28" d="M28 17h56l20 20v33L84 88H28L8 70V37z" />
+                <path fill="#a5162b" d="M12 39h88v29L82 84H30L12 68z" />
+                <path fill="#d42e34" d="M12 39h88v9L82 66H30L12 48z" />
+                <path fill="#77192b" d="M82 66l18-18v20L82 84z" />
+                <path fill="#c12629" d="M28 13h56l20 20v11L84 64H28L8 44V33z" />
+                <path
+                  fill="#ff4537"
+                  d="M29 12h54l18 18v12L82 60H30L11 42V30z"
+                />
+                <path fill="#ff6c43" d="M29 15h54l15 15H14z" />
+                <path fill="#ff8b62" d="M31 18h36v4H27zm-9 8h8v4h-8z" />
+                <path fill="#ec302c" d="M15 41h15l10 11h41l15-11h4L82 60H30z" />
+                <path fill="#ff5540" d="M41 30h33v5H41zm-8 7h10v5H33z" />
+              </g>
+            </svg>
+          </button>
+          <div class="power-label" id="powerLabel">
+            +1<small>COINS / PRESS</small>
+          </div>
+        </div>
+        <div
+          class="progress"
+          id="progress"
+          role="progressbar"
+          aria-label="Next field level"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="progress-fill" id="progressFill"></div>
+          <span class="progress-num" id="progressNum">0%</span>
+        </div>
+        <div class="effects" id="effects"></div>
+        <div class="toast" id="toast" hidden aria-live="polite"></div>
+        <div class="bottom-board">
+          <div class="ticker" id="ticker">
+            <b>Welcome, explorer!</b> Your first treasure is waiting to be
+            discovered.
+          </div>
+          <div class="field-status">
+            <button
+              class="field-wheel"
+              id="wheel"
+              hidden
+              aria-label="Collect milestone reward"
+              title="Milestone reward ready"
+            >
+              <span class="field-wheel-disc" aria-hidden="true"></span>
+            </button>
+            <div class="mini" id="boardInfo">0 chests on field</div>
+          </div>
+        </div>
+      </section>
+      <footer class="dock">
+        <div class="dock-left">
+          <span id="saveStatus">Local save</span> · <span>Space to press</span>
+        </div>
+        <div class="dock-right">
+          <button class="nav-btn worlds-btn" id="worlds">Worlds</button>
+          <button class="nav-btn inventory" id="inventory" hidden>
+            Gear <span class="count" id="invCount">0</span></button
+          ><button class="nav-btn" id="upgrades" hidden>Upgrades</button
+          ><button class="nav-btn skill" id="skills" hidden>Skilltree</button
+          ><button class="nav-btn" id="collection" hidden>Collection</button>
+        </div>
+      </footer>
+    </main>
+    <div class="modal" id="modal" hidden>
+      <section
+        class="window"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <header class="window-head">
+          <h2 id="modalTitle"></h2>
+          <button id="close" aria-label="Close dialog">✕</button>
+        </header>
+        <div class="window-body" id="modalBody"></div>
+      </section>
+    </div>
+    <div id="skillTooltip" class="skill-tooltip" role="tooltip" hidden></div>
+    <script>
+"use strict";
+
+const $ = (id) => document.getElementById(id),
+  KEY = "treasure-grove-v3";
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n)),
+  fmt = (n) =>
+    n >= 1e9
+      ? (n / 1e9).toFixed(1) + "B"
+      : n >= 1e6
+        ? (n / 1e6).toFixed(1) + "M"
+        : n >= 1000
+          ? (n / 1000).toFixed(1) + "K"
+          : Math.floor(n).toLocaleString("en-US");
+function fmtRate(n) {
+  return n < 1000
+    ? n.toLocaleString("en-US", { maximumFractionDigits: 2 })
+    : fmt(n);
+}
+const rarity = [
+  {
+    name: "Common",
+    color: "#d5ded2",
+    weight: 60,
+    scale: 1,
+    wood: "#9b542a",
+    light: "#df9b46",
+    metal: "#bfcac4",
+  },
+  {
+    name: "Uncommon",
+    color: "#8cf483",
+    weight: 26,
+    scale: 2,
+    wood: "#32764c",
+    light: "#81c961",
+    metal: "#c0e0a4",
+  },
+  {
+    name: "Rare",
+    color: "#6bd4ff",
+    weight: 10,
+    scale: 4,
+    wood: "#295e9d",
+    light: "#54c3e5",
+    metal: "#c5edf5",
+  },
+  {
+    name: "Epic",
+    color: "#d7a1ff",
+    weight: 3.5,
+    scale: 8,
+    wood: "#6d378d",
+    light: "#c780ed",
+    metal: "#edd7f5",
+  },
+  {
+    name: "Legendary",
+    color: "#ffe078",
+    weight: 0.5,
+    scale: 16,
+    wood: "#ad6223",
+    light: "#ffe05f",
+    metal: "#fff2ba",
+  },
+];
+const slots = ["Gloves", "Ring", "Boots", "Charm"];
+const names = [
+  [
+    "Garden Gloves",
+    "Mossweave Gloves",
+    "Skyweave Gloves",
+    "Starlight Gloves",
+    "Sunforge Gloves",
+  ],
+  ["Copper Ring", "Jade Ring", "Azure Ring", "Moonstone Ring", "Solar Ring"],
+  [
+    "Trail Boots",
+    "Leafstep Boots",
+    "Cloudstep Boots",
+    "Nightbloom Boots",
+    "Dawnrunner Boots",
+  ],
+  [
+    "Wooden Charm",
+    "Clover Charm",
+    "Rain Charm",
+    "Nebula Charm",
+    "Sunheart Charm",
+  ],
+];
+const stages = [
+  {
+    at: 0,
+    title: "First steps",
+    text: "Press the red button. Treasure may fall!",
+  },
+  {
+    at: 25,
+    title: "Workshop",
+    text: "Upgrades are open. Strengthen your button.",
+  },
+  {
+    at: 150,
+    title: "Treasure trail",
+    text: "Equip gear to improve your earnings and drops.",
+  },
+  {
+    at: 600,
+    title: "Crystal grove",
+    text: "Skills and shards unlock run bonuses. Ascension unlocks permanent bonuses.",
+  },
+  {
+    at: 2500,
+    title: "Living garden",
+    text: "Unlock automatic coin production.",
+  },
+  {
+    at: 10000,
+    title: "Sunlit ruins",
+    text: "Explore stronger gear as your field level rises.",
+  },
+  {
+    at: 50000,
+    title: "Golden grove",
+    text: "Ascend for permanent upgrades, or continue growing this run.",
+  },
+  {
+    at: 250000,
+    title: "Celestial orchard",
+    text: "Grow your legacy with powerful permanent upgrades.",
+  },
+  {
+    at: 1000000,
+    title: "Star garden",
+    text: "Your grove has reached the stars.",
+  },
+  {
+    at: 10000000,
+    title: "Cosmic grove",
+    text: "Push your upgrades even further or begin a new ascension.",
+  },
+];
+const upgrades = [
+  {
+    id: "power",
+    name: "Button reinforcement",
+    desc: "+2 base coins per press.",
+    at: 25,
+    base: 25,
+    rate: 1.65,
+  },
+  {
+    id: "fortune",
+    name: "Treasure compass",
+    desc: "+1.8 percentage points to chest drop chance (up to the 55% total cap).",
+    at: 150,
+    base: 100,
+    rate: 1.9,
+  },
+  {
+    id: "auto",
+    name: "Garden helper",
+    desc: "+3 coins per second while the game is open.",
+    at: 2500,
+    base: 350,
+    rate: 1.8,
+  },
+  {
+    id: "chestSpeed",
+    name: "Chest opener speed",
+    desc: "Speed up Auto Chest. One chest every 5 seconds at level 0, down to 0.5 seconds at level 20.",
+    at: 0,
+    base: 300,
+    rate: 1.45,
+    max: 20,
+    requires: "autoChest",
+  },
+];
+const skills = [
+  {
+    id: "root",
+    name: "First light",
+    desc: "The constellation begins here.",
+    base: 0,
+    max: 0,
+    x: 500,
+    y: 480,
+    icon: [3, 0],
+    req: [],
+  },
+  {
+    id: "tap",
+    name: "Solar resonance",
+    desc: "+15% press income per level.",
+    base: 3,
+    max: 50,
+    x: 280,
+    y: 363,
+    icon: [0, 0],
+    req: ["root"],
+  },
+  {
+    id: "force",
+    name: "Iron touch",
+    desc: "+5 base coins per press.",
+    base: 5,
+    max: 1,
+    x: 140,
+    y: 238,
+    icon: [0, 1],
+    req: ["tap"],
+  },
+  {
+    id: "echo",
+    name: "Echo pulse",
+    desc: "+30% press income.",
+    base: 7,
+    max: 1,
+    x: 330,
+    y: 175,
+    icon: [1, 2],
+    req: ["tap"],
+  },
+  {
+    id: "sun",
+    name: "Solar crown",
+    desc: "+65% press income.",
+    base: 12,
+    max: 1,
+    x: 205,
+    y: 75,
+    icon: [3, 4],
+    req: ["force", "echo"],
+  },
+  {
+    id: "fortune",
+    name: "Clover trail",
+    desc: "+1.2 percentage points to chest drop chance per level (55% total cap).",
+    base: 4,
+    max: 50,
+    x: 720,
+    y: 363,
+    icon: [3, 1],
+    req: ["root"],
+  },
+  {
+    id: "magnet",
+    name: "Treasure magnet",
+    desc: "+2.5 percentage points to chest drop chance.",
+    base: 6,
+    max: 1,
+    x: 670,
+    y: 175,
+    icon: [3, 2],
+    req: ["fortune"],
+  },
+  {
+    id: "luck",
+    name: "Golden path",
+    desc: "+3.5 percentage points to chest drop chance.",
+    base: 8,
+    max: 1,
+    x: 860,
+    y: 238,
+    icon: [1, 4],
+    req: ["fortune"],
+  },
+  {
+    id: "grove",
+    name: "Lucky grove",
+    desc: "+5 percentage points to chest drop chance (55% total cap).",
+    base: 14,
+    max: 1,
+    x: 795,
+    y: 75,
+    icon: [3, 4],
+    req: ["magnet", "luck"],
+  },
+  {
+    id: "helper",
+    name: "Clockwork seed",
+    desc: "+3 coins per second.",
+    base: 5,
+    max: 1,
+    x: 500,
+    y: 325,
+    icon: [2, 1],
+    req: ["root"],
+  },
+  {
+    id: "autoChest",
+    name: "Auto Chest",
+    desc: "Automatically opens the oldest fallen chest every 5 seconds while on the field. Upgrade its speed in the Workshop. Stops when your gear bag is full.",
+    base: 8,
+    max: 1,
+    x: 610,
+    y: 265,
+    icon: [3, 1],
+    req: ["helper"],
+  },
+  {
+    id: "engine",
+    name: "Starlight engine",
+    desc: "+9 coins per second.",
+    base: 9,
+    max: 1,
+    x: 500,
+    y: 190,
+    icon: [2, 3],
+    req: ["helper"],
+  },
+  {
+    id: "star",
+    name: "North star",
+    desc: "+20% press income, +50% automatic income, +2 percentage points chest chance.",
+    base: 20,
+    max: 1,
+    x: 500,
+    y: 55,
+    icon: [3, 3],
+    req: ["sun", "engine", "grove"],
+  },
+];
+const ascUpgrades = [
+  {
+    id: "might",
+    name: "Celestial touch",
+    desc: "Doubles all press income per level.",
+    base: 1,
+    max: 20,
+    icon: [0, 4],
+    req: 0,
+  },
+  {
+    id: "clock",
+    name: "Eternal engine",
+    desc: "Doubles automatic income per level.",
+    base: 2,
+    max: 20,
+    icon: [2, 4],
+    req: 0,
+  },
+  {
+    id: "seed",
+    name: "Golden beginning",
+    desc: "Start future runs with 250 extra coins per level. Starting coins do not count toward ascension.",
+    base: 2,
+    max: 20,
+    icon: [1, 4],
+    req: 0,
+  },
+  {
+    id: "fortune",
+    name: "Astral compass",
+    desc: "+2.5 percentage points chest drop chance per level (55% total cap).",
+    base: 2,
+    max: 12,
+    icon: [3, 4],
+    req: 1,
+  },
+  {
+    id: "wisdom",
+    name: "Crystal abundance",
+    desc: "+100% shards from chests per level.",
+    base: 3,
+    max: 15,
+    icon: [3, 3],
+    req: 2,
+  },
+  {
+    id: "cosmos",
+    name: "Cosmic heart",
+    desc: "Doubles BOTH press and automatic income per level.",
+    base: 5,
+    max: 20,
+    icon: [1, 3],
+    req: 3,
+  },
+];
+
+</script>
+    <script>
+"use strict";
+
+const firstWorld = "grasslands";
+const worlds = {
+  grasslands: {
+    name: "Grasslands",
+    at: stages[0].at,
+    accent: "#a3ec82",
+    mechanic: "Wild Growth",
+    limit: 25,
+    description: "Every 25 presses guarantees a chest as soon as there’s room.",
+  },
+  desert: {
+    name: "Desert",
+    at: stages[5].at,
+    accent: "#ffd38b",
+    mechanic: "Dune Surge",
+    limit: 12,
+    description: "Every 12th press pays 4× its usual coins.",
+    gearBonus: "Each piece adds 0.5× to Dune Surge.",
+    gear: [
+      "Dunewalker Gloves",
+      "Oasis Ring",
+      "Sandstrider Boots",
+      "Scarab Charm",
+    ],
+    gearScale: 1.25,
+    terrain: {
+      tiles: [
+        "#a9673d",
+        "#b97945",
+        "#c28448",
+        "#cd904e",
+        "#d59b58",
+        "#e0aa65",
+        "#ba814e",
+      ],
+      edges: ["#6b4147", "#704748", "#805044"],
+      border: "#4a353e",
+      grain: "#6f442644",
+      mark: "#536746",
+      shine: "#a7bf65",
+      shape: [
+        [5, 3, 2, 9],
+        [2, 6, 3, 2],
+        [8, 4, 3, 2],
+        [9, 2, 2, 3],
+      ],
+    },
+  },
+  frozen: {
+    name: "Frozen Lands",
+    at: stages[6].at,
+    accent: "#b5eeff",
+    mechanic: "Thaw",
+    limit: 10,
+    description:
+      "Every 10 presses releases 5 seconds of automatic income. The charge waits if your automatic income is zero.",
+    gearBonus: "Each piece adds 1 second of income to Thaw.",
+    gear: [
+      "Rimeweave Gloves",
+      "Glacier Ring",
+      "Snowstep Boots",
+      "Aurora Charm",
+    ],
+    gearScale: 1.5,
+    terrain: {
+      tiles: [
+        "#407694",
+        "#5d94ac",
+        "#6fa5ba",
+        "#89bbcd",
+        "#94c5d5",
+        "#abd4e0",
+        "#588fa8",
+      ],
+      edges: ["#274a69", "#2b5271", "#355f7d"],
+      border: "#1c3655",
+      grain: "#2c688947",
+      mark: "#3f8aaa",
+      shine: "#ddfaff",
+      shape: [
+        [5, 2, 2, 10],
+        [2, 6, 8, 2],
+        [3, 4, 2, 2],
+        [7, 8, 2, 2],
+      ],
+    },
+  },
+  volcano: {
+    name: "Volcano",
+    at: stages[7].at,
+    accent: "#ff9e70",
+    mechanic: "Forge Heat",
+    limit: 16,
+    description:
+      "Opening a chest, including with Auto Chest, doubles your next 8 presses here.",
+    gearBonus: "Each piece adds 2 presses to the heat from a chest.",
+    gear: [
+      "Emberforge Gloves",
+      "Obsidian Ring",
+      "Cinderstep Boots",
+      "Magma Charm",
+    ],
+    gearScale: 1.8,
+    terrain: {
+      tiles: [
+        "#49363f",
+        "#523c42",
+        "#633e46",
+        "#674345",
+        "#714744",
+        "#805047",
+        "#5e3b44",
+      ],
+      edges: ["#362831", "#38282c", "#4a2932"],
+      border: "#231a27",
+      grain: "#240f274f",
+      mark: "#b9533e",
+      shine: "#ffae59",
+      shape: [
+        [2, 7, 5, 2],
+        [6, 4, 2, 4],
+        [7, 3, 5, 2],
+        [10, 2, 4, 1],
+      ],
+    },
+  },
+  celestial: {
+    name: "Celestial Realm",
+    at: stages[8].at,
+    accent: "#dfbfff",
+    mechanic: "Starlight",
+    limit: 20,
+    description:
+      "After 20 presses, your next chest from pressing gains one rarity tier, up to Legendary.",
+    gearBonus: "Two pieces make Starlight grant two rarity tiers.",
+    gear: [
+      "Astralweave Gloves",
+      "Orbit Ring",
+      "Cometstride Boots",
+      "Nova Charm",
+    ],
+    gearScale: 2.1,
+    terrain: {
+      tiles: [
+        "#353261",
+        "#3e396e",
+        "#473b7d",
+        "#514383",
+        "#5a488d",
+        "#624e98",
+        "#3e437a",
+      ],
+      edges: ["#23233d", "#252246", "#2d294f"],
+      border: "#16182d",
+      grain: "#a28fc248",
+      mark: "#a891cf",
+      shine: "#f8deff",
+      shape: [
+        [5, 2, 1, 9],
+        [1, 6, 9, 1],
+        [3, 4, 5, 5],
+        [10, 2, 1, 1],
+      ],
+    },
+  },
+};
+
+function recordWorld(entry) {
+  const id = entry.world;
+  return typeof id === "string" && Object.hasOwn(worlds, id) ? id : firstWorld;
+}
+
+function worldTag(id) {
+  return id === firstWorld ? {} : { world: id };
+}
+
+function worldChests(id = s.world) {
+  return s.chests.filter((chest) => recordWorld(chest) === id);
+}
+
+function discoveryKey(slot, rarityIndex, id) {
+  const design = slot + "-" + rarityIndex;
+  return id === firstWorld ? design : id + ":" + design;
+}
+
+function worldGearCount(id, gear = equippedGear()) {
+  let count = 0;
+  for (const item of gear) {
+    if (item && recordWorld(item) === id) count++;
+  }
+  return count;
+}
+
+const worldMilestones = Object.values(worlds).filter((world) => world.at > 0);
+let pendingWorldUnlock = null;
+
+function checkWorldUnlocks(before, after) {
+  let latest;
+  let count = 0;
+  for (const world of worldMilestones) {
+    if (before < world.at && after >= world.at) {
+      latest = world;
+      count++;
+    }
+  }
+  if (count)
+    pendingWorldUnlock =
+      count === 1
+        ? "World unlocked · " + latest.name
+        : count + " worlds unlocked";
+}
+
+function worldPressIncome(tap, auto, pieces, goal) {
+  const id = s.world;
+  if (id === "volcano") {
+    if (!s.worldProgress[id]) return { coins: tap, bonus: "" };
+    s.worldProgress[id]--;
+    return {
+      coins: tap * (pieces >= 2 ? 2.25 : 2),
+      bonus: "Forge Heat",
+      extraChance: pieces >= 4 ? 0.08 : 0,
+    };
+  }
+
+  const world = worlds[id];
+  const charge = (s.worldProgress[id] = Math.min(
+    world.limit,
+    s.worldProgress[id] + 1,
+  ));
+  if (charge >= goal) {
+    if (id === "desert") {
+      s.worldProgress[id] = 0;
+      return {
+        coins: tap * (4 + pieces * 0.5),
+        bonus: "Dune Surge",
+      };
+    }
+    if (id === "frozen" && auto > 0) {
+      s.worldProgress[id] = 0;
+      if (pieces >= 4) s.shards++;
+      return { coins: tap + auto * (5 + pieces), bonus: "Thaw" };
+    }
+  }
+  return { coins: tap, bonus: "" };
+}
+
+function pressChest(chance, pieces, goal) {
+  const id = s.world;
+  const chests = worldChests();
+  if (chests.length >= 12) return "";
+  const charged = s.worldProgress[id] >= goal;
+  const growth = id === firstWorld && charged;
+  const starlight = id === "celestial" && charged;
+  const firstChest = s.opened === 0 && s.chests.length === 0 && s.misses >= 8;
+  if (Math.random() >= chance && !growth && !firstChest) return "";
+
+  const boost = starlight ? (pieces >= 2 ? 2 : 1) : 0;
+  if (!drop(undefined, boost, chests)) return "";
+  s.misses = 0;
+  if (growth || starlight) {
+    s.worldProgress[id] = 0;
+    return worlds[id].mechanic;
+  }
+  return "";
+}
+
+function worldReadout(pieces) {
+  const id = s.world;
+  const world = worlds[id];
+  const charge = s.worldProgress[id];
+  const goal = worldChargeGoal(id, pieces);
+  const status =
+    id === "volcano"
+      ? charge
+        ? charge + " presses left"
+        : "Open a chest to charge"
+      : charge >= goal
+        ? "Ready"
+        : charge + "/" + goal;
+  setText($("worldName"), world.name);
+  setText($("worldStatus"), world.mechanic + " · " + status);
+  setValue(
+    $("worldFill").style,
+    "width",
+    Math.min(100, (charge / goal) * 100) + "%",
+  );
+  if ($("board").dataset.world !== id) {
+    $("board").dataset.world = id;
+    $("board").style.setProperty("--world-accent", world.accent);
+    terrain();
+  }
+}
+
+function worldOptions() {
+  return Object.entries(worlds)
+    .map(([id, world]) => `<option value="${id}">${world.name}</option>`)
+    .join("");
+}
+
+function worldsMarkup() {
+  return `<p class="subtext">Unlock fields with coins earned this run. Travel is free. Chests stay where they land, and Auto Chest works in the field you’re visiting.</p>
+    <div class="world-grid">${Object.entries(worlds)
+      .map(
+        ([
+          id,
+          world,
+        ]) => `<article class="up-card world-card" style="--world-accent:${world.accent}">
+        <h3>${world.name}</h3>
+        <p><strong>${world.mechanic}</strong> · ${world.description}</p>
+        <p>${world.gearBonus || "Find the original Treasure Grove equipment here."}</p>
+        <details class="world-set-rules"><summary>World set bonuses</summary><p>2 pieces · ${regionalSets[id].two}</p><p>4 pieces · ${regionalSets[id].four}</p></details>
+        <button class="action" data-travel="${id}"></button>
+      </article>`,
+      )
+      .join("")}</div>`;
+}
+
+function updateWorlds() {
+  for (const button of $("modalBody").querySelectorAll("[data-travel]")) {
+    const id = button.dataset.travel;
+    const world = worlds[id];
+    const here = id === s.world;
+    const locked = s.total < world.at;
+    setValue(button, "disabled", here || locked);
+    setText(
+      button,
+      here
+        ? "Current field"
+        : locked
+          ? fmt(world.at) + " coins earned to unlock"
+          : "Travel to " + world.name,
+    );
+  }
+}
+
+function travel(id) {
+  const world = Object.hasOwn(worlds, id) && worlds[id];
+  if (!world || s.total < world.at || s.world === id) return;
+  s.world = id;
+  clearFieldEffects();
+  renderChests();
+  notice("Arrived in " + world.name + ".");
+  render();
+  save();
+  closeModal();
+  $("press").focus();
+}
+
+</script>
+    <script>
+"use strict";
+
+const maxForgeRank = 3;
+const forgeUnlock = stages[2].at;
+const maxScrap = Number.MAX_SAFE_INTEGER;
+
+const regionalSets = {
+  grasslands: {
+    goals: [21, 17],
+    two: "Wild Growth charges in 21 presses.",
+    four: "Wild Growth charges in 17 presses.",
+  },
+  desert: {
+    goals: [10, 8],
+    two: "Dune Surge charges in 10 presses.",
+    four: "Dune Surge charges in 8 presses.",
+  },
+  frozen: {
+    goals: [9, 9],
+    two: "Thaw charges in 9 presses.",
+    four: "Thaw also grants one shard.",
+  },
+  volcano: {
+    two: "Forge Heat pays 2.25× coins per press.",
+    four: "Heated presses gain 8 percentage points of chest chance, up to the 55% cap.",
+  },
+  celestial: {
+    goals: [20, 15],
+    two: "Starlight raises chest rarity by two tiers.",
+    four: "Starlight charges in 15 presses.",
+  },
+};
+
+function worldChargeGoal(id, pieces) {
+  const goals = regionalSets[id].goals;
+  return goals && pieces >= 2 ? goals[pieces >= 4 ? 1 : 0] : worlds[id].limit;
+}
+
+function gearValue(item) {
+  if (!item) return 0;
+  if (!item.forge) return item.value;
+  return Math.round(item.value * (100 + 12 * item.forge)) / 100;
+}
+
+function salvageYield(item) {
+  return { coins: 2 + item.r * 3, scrap: 1 + item.r };
+}
+
+function salvageGear(item) {
+  if (!item || s.equip[item.slot] === item.id) return false;
+  const { coins, scrap } = salvageYield(item);
+  s.items = s.items.filter((gear) => gear.id !== item.id);
+  earn(coins);
+  s.scrap = Math.min(maxScrap, s.scrap + scrap);
+  notice(
+    "Salvaged " +
+      itemName(item) +
+      " for " +
+      coins +
+      " coins and " +
+      scrap +
+      " scrap.",
+  );
+  return true;
+}
+
+function forgeCost(item) {
+  const rank = item.forge || 0;
+  return {
+    coins: 25 * (item.r + 1) * (rank + 1) ** 2,
+    scrap: 2 + item.r + 2 * rank,
+  };
+}
+
+function forgeOffer(item) {
+  const rank = item.forge || 0;
+  const cost = forgeCost(item);
+  const maxed = rank >= maxForgeRank;
+  const locked = s.total < forgeUnlock;
+  return {
+    rank,
+    maxed,
+    cost,
+    available:
+      !maxed && !locked && s.coins >= cost.coins && s.scrap >= cost.scrap,
+    label: maxed
+      ? "Fully forged"
+      : locked
+        ? "Unlocks at " + fmt(forgeUnlock) + " coins earned"
+        : "Forge · " + fmt(cost.coins) + " coins + " + cost.scrap + " scrap",
+  };
+}
+
+function forgeGear(item) {
+  if (!item) return false;
+  const offer = forgeOffer(item);
+  if (!offer.available) return false;
+  s.coins -= offer.cost.coins;
+  s.scrap -= offer.cost.scrap;
+  item.forge = offer.rank + 1;
+  notice("Forged " + itemName(item) + " to rank " + item.forge + ".");
+  sound("upgrade");
+  return true;
+}
+
+function equippedSetsMarkup() {
+  const counts = new Map();
+  for (const slot of slots.keys()) {
+    const gear = equipped(slot);
+    if (!gear) continue;
+    const id = recordWorld(gear);
+    counts.set(id, (counts.get(id) || 0) + 1);
+  }
+  const entries = [...counts]
+    .sort(([a], [b]) => Number(b === s.world) - Number(a === s.world))
+    .map(([id, pieces]) => {
+      const here = id === s.world;
+      const set = regionalSets[id];
+      return `<li><strong style="color:${worlds[id].accent}">${worlds[id].name} · ${pieces}/4</strong>${here ? "" : " · activates in its home field"}
+        <div class="${here && pieces >= 2 ? "set-active" : ""}">2 pieces · ${set.two}</div>
+        <div class="${here && pieces >= 4 ? "set-active" : ""}">4 pieces · ${set.four}</div></li>`;
+    });
+  return entries.length
+    ? `<details class="gear-sets"><summary>Equipped world sets</summary><ul>${entries.join("")}</ul></details>`
+    : "";
+}
+
+function forgeMarkup(item) {
+  return `<div class="reward-preview" style="--rarity:${rarity[item.r].color}">${iconMarkup(item)}
+    <div><div class="rarity">${worlds[recordWorld(item)].name} · ${rarity[item.r].name} · ${slots[item.slot]}</div>
+    <h3>${itemName(item)}</h3><div id="forgeStat" class="item-stat"></div></div></div>
+    <p class="subtext">Each rank adds 12% of the original stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
+    <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p></div>
+    <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+    <button class="action secondary" data-open="inventory">Back to Gear</button></div>
+    <p class="subtext" id="forgeResult" role="status"></p>`;
+}
+
+function updateForge() {
+  const button = $("forgeBuy");
+  if (!button) return;
+  const item = s.items.find((gear) => gear.id === +button.dataset.forge);
+  if (!item) return;
+  const offer = forgeOffer(item);
+  setText($("forgeStat"), itemStat(item));
+  setText($("forgeRank"), "Forge rank " + offer.rank + "/" + maxForgeRank);
+  setText(
+    $("forgeBalance"),
+    "Available · " + fmt(s.coins) + " coins and " + fmt(s.scrap) + " scrap",
+  );
+  setText(
+    $("forgeNext"),
+    offer.maxed
+      ? "Maximum rank reached."
+      : "Next rank · " + itemStat({ ...item, forge: offer.rank + 1 }),
+  );
+  setValue(button, "disabled", !offer.available);
+  setText(button, offer.label);
+}
+
+</script>
+    <script>
+"use strict";
+
+const fresh = () => ({
+  world: firstWorld,
+  worldProgress: Object.fromEntries(Object.keys(worlds).map((id) => [id, 0])),
+  coins: 0,
+  total: 0,
+  presses: 0,
+  misses: 0,
+  shards: 0,
+  scrap: 0,
+  up: { power: 0, fortune: 0, auto: 0, chestSpeed: 0 },
+  skills: {
+    tap: 0,
+    fortune: 0,
+    force: 0,
+    echo: 0,
+    sun: 0,
+    magnet: 0,
+    luck: 0,
+    grove: 0,
+    helper: 0,
+    engine: 0,
+    star: 0,
+    autoChest: 0,
+  },
+  items: [],
+  equip: {},
+  found: [],
+  chests: [],
+  nextId: 1,
+  notice: "Welcome, explorer! Your first treasure is waiting to be discovered.",
+  opened: 0,
+  wheelClaims: 0,
+  wheelNextAt: 50,
+  asc: {
+    stars: 0,
+    earned: 0,
+    runs: 0,
+    life: 0,
+    up: { might: 0, clock: 0, seed: 0, fortune: 0, wisdom: 0, cosmos: 0 },
+  },
+});
+let chestClock = 0;
+let s = fresh(),
+  modalType = "",
+  lastFocus = null,
+  saveDirty = false;
+function normalize(o) {
+  if (!o || typeof o !== "object" || Array.isArray(o))
+    throw Error("Invalid save");
+  const f = fresh(),
+    num = (n, max = 1e15) =>
+      typeof n === "number" && Number.isFinite(n) ? clamp(n, 0, max) : 0;
+  for (const k of ["coins", "total"]) f[k] = num(o[k], Number.MAX_VALUE);
+  for (const k of ["presses", "misses", "shards", "opened"]) f[k] = num(o[k]);
+  f.scrap = Math.floor(num(o.scrap, maxScrap));
+  for (const k of ["stars", "earned", "runs"])
+    f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
+  f.asc.life = num(o.asc?.life, Number.MAX_VALUE);
+  const world = recordWorld(o);
+  if (f.total >= worlds[world].at) f.world = world;
+  for (const [id, field] of Object.entries(worlds)) {
+    if (f.total >= field.at)
+      f.worldProgress[id] = Math.floor(num(o.worldProgress?.[id], field.limit));
+  }
+  if (typeof o.notice === "string") f.notice = o.notice;
+
+  if (!o.asc) f.asc.life = f.total;
+  for (const k of Object.keys(f.asc.up))
+    f.asc.up[k] = Math.floor(num(o.asc?.up?.[k], 30));
+  f.wheelClaims = Math.floor(num(o.wheelClaims, Math.floor(f.presses / 50)));
+  f.wheelNextAt =
+    typeof o.wheelNextAt === "number" && Number.isFinite(o.wheelNextAt)
+      ? Math.max(50, Math.min(f.presses + 50, Math.floor(o.wheelNextAt)))
+      : Math.min(f.presses + 50, (f.wheelClaims + 1) * 50);
+  for (const k of Object.keys(f.up)) f.up[k] = Math.floor(num(o.up?.[k], 100));
+  f.up.chestSpeed = Math.min(20, f.up.chestSpeed);
+  for (const k of Object.keys(f.skills))
+    f.skills[k] = Math.floor(num(o.skills?.[k], 50));
+  const validItem = (i) =>
+    i &&
+    Number.isInteger(i.id) &&
+    i.id > 0 &&
+    Number.isInteger(i.slot) &&
+    i.slot >= 0 &&
+    i.slot < 4 &&
+    Number.isInteger(i.r) &&
+    i.r >= 0 &&
+    i.r < 5 &&
+    Number.isInteger(i.level) &&
+    i.level >= 1 &&
+    i.level <= 1000 &&
+    Number.isFinite(i.value) &&
+    i.value > 0 &&
+    i.value < 1e8;
+  const usedIds = new Set();
+  function uniqueId(entry) {
+    if (
+      !Number.isSafeInteger(entry.id) ||
+      entry.id < 1 ||
+      entry.id >= Number.MAX_SAFE_INTEGER ||
+      usedIds.has(entry.id)
+    )
+      return false;
+    usedIds.add(entry.id);
+    return true;
+  }
+  if (Array.isArray(o.items)) {
+    for (const item of o.items) {
+      if (validItem(item) && uniqueId(item)) {
+        const { id, slot, r, level, value } = item;
+        const forge = Math.floor(num(item.forge, maxForgeRank));
+        f.items.push({
+          id,
+          slot,
+          r,
+          level,
+          value,
+          ...worldTag(recordWorld(item)),
+          ...(forge ? { forge } : {}),
+        });
+      }
+      if (f.items.length === 300) break;
+    }
+  }
+  for (const k of slots.keys()) {
+    const id = o.equip?.[k];
+    if (f.items.some((i) => i.id === id && i.slot === k)) f.equip[k] = id;
+  }
+  const validDesigns = new Set(
+    Object.keys(worlds).flatMap((id) =>
+      slots.flatMap((_, slot) =>
+        rarity.map((_, r) => discoveryKey(slot, r, id)),
+      ),
+    ),
+  );
+  if (Array.isArray(o.found))
+    f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
+
+  const chestCounts = {};
+  if (Array.isArray(o.chests)) {
+    for (const chest of o.chests) {
+      if (
+        !chest ||
+        !Number.isInteger(chest.r) ||
+        chest.r < 0 ||
+        chest.r >= rarity.length ||
+        !Number.isFinite(chest.x) ||
+        !Number.isFinite(chest.y) ||
+        !Number.isInteger(chest.level) ||
+        chest.level < 1 ||
+        chest.level > 1000
+      )
+        continue;
+      const id = recordWorld(chest);
+      if (f.total < worlds[id].at || chestCounts[id] === 12 || !uniqueId(chest))
+        continue;
+      chestCounts[id] = (chestCounts[id] || 0) + 1;
+      f.chests.push({
+        id: chest.id,
+        r: chest.r,
+        level: chest.level,
+        x: clamp(chest.x, 11.5, 86.5),
+        y: clamp(chest.y, 22, 79),
+        ...worldTag(id),
+      });
+    }
+  }
+  f.nextId = Math.max(
+    1,
+    Math.floor(num(o.nextId, 1e12)),
+    ...f.items.map((i) => i.id + 1),
+    ...f.chests.map((c) => c.id + 1),
+  );
+  return f;
+}
+const preForgeSaveKey = KEY + "-before-forge";
+
+function readPreForgeSave() {
+  try {
+    return localStorage.getItem(preForgeSaveKey);
+  } catch {
+    return null;
+  }
+}
+
+try {
+  const raw = localStorage.getItem(KEY);
+  if (raw) {
+    const stored = JSON.parse(raw);
+    s = normalize(stored);
+    if (!Object.hasOwn(stored, "scrap") && !readPreForgeSave())
+      localStorage.setItem(preForgeSaveKey, raw);
+  }
+} catch {}
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(s));
+    saveDirty = false;
+    setText($("saveStatus"), "Saved locally");
+  } catch {
+    saveDirty = true;
+    setText($("saveStatus"), "Local save unavailable");
+  }
+}
+function stageIndex() {
+  let k = 0;
+  stages.forEach((a, i) => {
+    if (s.total >= a.at) k = i;
+  });
+  return k;
+}
+function level() {
+  return 1 + Math.floor(Math.log2(1 + s.total / 100));
+}
+function equipped(k) {
+  const id = s.equip[k];
+  return id === undefined ? undefined : s.items.find((i) => i.id === id);
+}
+function equippedGear() {
+  return slots.map((_, slot) => equipped(slot));
+}
+function stats(gear = equippedGear()) {
+  const a = s.asc.up,
+    all = Math.pow(2, a.cosmos),
+    legacy = 1 + s.asc.earned * 0.15;
+  return {
+    tap:
+      all *
+      legacy *
+      Math.pow(2, a.might) *
+      ((1 + s.up.power * 2 + gearValue(gear[0]) + s.skills.force * 5) *
+        (1 +
+          s.skills.tap * 0.15 +
+          s.skills.echo * 0.3 +
+          s.skills.sun * 0.65 +
+          s.skills.star * 0.2 +
+          gearValue(gear[1]) / 100)),
+    auto:
+      all *
+      legacy *
+      Math.pow(2, a.clock) *
+      (s.up.auto * 3 +
+        gearValue(gear[2]) +
+        s.skills.helper * 3 +
+        s.skills.engine * 9) *
+      (1 + s.skills.star * 0.5),
+    chance: clamp(
+      0.16 +
+        a.fortune * 0.025 +
+        s.up.fortune * 0.018 +
+        s.skills.fortune * 0.012 +
+        s.skills.magnet * 0.025 +
+        s.skills.luck * 0.035 +
+        s.skills.grove * 0.05 +
+        s.skills.star * 0.02 +
+        gearValue(gear[3]) / 100,
+      0.16,
+      0.55,
+    ),
+  };
+}
+function earn(n) {
+  const before = s.total;
+  s.coins = Math.min(Number.MAX_VALUE, s.coins + n);
+  s.total = Math.min(Number.MAX_VALUE, s.total + n);
+  s.asc.life = Math.min(Number.MAX_VALUE, s.asc.life + n);
+  checkWorldUnlocks(before, s.total);
+  saveDirty = true;
+}
+function itemName(i) {
+  const gear = worlds[recordWorld(i)].gear;
+  return gear ? rarity[i.r].name + " " + gear[i.slot] : names[i.slot][i.r];
+}
+function itemStat(i) {
+  const value = gearValue(i);
+  return [
+    "+" + value + " base coins / press",
+    "+" + value + "% press income",
+    "+" + value + " coins / sec",
+    "+" + value + " percentage points chest chance",
+  ][i.slot];
+}
+
+</script>
+    <script>
+"use strict";
+
+function svg(body) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`;
+}
+function coin() {
+  return svg(
+    '<path fill="#633822" d="M10 2h12v4h5v5h3v12h-5v5H7v-5H2V9h4V5h4z"/><path fill="#ffaf2f" d="M10 4h12v4h4v15h-5v4H10v-4H5V9h5z"/><path fill="#ffe782" d="M10 6h12v3H10zM7 10h3v10H7z"/><path fill="#bd6324" d="M14 10h6v3h-3v7h-3z"/>',
+  );
+}
+const worldMarks = {
+  desert: "M26 23h2v2h2v2h-2v2h-2v-2h-2v-2h2z",
+  frozen: "M26 22h2v3h3v2h-3v3h-2v-3h-3v-2h3z",
+  volcano: "M27 21h2v5h2v3h-8v-3h2v-2h2z",
+  celestial: "M27 21h1v4h4v1h-4v4h-1v-4h-4v-1h4z",
+};
+
+function gearIcon(item) {
+  return itemIcon(item.slot, item.r, recordWorld(item));
+}
+
+function itemIcon(k, r, worldId = firstWorld) {
+  const c = rarity[r].color,
+    theme = worlds[worldId].terrain,
+    d = theme?.tiles[2] || rarity[r].wood;
+  let p = "";
+  if (k === 0)
+    p = `<path fill="#172c32" d="M4 13h5V5h4v6h2V3h5v8h2V7h5v7h3v11l-6 5H10l-6-7z"/><path fill="${d}" d="M6 15h5V7h2v8h4V5h2v10h5V9h2v7h2v8l-5 4H11l-5-6z"/><path fill="${c}" d="M10 19h15v5H10zm2 6h10v3H12z"/>`;
+  if (k === 1)
+    p = `<path fill="#172c32" d="M10 5h12v4h5v4h3v10h-4v5H6v-5H2V13h4V9h4z"/><path fill="${theme ? d : "#cf8b38"}" d="M10 11h12v3h4v9h-5v4H11v-4H6v-9h4z"/><path fill="#ffe0a0" d="M10 14h4v3h-4v5H8v-8z"/><path fill="#172c32" d="M12 16h8v7h-8z"/><path fill="${c}" d="M11 3h10l5 6-10 8L6 9z"/><path fill="#fff" opacity=".7" d="M11 5h8v3h-8z"/>`;
+  if (k === 2)
+    p = `<path fill="#152d31" d="M6 3h15v17h8v10H3v-9h3z"/><path fill="${d}" d="M8 5h11v17h8v6H5v-6h3z"/><path fill="${c}" d="M8 6h11v5H8zm-3 17h22v4H5z"/><path fill="#fff4cb" d="M11 12h6v2h-6zm0 5h6v2h-6z"/>`;
+  if (k === 3)
+    p = `<path fill="#172d31" d="M13 1h6v6h6v4h5v10h-5v5h-6v5h-6v-5H7v-5H2V11h5V7h6z"/><path fill="${d}" d="M14 3h4v7h6v3h4v6h-5v5h-5v5h-4v-5H9v-5H4v-6h5v-3h5z"/><path fill="${c}" d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/><path fill="#fff" opacity=".75" d="M13 11h5v3h-5z"/>`;
+  if (theme)
+    p += `<path fill="#172c32" d="M23 20h9v12H21v-9h2z"/><path fill="${worlds[worldId].accent}" d="${worldMarks[worldId]}"/>`;
+  return svg(p);
+}
+function chestIcon(r) {
+  const a = rarity[r];
+  return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M9 4h46v4h5v35h-5v5H9v-5H4V8h5z"/><path fill="${a.wood}" d="M7 24h50v18l-4 4H11l-4-4z"/><path fill="${a.light}" d="M11 6h42v4h5v14H6V10h5z"/><path fill="#fff3be" opacity=".45" d="M12 8h40v3H12z"/><path fill="#192d31" opacity=".55" d="M6 22h52v4H6zm3 12h46v2H9z"/><path fill="#17282b" d="M11 4h10v43H11zm32 0h10v43H43z"/><path fill="${a.metal}" d="M13 6h6v39h-6zm32 0h6v39h-6z"/><path fill="#fff" opacity=".6" d="M13 8h2v15h-2zm32 0h2v15h-2z"/><path fill="#17282b" d="M25 21h14v13H25z"/><path fill="${a.metal}" d="M27 23h10v9H27z"/><path fill="#182d31" d="M31 25h3v5h-3z"/></svg>`;
+}
+function openedChestIcon(r) {
+  const a = rarity[r];
+  return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
+}
+
+</script>
+    <script>
+"use strict";
+
+const soundTones = {
+  tap: [[180, 115, 0.065, 0, "triangle", 0.09]],
+  menu: [[450, 350, 0.075, 0, "triangle", 0.045]],
+  chest: [
+    [220, 115, 0.09, 0, "triangle", 0.07],
+    [410, 410, 0.1, 0.065, "triangle", 0.05],
+    [520, 520, 0.11, 0.13, "triangle", 0.04],
+  ],
+  upgrade: [
+    [392, 392, 0.1, 0, "triangle", 0.06],
+    [523, 523, 0.12, 0.09, "triangle", 0.055],
+    [659, 659, 0.16, 0.18, "triangle", 0.045],
+  ],
+  equip: [
+    [330, 330, 0.08, 0, "triangle", 0.05],
+    [440, 440, 0.12, 0.07, "triangle", 0.05],
+  ],
+  ascend: [
+    [262, 262, 0.24, 0, "sine", 0.07],
+    [392, 392, 0.24, 0.1, "sine", 0.065],
+    [523, 523, 0.3, 0.2, "sine", 0.055],
+  ],
+};
+let soundOn = true,
+  audioCtx = null,
+  soundLast = 0;
+try {
+  soundOn = localStorage.getItem(KEY + "-sound") !== "off";
+} catch {}
+function syncSound() {
+  const b = $("soundToggle");
+  b.textContent = soundOn ? "🔊" : "🔇";
+  b.setAttribute("aria-pressed", String(soundOn));
+  b.setAttribute("aria-label", soundOn ? "Mute sound" : "Enable sound");
+  b.title = soundOn ? "Mute sound" : "Enable sound";
+}
+function initAudio() {
+  if (!soundOn) return null;
+  try {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    if (!audioCtx) audioCtx = new C();
+    if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    return audioCtx;
+  } catch {
+    return null;
+  }
+}
+function sound(kind) {
+  if (!soundOn) return;
+  const ctx = initAudio();
+  if (!ctx || ctx.state === "closed") return;
+  const t = ctx.currentTime;
+  if (kind === "tap" && t - soundLast < 0.042 && soundLast > 0) return;
+  if (kind === "tap") soundLast = t;
+
+  for (const [f, end, d, offset, type, vol] of soundTones[kind] || soundTones.menu) {
+    try {
+      const o = ctx.createOscillator(),
+        g = ctx.createGain(),
+        start = t + offset;
+      o.type = type;
+      o.frequency.setValueAtTime(f, start);
+      o.frequency.exponentialRampToValueAtTime(end, start + d);
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(vol, start + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + d);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(start);
+      o.stop(start + d + 0.01);
+      o.onended = () => {
+        o.disconnect();
+        g.disconnect();
+      };
+    } catch {}
+  }
+}
+syncSound();
+$("soundToggle").addEventListener("click", () => {
+  soundOn = !soundOn;
+  try {
+    localStorage.setItem(KEY + "-sound", soundOn ? "on" : "off");
+  } catch {}
+  syncSound();
+  if (soundOn) sound("menu");
+  else if (audioCtx) audioCtx.suspend().catch(() => {});
+});
+
+</script>
+    <script>
+"use strict";
+
+let terrainWorld;
+let toastTimer;
+
+function terrain() {
+  const c = $("terrain"),
+    b = $("board"),
+    w = b.clientWidth,
+    h = b.clientHeight;
+  const W = Math.max(120, Math.floor(w / 3)),
+    H = Math.max(100, Math.floor(h / 3));
+  if (c.width === W && c.height === H && terrainWorld === s.world) return;
+  const traveled = terrainWorld !== undefined && terrainWorld !== s.world;
+  terrainWorld = s.world;
+  const style = worlds[s.world].terrain;
+  c.width = W;
+  c.height = H;
+  const g = c.getContext("2d");
+  g.imageSmoothingEnabled = false;
+  let seed = 74821;
+  const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const T = 16,
+    cols = Math.ceil(W / T),
+    rows = Math.ceil(H / T);
+  g.fillStyle = "#173d43";
+  g.fillRect(0, 0, W, H);
+  const colors = style?.tiles || [
+    "#23744d",
+    "#268452",
+    "#2b9853",
+    "#37a853",
+    "#45b65a",
+    "#58bc63",
+    "#2c8b55",
+  ];
+  const edges = style?.edges || ["#244b4e", "#1d4149", "#285657"];
+  for (let y = 0; y < rows; y++)
+    for (let x = 0; x < cols; x++) {
+      let edge = Math.min(x, y, cols - x - 1, rows - y - 1);
+      const cx = x * T,
+        cy = y * T;
+      const inside = edge > 0 && (edge > 1 || rand() > 0.28);
+      g.fillStyle = inside
+        ? colors[Math.floor(rand() * colors.length)]
+        : edges[Math.floor(rand() * edges.length)];
+      g.fillRect(cx, cy, T, T);
+      g.fillStyle = inside ? "#ffffff08" : "#0a272b40";
+      g.fillRect(cx, cy, T, 1);
+      g.fillRect(cx, cy, 1, T);
+      if (inside) {
+        g.fillStyle = style?.grain || "#16503c44";
+        for (let i = 0; i < 3; i++) {
+          const px = cx + 2 + Math.floor(rand() * 12),
+            py = cy + 2 + Math.floor(rand() * 12);
+          g.fillRect(px, py, 1, 2);
+        }
+        if (rand() < 0.16) {
+          let px = cx + 5 + Math.floor(rand() * 5),
+            py = cy + 7;
+          if (style) {
+            g.fillStyle = style.mark;
+            for (const [x, y, w, h] of style.shape)
+              g.fillRect(cx + x, cy + y, w, h);
+            g.fillStyle = style.shine;
+            g.fillRect(px, py, 2, 2);
+          } else {
+            g.fillStyle = "#17583e";
+            g.fillRect(px, py, 1, 4);
+            g.fillRect(px - 2, py + 1, 1, 2);
+            g.fillRect(px + 2, py, 1, 3);
+            g.fillStyle = "#77d86c";
+            g.fillRect(px, py, 1, 2);
+          }
+        }
+        if (rand() < 0.04) {
+          g.fillStyle = style?.shine || "#f6da91";
+          g.fillRect(cx + 8, cy + 5, 2, 2);
+          g.fillStyle = "#e9fff2";
+          g.fillRect(cx + 7, cy + 4, 1, 1);
+          g.fillRect(cx + 10, cy + 6, 1, 1);
+        }
+      }
+    }
+  g.fillStyle = style?.border || "#0e343c";
+  for (let x = 0; x < W; x += 4) {
+    let z = Math.floor(rand() * 4) + 1;
+    g.fillRect(x, 0, 4, z);
+    g.fillRect(x, H - z, 4, z);
+  }
+  for (let y = 0; y < H; y += 4) {
+    let z = Math.floor(rand() * 4) + 1;
+    g.fillRect(0, y, z, 4);
+    g.fillRect(W - z, y, z, 4);
+  }
+  if (traveled && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+    c.animate([{ opacity: 0.65 }, { opacity: 1 }], {
+      duration: 360,
+      easing: "ease-out",
+    });
+}
+new ResizeObserver(terrain).observe($("board"));
+function toast(text) {
+  $("toast").textContent = text;
+  $("toast").hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => ($("toast").hidden = true), 2400);
+}
+function directionalFloat(text, bonus) {
+  const el = document.createElement("span"),
+    board = $("board").getBoundingClientRect(),
+    button = $("press").getBoundingClientRect(),
+    angle = Math.random() * Math.PI * 2,
+    dist = 65 + Math.random() * Math.min(105, board.width * 0.15);
+  el.className = "float directional" + (bonus ? " world-bonus" : "");
+  el.textContent = text;
+  el.style.cssText = `left:${((button.left + button.width / 2 - board.left) / board.width) * 100}%;top:${((button.top + button.height / 2 - board.top) / board.height) * 100}%;--dx:${Math.cos(angle) * dist}px;--dy:${Math.sin(angle) * dist}px`;
+  $("effects").append(el);
+  setTimeout(() => el.remove(), 850);
+}
+function burst(x, y, color) {
+  const particles = document.createDocumentFragment();
+  for (let k = 0; k < 12; k++) {
+    const el = document.createElement("i");
+    el.className = "particle";
+    const ang = (k * Math.PI) / 6,
+      len = 15 + Math.random() * 50;
+    el.style.cssText = `left:${x}%;top:${y}%;--c:${color};--dx:${Math.cos(ang) * len}px;--dy:${Math.sin(ang) * len}px`;
+    particles.append(el);
+  }
+  const batch = [...particles.children];
+  $("effects").append(particles);
+  setTimeout(() => batch.forEach((el) => el.remove()), 650);
+}
+function popGroundLoot(c, item) {
+  const layer = $("effects"),
+    w = layer.clientWidth,
+    h = layer.clientHeight;
+  const side = c.x > 65 ? -1 : c.x < 35 ? 1 : Math.random() < 0.5 ? -1 : 1;
+  const dx = side * Math.min(86, w * 0.12),
+    dy = Math.min(38, h * 0.065) * (c.y > 65 ? -1 : 1);
+  const x = clamp(c.x + (dx / w) * 100, 10, 88),
+    y = clamp(c.y + (dy / h) * 100, 18, 76);
+  const el = document.createElement("div");
+  el.className = "ground-loot";
+  el.style.cssText = `left:${x}%;top:${y}%;--rarity:${rarity[item.r].color};--from-x:${((c.x - x) * w) / 100}px;--from-y:${((c.y - y) * h) / 100}px`;
+  el.innerHTML = `<div class="ground-shadow"></div><div class="ground-sprite">${gearIcon(item)}</div><div class="ground-label">${itemName(item)}<small>${itemStat(item)}</small></div>`;
+  layer.append(el);
+  setTimeout(() => el.remove(), 2650);
+}
+
+</script>
+    <script>
+"use strict";
+
+let pressTimer;
+
+function setValue(target, property, value) {
+  if (target[property] !== value) target[property] = value;
+}
+
+function setText(element, value) {
+  setValue(element, "textContent", String(value));
+}
+
+function replaceRun(run) {
+  s = run;
+  ascConfirm = false;
+  selectedSkill = "root";
+  pendingWorldUnlock = null;
+  clearFieldEffects();
+  renderChests();
+}
+
+function clearFieldEffects() {
+  chestClock = 0;
+  clearTimeout(pressTimer);
+  clearTimeout(toastTimer);
+  $("press").classList.remove("pressed");
+  $("toast").hidden = true;
+  $("chests").replaceChildren();
+  $("effects").replaceChildren();
+}
+
+function notice(text) {
+  s.notice = text;
+  setText($("ticker"), text);
+}
+function rollRarity() {
+  let v = Math.random() * 100;
+  for (let i = 0; i < rarity.length; i++) {
+    v -= rarity[i].weight;
+    if (v < 0) return i;
+  }
+  return 4;
+}
+function position(chests) {
+  const spots = [];
+  for (const y of [25, 41, 59, 75])
+    for (const x of [13, 28, 43, 57, 72, 85])
+      if (!(x > 32 && x < 68 && y > 30 && y < 69)) spots.push([x, y]);
+  const free = spots.filter(
+    ([x, y]) => !chests.some((c) => Math.hypot(c.x - x, c.y - y) < 12),
+  );
+  if (!free.length) return null;
+  let [x, y] = free[Math.floor(Math.random() * free.length)];
+  return { x: x + (Math.random() - 0.5) * 3, y: y + (Math.random() - 0.5) * 3 };
+}
+function drop(forcedRarity, rarityBoost = 0, chests = worldChests()) {
+  if (chests.length >= 12) return false;
+  const p = position(chests);
+  if (!p) return false;
+  const c = {
+    ...p,
+    id: s.nextId++,
+    r: forcedRarity ?? Math.min(rarity.length - 1, rollRarity() + rarityBoost),
+    level: level(),
+    ...worldTag(s.world),
+  };
+  s.chests.push(c);
+  renderChests();
+  notice(rarity[c.r].name + " treasure chest landed! Tap it to discover gear.");
+  return true;
+}
+function renderChests() {
+  const root = $("chests");
+  const chests = worldChests();
+  for (const e of [...root.children])
+    if (
+      !chests.some((c) => c.id === +e.dataset.chest) &&
+      !e.classList.contains("opening")
+    )
+      e.remove();
+  for (const c of chests) {
+    if (root.querySelector(`[data-chest="${c.id}"]`)) continue;
+    const el = document.createElement("button");
+    el.className = "chest" + (c.r >= 2 ? " rareplus" : "");
+    el.dataset.chest = c.id;
+    el.setAttribute("aria-label", `Open ${rarity[c.r].name} treasure chest`);
+    el.style.cssText = `left:${c.x}%;top:${c.y}%;--rarity:${rarity[c.r].color}`;
+    el.innerHTML =
+      chestIcon(c.r) +
+      `<span class="chest-name">${rarity[c.r].name}</span>` +
+      (c.r >= 2 ? '<span class="chest-star">✦</span>' : "");
+    root.append(el);
+  }
+}
+function press() {
+  sound("tap");
+  const gear = equippedGear();
+  const before = stageIndex(),
+    { tap, auto, chance } = stats(gear);
+  const pieces = worldGearCount(s.world, gear);
+  const goal = worldChargeGoal(s.world, pieces);
+  const {
+    coins,
+    bonus,
+    extraChance = 0,
+  } = worldPressIncome(tap, auto, pieces, goal);
+  earn(coins);
+  s.presses++;
+  s.misses++;
+  const chestBonus = pressChest(
+    Math.min(0.55, chance + extraChance),
+    pieces,
+    goal,
+  );
+  const effect = bonus || chestBonus;
+  directionalFloat(
+    (effect ? effect + " · " : "") + "+" + fmtRate(coins),
+    effect,
+  );
+  burst(50, 47, effect ? worlds[s.world].accent : "#ffe5a2");
+  $("press").classList.add("pressed");
+  clearTimeout(pressTimer);
+  pressTimer = setTimeout(() => $("press").classList.remove("pressed"), 90);
+  if (stageIndex() > before)
+    toast("New discovery: " + stages[stageIndex()].title);
+  render();
+  save();
+}
+function openChest(id) {
+  const c = s.chests.find((c) => c.id === id);
+  if (!c || recordWorld(c) !== s.world) return;
+  if (s.items.length >= 300) {
+    toast("Gear bag is full. Salvage an unused item first.");
+    return;
+  }
+  const el = $("chests").querySelector(`[data-chest="${id}"]`);
+  if (el) {
+    el.innerHTML = openedChestIcon(c.r);
+    el.classList.add("opening");
+    el.disabled = true;
+    setTimeout(() => el.remove(), 1500);
+  }
+  sound("chest");
+  s.chests = s.chests.filter((t) => t.id !== id);
+  const k = Math.floor(Math.random() * 4),
+    base = [1, 8, 1, 2][k],
+    scale = rarity[c.r].scale,
+    lv = c.level;
+  const value = Math.max(
+    1,
+    Math.round(
+      base *
+        scale *
+        (worlds[s.world].gearScale || 1) *
+        (1 + Math.min(50, lv - 1) * 0.18) *
+        (0.85 + Math.random() * 0.3),
+    ),
+  );
+  const item = {
+    id: s.nextId++,
+    slot: k,
+    r: c.r,
+    level: lv,
+    value,
+    ...worldTag(s.world),
+  };
+  s.items.push(item);
+  s.opened++;
+  if (s.world === "volcano")
+    s.worldProgress.volcano = Math.max(
+      s.worldProgress.volcano,
+      8 + 2 * worldGearCount("volcano"),
+    );
+  const key = discoveryKey(k, c.r, s.world);
+  if (!s.found.includes(key)) s.found.push(key);
+  if (stageIndex() >= 3) s.shards += (1 + c.r) * (1 + s.asc.up.wisdom);
+  burst(c.x, c.y, rarity[c.r].color);
+  popGroundLoot(c, item);
+  notice("Collected " + itemName(item) + "! Open Gear to equip it.");
+  render();
+  save();
+}
+function progress(i) {
+  const n = stages[i + 1];
+  return n
+    ? clamp(((s.total - stages[i].at) / (n.at - stages[i].at)) * 100, 0, 100)
+    : 100;
+}
+function render() {
+  const gear = equippedGear();
+  const v = stats(gear),
+    i = stageIndex(),
+    p = progress(i);
+  const chestCount = worldChests().length;
+  setText($("coins"), fmt(s.coins));
+  setText($("tapValue"), fmtRate(v.tap));
+  setText($("autoValue"), fmtRate(v.auto));
+  setText($("shards"), fmt(s.shards));
+  setValue($("autoStat"), "hidden", v.auto === 0 && i < 4);
+  setValue($("shardStat"), "hidden", i < 3);
+  setValue($("powerLabel").firstChild, "nodeValue", "+" + fmtRate(v.tap));
+  setText(
+    $("questTitle"),
+    "Chapter " + String(i + 1).padStart(2, "0") + " · " + stages[i].title,
+  );
+  setText(
+    $("questText"),
+    chestCount
+      ? owned("autoChest")
+        ? s.items.length >= 300
+          ? "Auto Chest paused · gear bag full."
+          : "Auto Chest active · " +
+            chestInterval().toFixed(2) +
+            "s per chest. You can still open them manually."
+        : "Tap a fallen chest to open it."
+      : stages[i].text,
+  );
+  setText($("level"), String(level()).padStart(2, "0"));
+  setValue($("progressFill").style, "height", p + "%");
+  setText($("progressNum"), Math.floor(p) + "%");
+  const progressValue = String(Math.floor(p));
+  if ($("progress").getAttribute("aria-valuenow") !== progressValue)
+    $("progress").setAttribute("aria-valuenow", progressValue);
+  setText(
+    $("boardInfo"),
+    chestCount + " chest" + (chestCount === 1 ? "" : "s") + " on field",
+  );
+  setValue($("inventory"), "hidden", s.items.length === 0 && s.opened === 0);
+  setText($("invCount"), s.items.length);
+  setValue($("upgrades"), "hidden", i < 1);
+  setValue($("skills"), "hidden", i < 3 && s.asc.runs === 0);
+  setValue($("collection"), "hidden", s.opened === 0);
+  setText($("ticker"), s.notice);
+  worldReadout(worldGearCount(s.world, gear));
+  if (pendingWorldUnlock) {
+    toast(pendingWorldUnlock);
+    pendingWorldUnlock = null;
+  }
+  wheelHUD();
+  if (modalType === "worlds") updateWorlds();
+  if (modalType === "forge") updateForge();
+  if (modalType === "upgrades" || modalType === "skills") updateBuyButtons();
+}
+function chestInterval() {
+  return 5 / (1 + 0.45 * s.up.chestSpeed);
+}
+function autoChestTick(dt) {
+  const chest = s.chests.find((c) => recordWorld(c) === s.world);
+  if (!owned("autoChest") || !chest || s.items.length >= 300 || modalType) {
+    chestClock = 0;
+    return;
+  }
+  chestClock += dt;
+  if (chestClock >= chestInterval()) {
+    chestClock = 0;
+    openChest(chest.id);
+  }
+}
+
+</script>
+    <script>
+"use strict";
+
+let selectedSkill = "root",
+  treeTab = "skills",
+  ascConfirm = false;
+const skillById = (id) => skills.find((n) => n.id === id);
+const owned = (id) => id === "root" || (s.skills[id] || 0) > 0;
+const skillReady = (n) => n.req.every(owned);
+const skillLevel = (n) => s.skills[n.id] || 0;
+function skillPrice(n) {
+  return n.base + skillLevel(n) * 2;
+}
+function skillState(n) {
+  return owned(n.id) ? "owned" : skillReady(n) ? "ready" : "locked";
+}
+function treeBackground() {
+  let seed = 5382;
+  const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  let stars = "";
+  for (let i = 0; i < 310; i++) {
+    const x = Math.floor(rand() * 1000),
+      y = Math.floor(rand() * 560),
+      r = rand();
+    stars +=
+      r > 0.94
+        ? `<path d="M${x - 4} ${y}h8m-4 -4v8" stroke="#c7d7ff" opacity=".45"/>`
+        : `<rect x="${x}" y="${y}" width="${r > 0.6 ? 2 : 1}" height="${r > 0.6 ? 2 : 1}" fill="${r > 0.5 ? "#bdcafa" : "#fff4de"}" opacity="${(0.15 + rand() * 0.5).toFixed(2)}"/>`;
+  }
+  return `<svg class="tree-back" viewBox="0 0 1000 560" aria-hidden="true"><defs><pattern id="starGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#96a2bc" stroke-opacity=".14" stroke-width="1.5"/></pattern></defs><rect width="1000" height="560" fill="url(#starGrid)"/>${stars}</svg>`;
+}
+function treeEdges() {
+  return skills
+    .flatMap((n) =>
+      n.req.map((id) => {
+        const p = skillById(id);
+        return `<line x1="${p.x}" y1="${p.y}" x2="${n.x}" y2="${n.y}" class="${owned(n.id) && owned(id) ? "owned" : owned(id) ? "ready" : ""}"/>`;
+      }),
+    )
+    .join("");
+}
+function treeIcon(n) {
+  if (n.id === "autoChest") return chestIcon(1);
+  return n.id === "root"
+    ? svg(
+        '<path fill="#17232e" d="M11 2h10v7h9v12h-9v9H11v-9H2V9h9z"/><path fill="#88df68" d="M13 5h6v7h8v6h-8v9h-6v-9H5v-6h8z"/><path fill="#f2ffca" d="M14 12h4v7h-4z"/>',
+      )
+    : itemIcon(...n.icon);
+}
+function ascReward() {
+  return Math.floor(Math.sqrt(s.total / 10000));
+}
+function ascCost(u) {
+  return Math.ceil(u.base * Math.pow(1.65, s.asc.up[u.id]));
+}
+function ascTabs() {
+  return `<div class="tree-tabs"><button class="tree-tab ${treeTab === "skills" ? "active" : ""}" data-tree-tab="skills">Skill tree</button><button class="tree-tab ${treeTab === "ascend" ? "active" : ""}" data-tree-tab="ascend">✦ Ascend</button></div>`;
+}
+function ascMarkup() {
+  const reward = ascReward(),
+    next = 10000 * Math.pow(reward + 1, 2),
+    a = s.asc;
+  return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>✦ ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> · ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, (s.total / next) * 100)}%"></i></div><p>Next star at ${fmt(next)} coins · First ascension requires 10K coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend · +${fmt(reward)} ★</button><span>Lifetime multiplier: ×${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses and wheel progress. Keeps Ascension Stars, permanent upgrades, and lifetime records.</p>${ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your current run will be erased.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">✦ ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades
+    .map((u) => {
+      const lv = a.up[u.id],
+        cost = ascCost(u),
+        locked = a.runs < u.req;
+      return `<article class="asc-card ${locked ? "locked" : ""}">${itemIcon(...u.icon)}<h4>${u.name}</h4><p>${u.desc}</p><span class="asc-level">Level ${lv} / ${u.max}</span><span class="requirement">${locked ? "Requires " + u.req + " ascensions" : "Persists through every reset"}</span><button class="tree-buy" data-asc-buy="${u.id}" ${locked || lv >= u.max || a.stars < cost ? "disabled" : ""}>${locked ? "Locked" : lv >= u.max ? "Max level" : "Upgrade · " + fmt(cost) + " ★"}</button></article>`;
+    })
+    .join(
+      "",
+    )}</div><p class="subtext">Lifetime coins generated: ${fmt(a.life)}. Earn stars by playing at your own pace; there are no time-limited bonuses.</p></div></div>`;
+}
+function refreshAsc() {
+  const b = $("modalBody"),
+    sc = b.querySelector(".asc-scroll"),
+    y = sc?.scrollTop || 0;
+  b.innerHTML = ascMarkup();
+  b.querySelector(".asc-scroll").scrollTop = y;
+}
+function ascend() {
+  const reward = ascReward();
+  if (reward < 1 || !ascConfirm) return;
+  sound("ascend");
+  const a = s.asc;
+  a.stars += reward;
+  a.earned += reward;
+  a.runs++;
+  const run = fresh();
+  run.asc = a;
+  run.coins = a.up.seed * 250;
+  run.notice = "Ascension complete! Permanent upgrades are active.";
+  replaceRun(run);
+  render();
+  save();
+  refreshAsc();
+  toast("Ascended! +" + fmt(reward) + " stars");
+}
+function treeMarkup() {
+  return `${ascTabs()}<div class="tree-map-scroll"><div class="tree-map">${treeBackground()}<svg class="tree-lines" viewBox="0 0 1000 560" aria-hidden="true">${treeEdges()}</svg>${skills.map((n) => `<button class="tree-node ${skillState(n)} ${n.id === selectedSkill ? "selected" : ""}" style="left:${n.x / 10}%;top:${n.y / 5.6}%" data-node="${n.id}" aria-label="${n.name}, ${skillState(n)}"><span class="node-core">${treeIcon(n)}</span><span class="node-tag">${n.id === "root" ? "✓" : owned(n.id) ? (n.max > 1 ? "Lv " + skillLevel(n) : "✓") : "+"}</span><span class="node-label">${n.name}</span></button>`).join("")}</div></div><div class="tree-info" id="treeInfo"></div>`;
+}
+
+let tipNode = null;
+function hideSkillTip() {
+  const tip = $("skillTooltip");
+  if (tipNode) tipNode.removeAttribute("aria-describedby");
+  tipNode = null;
+  tip.hidden = true;
+}
+function showSkillTip(node) {
+  if (modalType !== "skills" || treeTab !== "skills" || !node?.isConnected)
+    return;
+  const n = skillById(node.dataset.node);
+  if (!n) return;
+  const tip = $("skillTooltip"),
+    lv = skillLevel(n),
+    done = n.id === "root" || lv >= n.max,
+    ready = skillReady(n),
+    price = skillPrice(n),
+    req = n.req
+      .filter((id) => !owned(id))
+      .map((id) => skillById(id).name)
+      .join(", ");
+  if (tipNode && tipNode !== node) tipNode.removeAttribute("aria-describedby");
+  tipNode = node;
+  node.setAttribute("aria-describedby", "skillTooltip");
+  tip.innerHTML = `<h3>${n.name}</h3><p>${n.desc}</p><div class="tip-meta"><span>${n.id === "root" ? "Starting node" : "Level " + lv + " / " + n.max}</span><b class="${done || ready ? "tip-ready" : "tip-locked"}">${done ? "Learned" : fmt(price) + " shards"}</b></div>${!ready ? '<div class="tip-req">Requires: ' + req + "</div>" : !done && s.shards < price ? '<div class="tip-req">Not enough shards</div>' : ""}`;
+  tip.hidden = false;
+  const r = node.getBoundingClientRect(),
+    w = tip.offsetWidth,
+    h = tip.offsetHeight,
+    pad = 10;
+  let x = r.right + 12,
+    y = r.top + r.height / 2 - h / 2;
+  if (x + w > innerWidth - pad) x = r.left - w - 12;
+  if (x < pad) {
+    x = clamp(
+      r.left + r.width / 2 - w / 2,
+      pad,
+      Math.max(pad, innerWidth - w - pad),
+    );
+    y = r.bottom + 12;
+    if (y + h > innerHeight - pad) y = r.top - h - 12;
+  }
+  tip.style.left = clamp(x, pad, Math.max(pad, innerWidth - w - pad)) + "px";
+  tip.style.top = clamp(y, pad, Math.max(pad, innerHeight - h - pad)) + "px";
+}
+const treeBody = $("modalBody");
+treeBody.addEventListener("pointerover", (e) => {
+  const n = e.target.closest("[data-node]");
+  if (n && e.pointerType !== "touch" && !n.contains(e.relatedTarget))
+    showSkillTip(n);
+});
+treeBody.addEventListener("pointerout", (e) => {
+  const n = e.target.closest("[data-node]");
+  if (n && tipNode === n && !n.contains(e.relatedTarget)) hideSkillTip();
+});
+treeBody.addEventListener("focusin", (e) => {
+  const n = e.target.closest("[data-node]");
+  if (n && n.matches(":focus-visible")) showSkillTip(n);
+});
+treeBody.addEventListener("focusout", (e) => {
+  if (e.target === tipNode) hideSkillTip();
+});
+treeBody.addEventListener("scroll", hideSkillTip, true);
+window.addEventListener("resize", hideSkillTip);
+function updateTree() {
+  const n = skillById(selectedSkill) || skills[0],
+    lv = skillLevel(n),
+    max = n.id === "root" || lv >= n.max,
+    ready = skillReady(n),
+    price = skillPrice(n);
+  const t = $("treeInfo");
+  if (!t) return;
+  const detailKey = [selectedSkill, s.shards, JSON.stringify(s.skills)].join(
+    ":",
+  );
+  if (t.dataset.key === detailKey) return;
+  t.dataset.key = detailKey;
+  const balance = `<div class="tree-balance">${itemIcon(3, 3)}<div>AVAILABLE SHARDS<b>${fmt(s.shards)}</b></div></div>`;
+  const req = n.req
+    .filter((id) => !owned(id))
+    .map((id) => skillById(id).name)
+    .join(", ");
+  t.innerHTML =
+    balance +
+    `<div class="tree-detail"><h3>${n.name}${n.max > 1 ? " · Lv " + lv : ""}</h3><p>${n.desc}</p><small>${max ? "Fully unlocked" : !ready ? "Requires: " + req : s.shards < price ? "Not enough shards. Open chests to earn more." : "Ready to unlock"}</small></div><button class="tree-buy" data-learn="${n.id}" ${max || !ready || s.shards < price ? "disabled" : ""}>${max ? "Unlocked" : !ready ? "Locked" : "Unlock · " + fmt(price) + " shards"}</button>`;
+  for (const b of $("modalBody").querySelectorAll("[data-node]")) {
+    const k = skillById(b.dataset.node);
+    b.className =
+      "tree-node " +
+      skillState(k) +
+      (k.id === selectedSkill ? " selected" : "");
+    b.setAttribute("aria-label", k.name + ", " + skillState(k));
+    b.querySelector(".node-tag").textContent =
+      k.id === "root"
+        ? "✓"
+        : owned(k.id)
+          ? k.max > 1
+            ? "Lv " + skillLevel(k)
+            : "✓"
+          : "+";
+  }
+  const lines = $("modalBody").querySelector(".tree-lines");
+  if (lines) lines.innerHTML = treeEdges();
+  if (tipNode) showSkillTip(tipNode);
+}
+
+</script>
+    <script>
+"use strict";
+
+const wheelRewards = [
+  {
+    name: "Coin bundle",
+    detail: "+100 coins",
+    color: "#d5b85a",
+    icon: () => coin(),
+    apply: () => {
+      earn(100);
+      return true;
+    },
+  },
+  {
+    name: "Crystal gift",
+    detail: "+3 shards",
+    color: "#b875f1",
+    icon: () => itemIcon(3, 3),
+    apply: () => {
+      s.shards += 3;
+      return true;
+    },
+  },
+  {
+    name: "Rare chest",
+    detail: "One rare chest on the field",
+    color: "#78d9ff",
+    icon: () => chestIcon(2),
+    apply: () => drop(2),
+  },
+  {
+    name: "Coin cache",
+    detail: "+250 coins",
+    color: "#ffb04d",
+    icon: () => coin(),
+    apply: () => {
+      earn(250);
+      return true;
+    },
+  },
+  {
+    name: "Star crystals",
+    detail: "+5 shards",
+    color: "#a3ef85",
+    icon: () => itemIcon(3, 4),
+    apply: () => {
+      s.shards += 5;
+      return true;
+    },
+  },
+  {
+    name: "Epic chest",
+    detail: "One epic chest on the field",
+    color: "#e3a4ff",
+    icon: () => chestIcon(3),
+    apply: () => drop(3),
+  },
+];
+let wheelResult = null,
+  wheelMoving = false,
+  wheelGeneration = 0;
+function wheelReady() {
+  return s.presses >= s.wheelNextAt ? 1 : 0;
+}
+function wheelProgress() {
+  return clamp(50 - (s.wheelNextAt - s.presses), 0, 50);
+}
+function wheelHUD() {
+  setValue($("wheel"), "hidden", !wheelReady());
+}
+function rewardCard(index, extra = "") {
+  const a =
+    wheelRewards[
+      ((index % wheelRewards.length) + wheelRewards.length) %
+        wheelRewards.length
+    ];
+  return `<div class="wheel-card ${extra}" style="--reward-color:${a.color}">${a.icon()}<span>${a.name}</span></div>`;
+}
+function wheelMarkup() {
+  const index =
+      wheelResult === null ? s.wheelClaims % wheelRewards.length : wheelResult,
+    r = wheelRewards[index],
+    ready = wheelReady(),
+    progress = wheelProgress(),
+    claimed = wheelResult !== null;
+  return `<div class="wheel-stage"><div class="wheel-disc" aria-hidden="true"><div class="wheel-face" style="--angle:${-index * 60}deg"></div><div class="wheel-pointer"></div></div><div class="wheel-info"><strong>${claimed ? "Reward collected!" : ready ? "Milestone complete!" : "Next milestone reward"}</strong>${r.detail}<small>${claimed ? "Your reward has been added." : ready ? "Spin to collect your displayed milestone reward." : "A new reward becomes available after 50 presses following each claim. Rewards do not stack."}</small>${claimed ? "" : `<div class="wheel-progress"><i style="width:${progress * 2}%"></i></div><small>${progress}/50 presses · ${ready} reward available</small>`}</div><div class="wheel-reel"><div class="wheel-title">REWARD WHEEL</div><div class="wheel-track"><div class="wheel-strip" id="wheelStrip">${Array.from({ length: 29 }, (_, j) => rewardCard(index + j - 2, j === 2 ? "chosen" : "")).join("")}</div></div></div><div class="wheel-controls">${claimed ? '<button class="wheel-claim" id="wheelNext">Done</button>' : `<button class="wheel-claim" id="wheelClaim" ${!ready ? "disabled" : ""}>${ready ? "SPIN WHEEL" : "SPIN WHEEL · " + (50 - progress) + " presses left"}</button>`}<button class="action secondary" data-close="1">Return to field</button></div></div>`;
+}
+function centerReel(strip, index) {
+  const card = strip.children[index],
+    track = strip.parentElement;
+  return track.clientWidth / 2 - card.offsetLeft - card.offsetWidth / 2;
+}
+function placeReel() {
+  const strip = $("wheelStrip");
+  if (!strip) return;
+  strip.style.transition = "none";
+  strip.style.transform = `translateX(${centerReel(strip, wheelResult === null ? 2 : 20)}px)`;
+}
+
+function collectWheel() {
+  if (wheelMoving || !wheelReady() || wheelResult !== null) return;
+  const i = s.wheelClaims % wheelRewards.length,
+    r = wheelRewards[i];
+  if (!r.apply()) {
+    toast("Make room on the field by opening a chest first.");
+    return;
+  }
+  s.wheelClaims++;
+  s.wheelNextAt = s.presses + 50;
+  wheelResult = i;
+  wheelMoving = true;
+  const token = ++wheelGeneration;
+  notice("Milestone reward: " + r.detail + ".");
+  render();
+  save();
+  const strip = $("wheelStrip"),
+    btn = $("wheelClaim"),
+    face = $("modalBody").querySelector(".wheel-face");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "SPINNING…";
+  }
+  const info = $("modalBody").querySelector(".wheel-info strong");
+  if (info) info.textContent = "Collecting your reward…";
+  const finish = () => {
+    if (token !== wheelGeneration || modalType !== "wheel") return;
+    wheelMoving = false;
+    placeReel();
+    const controls = $("modalBody").querySelector(".wheel-controls");
+    controls.innerHTML =
+      '<button class="wheel-claim" id="wheelNext">Done</button><button class="action secondary" data-close="1">Return to field</button>';
+    const detail = $("modalBody").querySelector(".wheel-info");
+    detail.innerHTML = `<strong>Reward collected!</strong>${r.detail}<small>Your reward has been added.</small>`;
+    if (strip) strip.children[20].classList.add("chosen", "revealed");
+    $("wheelNext").focus();
+  };
+  if (!strip) {
+    finish();
+    return;
+  }
+  strip.children[2].classList.remove("chosen");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const duration = reduced ? 0 : 2200;
+  strip.style.transition = `transform ${duration}ms cubic-bezier(.12,.72,.15,1)`;
+  strip.getBoundingClientRect();
+  strip.style.transform = `translateX(${centerReel(strip, 20)}px)`;
+  if (face && !reduced)
+    face.animate(
+      [
+        { transform: `rotate(${-i * 60}deg)` },
+        { transform: `rotate(${1080 - i * 60}deg)` },
+      ],
+      { duration, easing: "cubic-bezier(.12,.72,.15,1)" },
+    );
+  setTimeout(finish, duration + 40);
+}
+
+</script>
+    <script>
+"use strict";
+
+function upgradeLocked(u) {
+  return u.requires ? !owned(u.requires) : s.total < u.at;
+}
+function upgradeRequirement(u) {
+  return u.requires
+    ? "Learn Auto Chest in Skilltree"
+    : "Unlock at " + fmt(u.at) + " total coins";
+}
+function chestSpeedLabel() {
+  return (
+    "Level " +
+    s.up.chestSpeed +
+    " / 20 · " +
+    chestInterval().toFixed(2) +
+    "s per chest"
+  );
+}
+function cost(u, skill = false) {
+  return skill
+    ? u.base + (s.skills[u.id] || 0) * 2
+    : Math.ceil(u.base * Math.pow(u.rate, s.up[u.id]));
+}
+function iconMarkup(item) {
+  return `<div class="item-icon">${gearIcon(item)}</div>`;
+}
+function itemCard(i) {
+  const world = worlds[recordWorld(i)];
+  const eq = equipped(i.slot),
+    on = eq?.id === i.id,
+    diff = eq ? Math.round((gearValue(i) - gearValue(eq)) * 100) / 100 : null;
+  const salvage = salvageYield(i);
+  return `<article class="item-card" style="--rarity:${rarity[i.r].color}"><div class="item-top">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} · Lv ${i.level}${i.forge ? " · Forge " + i.forge : ""}</div><h3>${itemName(i)}</h3><p>${slots[i.slot]} · ${world.name}</p></div></div><div class="item-stat">${itemStat(i)}</div>${world.gearBonus ? `<div class="gear-bonus">${world.gearBonus}</div>` : ""}<div class="compare">${on ? "Currently equipped" : diff === null ? "Empty equipment slot" : diff === 0 ? "Same stat as equipped" : (diff > 0 ? "+" : "") + diff + " compared with equipped"}</div><div class="actions"><button class="action gold" data-equip="${i.id}">${on ? "Unequip" : "Equip"}</button><button class="action secondary" data-salvage="${i.id}" ${on ? "disabled" : ""}>Salvage<span class="salvage-yield">${salvage.coins} coins + ${salvage.scrap} scrap</span></button></div><button class="action secondary" data-open-forge="${i.id}">Forge</button></article>`;
+}
+let filter = "all";
+let gearWorldFilter = "all";
+function inventory() {
+  const list = s.items
+    .filter(
+      (i) =>
+        (filter === "all" || String(i.slot) === filter) &&
+        (gearWorldFilter === "all" || recordWorld(i) === gearWorldFilter),
+    )
+    .sort((a, b) => b.r - a.r || gearValue(b) - gearValue(a) || b.id - a.id);
+  return `<p class="subtext">Wear one item in each slot. Replacing gear keeps the previous item in your bag.</p><div class="slots">${slots
+    .map((k, j) => {
+      const i = equipped(j);
+      return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>— Empty —</b>"}</div>`;
+    })
+    .join(
+      "",
+    )}</div>${equippedSetsMarkup()}<div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select></div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
+}
+function showCollection(id) {
+  const designs = slots.flatMap((slotName, slot) =>
+    rarity.map((grade, r) => {
+      const item = { slot, r, world: id };
+      const found = s.found.includes(discoveryKey(slot, r, id));
+      return {
+        item,
+        found,
+        name: found ? itemName(item) : "Undiscovered " + slotName,
+        grade,
+      };
+    }),
+  );
+  const discovered = designs.filter((design) => design.found).length;
+  setText(
+    $("collectionCount"),
+    discovered +
+      "/" +
+      designs.length +
+      " item designs discovered in " +
+      worlds[id].name +
+      ". " +
+      s.found.length +
+      "/" +
+      designs.length * Object.keys(worlds).length +
+      " across all worlds.",
+  );
+  $("collectionGrid").innerHTML = designs
+    .map(
+      ({ item, found, name, grade }) =>
+        `<div class="up-card" style="border-color:${found ? grade.color : "#3b6262"}"><div class="item-top" style="opacity:${found ? 1 : 0.45}">${iconMarkup(item)}<div><div class="rarity" style="--rarity:${grade.color}">${grade.name}</div><h3>${name}</h3></div></div></div>`,
+    )
+    .join("");
+}
+
+function openModal(type, id) {
+  if (type === "wheel" && !wheelReady()) return;
+  hideSkillTip();
+  sound("menu");
+  if ($("modal").hidden) lastFocus = document.activeElement;
+  modalType = type;
+  $("modal").hidden = false;
+  $("modal").classList.toggle("constellation", type === "skills");
+  $("modal").classList.toggle("milestone-wheel", type === "wheel");
+  $("close").textContent = type === "skills" ? "DONE" : "✕";
+  $("close").setAttribute(
+    "aria-label",
+    type === "skills" ? "Done, return to field" : "Close dialog",
+  );
+  const oldLegend = $("treeLegend");
+  if (oldLegend) oldLegend.remove();
+  const t = $("modalTitle"),
+    b = $("modalBody");
+  if (type === "wheel") {
+    wheelGeneration++;
+    wheelMoving = false;
+    wheelResult = null;
+    t.textContent = "Milestone rewards";
+    b.innerHTML = wheelMarkup();
+    placeReel();
+  } else if (type === "reward") {
+    const i = s.items.find((i) => i.id === id);
+    if (!i) {
+      openModal("inventory");
+      return;
+    }
+    t.textContent = "Treasure discovered";
+    b.innerHTML = `<div class="reward-preview" style="--rarity:${rarity[i.r].color}">${iconMarkup(i)}<div><div class="rarity">${rarity[i.r].name} · Field level ${i.level}</div><h3>${itemName(i)}</h3><div class="item-stat">${itemStat(i)}</div></div></div><p class="subtext">${equipped(i.slot) ? "Equipped: " + itemName(equipped(i.slot)) + " · " + itemStat(equipped(i.slot)) : "Your " + slots[i.slot].toLowerCase() + " slot is empty."}</p><div class="actions"><button class="action gold" data-equip-reward="${i.id}">Equip item</button><button class="action secondary" data-close="1">Keep in bag</button><button class="action" data-open="inventory">Gear bag</button></div>`;
+  } else if (type === "inventory") {
+    t.textContent = "Equipment & gear";
+    b.innerHTML = inventory();
+    $("filter").value = filter;
+    $("gearWorldFilter").value = gearWorldFilter;
+  } else if (type === "forge") {
+    const item = s.items.find((gear) => gear.id === id);
+    if (!item) {
+      openModal("inventory");
+      return;
+    }
+    t.textContent = "Equipment forge";
+    b.innerHTML = forgeMarkup(item);
+    b.closest(".window").scrollTop = 0;
+    updateForge();
+  } else if (type === "worlds") {
+    t.textContent = "Worlds";
+    b.innerHTML = worldsMarkup();
+    updateWorlds();
+    b.closest(".window").scrollTop = 0;
+  } else if (type === "skills") {
+    t.textContent = "Skilltree";
+    const legend = document.createElement("div");
+    legend.id = "treeLegend";
+    legend.className = "tree-legend";
+    legend.innerHTML = '<i class="green"></i> Learned<br><i></i> Available';
+    t.parentElement.appendChild(legend);
+    b.innerHTML = treeTab === "ascend" ? ascMarkup() : treeMarkup();
+    updateTree();
+    const sc = b.querySelector(".tree-map-scroll");
+    if (sc) sc.scrollLeft = Math.max(0, (sc.scrollWidth - sc.clientWidth) / 2);
+  } else if (type === "upgrades") {
+    const sk = type === "skills",
+      arr = sk ? skills : upgrades;
+    t.textContent = sk ? "Skill garden" : "Workshop";
+    b.innerHTML = `<p class="subtext">${sk ? "Spend shards collected from chests." : "Spend earned coins on lasting improvements. New upgrades appear as your field grows."}</p><div class="item-grid">${arr
+      .map((u, j) => {
+        const locked = !sk && upgradeLocked(u);
+        return `<div class="up-card"><h3>${locked ? "🔒 " : ""}${u.name}</h3><p>${u.desc}</p><strong data-level="${j}">Level ${sk ? s.skills[u.id] : s.up[u.id]}</strong><button class="action" data-buy="${j}" ${locked ? "disabled" : ""}>${locked ? upgradeRequirement(u) : "Buy · " + fmt(cost(u, sk)) + (sk ? " shards" : " coins")}</button></div>`;
+      })
+      .join("")}</div>`;
+    updateBuyButtons();
+  } else if (type === "collection") {
+    t.textContent = "Treasure collection";
+    b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world">${worldOptions()}</select></div>
+      <p class="subtext">Base chest rarities: Common 60%, Uncommon 26%, Rare 10%, Epic 3.5%, Legendary 0.5%.</p><div id="collectionGrid" class="item-grid"></div>`;
+    $("collectionWorld").value = s.world;
+    showCollection(s.world);
+  } else if (type === "settings") {
+    t.textContent = "Save & settings";
+    b.innerHTML = `<p class="subtext">Your game saves locally when browser storage is available. Export a backup to keep progress across devices.</p><textarea id="saveText" aria-label="Save code" placeholder="Export or paste a save code"></textarea><div class="settings-row"><button class="action" id="export">Export</button><button class="action" id="import">Import</button>${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}<button class="action secondary" id="reset">New game</button></div><p class="subtext" id="saveMsg">Press the red button or Space. Chests have a ${Math.round(stats().chance * 100)}% drop chance per press while there is space. Your first chest is guaranteed by press 8 if none has landed.</p>`;
+  }
+  $("close").focus();
+}
+function closeModal() {
+  hideSkillTip();
+  ascConfirm = false;
+  sound("menu");
+  wheelGeneration++;
+  wheelMoving = false;
+  $("modal").hidden = true;
+  modalType = "";
+  if (lastFocus?.isConnected && !lastFocus.hidden) lastFocus.focus();
+  else $("press").focus();
+}
+function updateBuyButtons() {
+  if (modalType === "skills") {
+    if (treeTab === "ascend") {
+      const btn = $("modalBody").querySelector("[data-asc-start]");
+      if (btn) {
+        const r = ascReward();
+        btn.disabled = r < 1;
+        setText(btn, "Ascend · +" + fmt(r) + " ★");
+        const next = 10000 * Math.pow(r + 1, 2),
+          bar = $("modalBody").querySelector(".asc-meter i");
+        bar.style.width = Math.min(100, (s.total / next) * 100) + "%";
+        const banner = $("modalBody").querySelector(".asc-banner");
+        banner.querySelector("p b").textContent =
+          fmt(s.total) + " / " + fmt(next) + " coins earned this run";
+        banner.querySelector(".asc-meter + p").textContent =
+          "Next star at " +
+          fmt(next) +
+          " coins · First ascension requires 10K coins.";
+      }
+    } else updateTree();
+    return;
+  }
+  const sk = modalType === "skills",
+    arr = sk ? skills : upgrades;
+  for (const b of $("modalBody").querySelectorAll("[data-buy]")) {
+    const u = arr[+b.dataset.buy],
+      locked = !sk && upgradeLocked(u),
+      c = cost(u, sk),
+      lv = sk ? s.skills[u.id] : s.up[u.id],
+      max = sk ? 50 : u.max || 100;
+    setValue(
+      b,
+      "disabled",
+      locked || lv >= max || (sk ? s.shards : s.coins) < c,
+    );
+    setText(
+      b,
+      locked
+        ? upgradeRequirement(u)
+        : lv >= max
+          ? "Max level"
+          : "Buy · " + fmt(c) + (sk ? " shards" : " coins"),
+    );
+    const l = $("modalBody").querySelector(`[data-level="${b.dataset.buy}"]`);
+    if (l)
+      setText(l, u.id === "chestSpeed" ? chestSpeedLabel() : "Level " + lv);
+    setText(
+      b.closest(".up-card").querySelector("h3"),
+      (locked ? "🔒 " : "") + u.name,
+    );
+  }
+}
+
+</script>
+    <script>
+"use strict";
+
+$("coinIcon").innerHTML = coin();
+$("tapIcon").innerHTML = itemIcon(0, 0);
+$("autoIcon").innerHTML = itemIcon(2, 1);
+$("shardIcon").innerHTML = itemIcon(3, 3);
+$("press").addEventListener("click", press);
+$("chests").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-chest]");
+  if (b) openChest(+b.dataset.chest);
+});
+for (const id of [
+  "worlds",
+  "inventory",
+  "upgrades",
+  "skills",
+  "collection",
+  "settings",
+  "wheel",
+])
+  $(id).addEventListener("click", () => openModal(id));
+$("close").addEventListener("click", closeModal);
+$("modal").addEventListener("click", (e) => {
+  if (e.target === $("modal")) closeModal();
+});
+$("modalBody").addEventListener("change", (e) => {
+  const { id, value } = e.target;
+  if (id === "collectionWorld") {
+    showCollection(value);
+    return;
+  }
+  if (id === "filter" || id === "gearWorldFilter") {
+    if (id === "filter") filter = value;
+    else gearWorldFilter = value;
+    openModal("inventory");
+    $(id).focus();
+  }
+});
+$("modalBody").addEventListener("click", (e) => {
+  const b = e.target.closest("button");
+  if (!b || b.disabled) return;
+  if (b.dataset.openForge) {
+    openModal("forge", +b.dataset.openForge);
+    return;
+  }
+  if (b.dataset.forge) {
+    const item = s.items.find((gear) => gear.id === +b.dataset.forge);
+    if (modalType === "forge" && forgeGear(item)) {
+      render();
+      save();
+      setText($("forgeResult"), "Forged to rank " + item.forge + ".");
+      if (b.disabled) $("close").focus();
+    }
+    return;
+  }
+  if (b.dataset.travel) {
+    travel(b.dataset.travel);
+    return;
+  }
+  if (b.id === "wheelClaim") {
+    collectWheel();
+    return;
+  }
+  if (b.id === "wheelNext") {
+    closeModal();
+    return;
+  }
+  if (b.dataset.treeTab) {
+    treeTab = b.dataset.treeTab;
+    ascConfirm = false;
+    openModal("skills");
+    return;
+  }
+  if (b.hasAttribute("data-asc-start")) {
+    ascConfirm = true;
+    refreshAsc();
+    return;
+  }
+  if (b.hasAttribute("data-asc-cancel")) {
+    ascConfirm = false;
+    refreshAsc();
+    return;
+  }
+  if (b.hasAttribute("data-asc-confirm")) {
+    ascend();
+    return;
+  }
+  if (b.dataset.ascBuy) {
+    const u = ascUpgrades.find((x) => x.id === b.dataset.ascBuy);
+    if (
+      u &&
+      s.asc.runs >= u.req &&
+      s.asc.up[u.id] < u.max &&
+      s.asc.stars >= ascCost(u)
+    ) {
+      s.asc.stars -= ascCost(u);
+      s.asc.up[u.id]++;
+      sound("upgrade");
+      render();
+      save();
+      refreshAsc();
+    }
+    return;
+  }
+  if (b.dataset.node) {
+    selectedSkill = b.dataset.node;
+    updateTree();
+    return;
+  }
+  if (b.dataset.learn) {
+    const n = skillById(b.dataset.learn);
+    if (
+      n &&
+      n.id !== "root" &&
+      skillReady(n) &&
+      skillLevel(n) < n.max &&
+      s.shards >= skillPrice(n)
+    ) {
+      s.shards -= skillPrice(n);
+      s.skills[n.id]++;
+      sound("upgrade");
+      notice("Skill learned: " + n.name + ".");
+      render();
+      save();
+      updateTree();
+    }
+    return;
+  }
+  if (b.dataset.close) {
+    closeModal();
+    return;
+  }
+  if (b.dataset.open) {
+    openModal(b.dataset.open);
+    return;
+  }
+  if (b.dataset.equip || b.dataset.equipReward) {
+    const i = s.items.find(
+      (i) => i.id === +(b.dataset.equip || b.dataset.equipReward),
+    );
+    if (!i) return;
+    if (b.dataset.equip && s.equip[i.slot] === i.id) delete s.equip[i.slot];
+    else s.equip[i.slot] = i.id;
+    sound("equip");
+    notice("Equipment updated: " + itemName(i) + ".");
+    render();
+    save();
+    if (b.dataset.equipReward) closeModal();
+    else openModal("inventory");
+    return;
+  }
+  if (b.dataset.salvage) {
+    const i = s.items.find((i) => i.id === +b.dataset.salvage);
+    if (salvageGear(i)) {
+      render();
+      save();
+      openModal("inventory");
+    }
+    return;
+  }
+  if (b.dataset.buy !== undefined) {
+    const sk = modalType === "skills",
+      u = (sk ? skills : upgrades)[+b.dataset.buy],
+      c = cost(u, sk);
+    if (
+      (sk ? s.shards : s.coins) < c ||
+      (!sk && (upgradeLocked(u) || s.up[u.id] >= (u.max || 100)))
+    )
+      return;
+    if (sk) {
+      s.shards -= c;
+      s.skills[u.id]++;
+    } else {
+      s.coins -= c;
+      s.up[u.id]++;
+    }
+    sound("upgrade");
+    render();
+    save();
+    return;
+  }
+  if (b.id === "export") {
+    $("saveText").value = JSON.stringify(s);
+    $("saveText").select();
+    $("saveMsg").textContent = "Copy the save code to keep a backup.";
+  }
+  if (b.id === "exportPreForge") {
+    const backup = readPreForgeSave();
+    if (backup) {
+      $("saveText").value = backup;
+      $("saveText").select();
+      $("saveMsg").textContent =
+        "Copy the pre-forge backup to keep it separately.";
+    }
+  }
+  if (b.id === "import") {
+    try {
+      replaceRun(normalize(JSON.parse($("saveText").value)));
+      render();
+      save();
+      closeModal();
+      toast("Save imported");
+    } catch {
+      $("saveMsg").textContent = "Invalid save code.";
+    }
+  }
+  if (
+    b.id === "reset" &&
+    confirm("Start a new game and erase this progress?")
+  ) {
+    replaceRun(fresh());
+    render();
+    save();
+    closeModal();
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !$("modal").hidden) {
+    closeModal();
+    return;
+  }
+  if (
+    e.code === "Space" &&
+    !e.repeat &&
+    $("modal").hidden &&
+    (!document.activeElement ||
+      document.activeElement === $("press") ||
+      !["BUTTON", "INPUT", "TEXTAREA", "SELECT"].includes(
+        document.activeElement.tagName,
+      ))
+  ) {
+    e.preventDefault();
+    press();
+  }
+});
+window.addEventListener("resize", () => {
+  if (modalType === "wheel" && !wheelMoving) placeReel();
+});
+function savePassiveIncome() {
+  if (saveDirty) save();
+}
+window.addEventListener("pagehide", savePassiveIncome);
+renderChests();
+render();
+save();
+let last = performance.now();
+setInterval(() => {
+  const now = performance.now(),
+    dt = clamp((now - last) / 1000, 0, 1);
+  last = now;
+  const a = stats().auto;
+  if (a > 0) {
+    earn(a * dt);
+    render();
+  }
+  autoChestTick(dt);
+}, 250);
+setInterval(savePassiveIncome, 5000);
+
+</script>
+  </body>
+</html>
