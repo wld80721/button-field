@@ -2,7 +2,7 @@
 
 ## Handoff · 2026-11-27
 
-The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the standalone root `index.html` from `main`. The `living-field` review branch implements Expansion 1. Boss Arenas remains at the proposal stage and follows this expansion. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
+The latest shipped gameplay commit is `b78f443` (The Living Field). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage and follows this expansion. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
 ## Shipped
 
@@ -15,9 +15,9 @@ The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the stan
 
 - Edit `src/` and run `npm run build` to regenerate the root `index.html`. The output embeds CSS, scripts, art, and synthesized sound.
 - Use the existing progression selectors and shared resource ledger. Run earnings are separate from spendable coins. Combat rules are in `src/js/combat.js`, boss definitions in `boss-data.js`, and presentation in `combat-view.js`. Continue using the existing field, sites, and companion rules.
-- The published combat release uses schema **5** under `treasure-grove-v3`. The review branch uses schema **6** with the same key and saves only the three new discovery IDs. Local migration preserves the raw save in an exportable backup and pauses autosave if backup fails. Resumed combat has no offline damage. Keep saved IDs stable and define reset and carry-over rules for every new system.
+- The combat release used schema **5** under `treasure-grove-v3`. The Living Field uses schema **6** with the same key and saves only the three new discovery IDs. Local migration preserves the raw save in an exportable backup and pauses autosave if backup fails. Resumed combat has no offline damage. Keep saved IDs stable and define reset and carry-over rules for every new system.
 
-## The Living Field · review branch
+## The Living Field · release verification
 
 - Grasslands landmarks and scenery derive from existing run milestones. Local scenes share existing screens and actions. The trade gate and the return route use the existing world travel rules.
 - The three discoveries add one scrap, one Glowleaf, and one Copper Ore respectively. Keepsakes survive Ascension. The materials reset with the existing resource balances.

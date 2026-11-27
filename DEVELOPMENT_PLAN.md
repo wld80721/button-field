@@ -6,7 +6,7 @@ Start with one red button. As the field changes, paths and interactive objects l
 
 ## Expansion 1 · The Living Field
 
-**Status** · Implemented on the `living-field` review branch. Grasslands grows from a clearing into a settlement. Branching paths and illustrated landmarks open Workshop, Forge, companions, Farming, the skill tree, Mining, and the Boss Board at existing milestones. The trade gate connects to the four established regions. Three hidden finds award small, one-time material bundles and leave permanent decorations.
+**Status** · Released on `main`. Grasslands grows from a clearing into a settlement. Branching paths and illustrated landmarks open Workshop, Forge, companions, Farming, the skill tree, Mining, and the Boss Board at existing milestones. The trade gate connects to the four established regions. Three hidden finds award small, one-time material bundles and leave permanent decorations.
 
 Local scenes use the shipped activity rules. The dedicated redesigns below will deepen the activities. See [Progress](PROGRESS.md) for verification and coverage.
 
@@ -19,7 +19,7 @@ Local scenes use the shipped activity rules. The dedicated redesigns below will 
 - **Connections.** Open first-clear loot in the arena and display trophies back in the field. Prototype Mossguard opening a trail to an extra garden bed whose crop can feed a Forge tool for breaking armor in later fights. Keep existing routes into farming and the other systems available. Preserve the ten bosses, earned trophies and items, gear effects, normal press rewards, and optional combat.
 - **Release check.** Back up the current build and representative saves. Play from a fresh save through discovery, the first fight, a midgame arena, the late-game Orrery, and use of a reward outside combat. Inspect desktop and mobile screenshots during attacks, victories, and visible field changes. Verify touch, keyboard, reduced motion, reload and migration, economy, and performance. Report any coverage gaps.
 
-Start the expansion on a separate branch from the documented `main`. The first implementation slice is the entrance and a complete Mossguard fight, including movement, Guard, the reward, and the return to the field. Playtest that loop before extending it to the remaining arenas. Update [PROGRESS.md](PROGRESS.md) and the [changelog](CHANGELOG.md) with actual outcomes and obtain explicit user approval before merging into `main` or pushing the expansion directly to it.
+Start the expansion on a separate branch from the documented `main`. The first implementation slice is the entrance and a complete Mossguard fight, including movement, Guard, the reward, and the return to the field. Playtest that loop before extending it to the remaining arenas. Update [PROGRESS.md](PROGRESS.md) and the [changelog](CHANGELOG.md) with actual outcomes and follow the release instructions in [AGENTS.md](AGENTS.md).
 
 ## Later phases
 

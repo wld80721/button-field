@@ -38,4 +38,4 @@ These requirements apply to every major expansion and to redesigns of existing s
 ## Changelog and approval
 
 - Maintain [CHANGELOG.md](CHANGELOG.md). Record player-facing changes and save or compatibility notes as part of each update. Keep pending changes under Unreleased until they ship.
-- Prepare major updates on a separate branch for review. Obtain the user's explicit approval before merging a major update into `main` or pushing it directly to `main`.
+- Prepare major updates on a separate branch for review. The owner has given standing approval to merge verified updates into `main` when they ask to push or publish an update. Verify the GitHub Pages deployment after publishing.
