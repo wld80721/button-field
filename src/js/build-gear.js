@@ -64,6 +64,7 @@ const evolution = {
 const defaultLootRules = () => ({
   equip: "off",
   salvage: false,
+  sell: false,
   ceiling: 0,
   duplicates: true,
 });
@@ -80,7 +81,8 @@ function normalizeLootRules(raw) {
     equip: ["off", "protect", "strongest"].includes(raw?.equip)
       ? raw.equip
       : "off",
-    salvage: raw?.salvage === true,
+    salvage: raw?.salvage === true && raw?.sell !== true,
+    sell: raw?.sell === true,
     ceiling: Number.isInteger(raw?.ceiling)
       ? Math.max(0, Math.min(3, raw.ceiling))
       : 0,
@@ -271,10 +273,10 @@ function resolveLoot(
     gear.slot === item.slot &&
     recordWorld(gear) === recordWorld(item) &&
     !gear.set;
-  const salvage =
+  const dispose =
     !equip &&
     !strong &&
-    rules.salvage &&
+    (rules.salvage || rules.sell) &&
     !firstDiscovery &&
     !item.locked &&
     !item.set &&
@@ -282,8 +284,12 @@ function resolveLoot(
     (!rules.duplicates ||
       state.items.some((gear) => designKey(gear) === designKey(item))) &&
     state.items.some((gear) => matches(gear) && value(gear) >= value(item));
-  if (salvage) {
+  if (dispose) {
     const reward = payout(item);
+    if (rules.sell) {
+      creditCoins(state, reward.coins + reward.scrap);
+      return "sold";
+    }
     creditCoins(state, reward.coins);
     creditResource(state, "scrap", reward.scrap);
     return "salvaged";

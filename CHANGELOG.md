@@ -4,6 +4,10 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
+## 2026-11-28 · Auto Sell
+
+- Choose Auto Sell for spare chest loot in Gear → Loot automation. It converts the usual scrap payout into extra coins and uses the same rarity and duplicate filters as Auto Salvage. Old saves retain their existing setting.
+
 ## 2026-11-28 · Navigation and Blacksmith fixes
 
 - Grasslands activities open from their landmarks. Regional fields keep the shortcuts they need, and the Garden and Mine landmarks show their current status.

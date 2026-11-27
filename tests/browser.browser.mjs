@@ -724,7 +724,7 @@ browserTest("touch comparison and opt-in automation apply only to incoming gear"
   await escape(page);
   await click(page, "#lootRules summary");
   await page.locator("#lootEquip").selectOption("protect");
-  await page.locator("#lootSalvage").check();
+  await page.locator("#lootDisposal").selectOption("salvage");
   assert.match(await text(page, "#lootRuleSummary"), /Protect current build.*duplicates only/);
   assert.equal((await saved(page)).items.length, 2);
   await escape(page);
@@ -1649,3 +1649,33 @@ browserTest("the timing meter leaves the anvil tappable on a short viewport", as
   await click(page, "#smith-quench");
   assert.equal((await saved(page)).items[0].forge, 1);
 }, { viewport: { width: 568, height: 320 }, touch: true, motion: "no-preference" });
+
+browserTest("Auto Sell trades eligible chest gear for coins and keeps protected gear", async (page) => {
+  await importSave(page, {
+    total: 2500, coins: 1000, scrap: 5, opened: 1,
+    items: [equipment(0, { value: 50 })], equip: { 0: 1 },
+    chests: [{ ...chest(2), x: 17 }, { ...chest(3), x: 17, y: 65 }, { ...chest(4), r: 1, x: 82 }],
+    lootRules: { salvage: true },
+  });
+  await click(page, "#inventory");
+  await click(page, "#lootRules summary");
+  assert.equal(await page.locator("#lootDisposal").inputValue(), "salvage");
+  await page.locator("#lootDisposal").selectOption("sell");
+  assert.match(await text(page, "#lootRuleSummary"), /Auto Sell up to Common, duplicates only/);
+  await escape(page);
+  await page.evaluate(() => window.testRandom = () => 0);
+  await click(page, "[data-chest='2']");
+  assert.match(await text(page, "#ticker"), /Collected/);
+  await click(page, "[data-chest='3']");
+  assert.match(await text(page, "#ticker"), /Auto-sold/);
+  await click(page, "[data-chest='4']");
+  assert.match(await text(page, "#ticker"), /Collected/);
+  await page.reload();
+  const run = await saved(page);
+  assert.equal(run.lootRules.sell, true);
+  assert.equal(run.lootRules.salvage, false);
+  assert.equal(run.coins, 1003);
+  assert.equal(run.scrap, 5);
+  assert.equal(run.items.length, 3);
+  assert.equal(run.equip[0], 1);
+}, { touch: true });
