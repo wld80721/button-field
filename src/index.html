@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Button Field — Treasure Grove</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main id="game">
+      <header class="top">
+        <div class="brand">
+          <div class="brand-mark">●</div>
+          <div><strong>BUTTON FIELD</strong><small>TREASURE GROVE</small></div>
+        </div>
+        <div class="hud">
+          <div class="stat">
+            <span class="ico" id="coinIcon"></span>
+            <div><small>Coins</small><b id="coins">0</b></div>
+          </div>
+          <div class="stat">
+            <span class="ico" id="tapIcon"></span>
+            <div><small>Per press</small><b id="tapValue">1</b></div>
+          </div>
+          <div class="stat" id="autoStat" hidden>
+            <span class="ico" id="autoIcon"></span>
+            <div><small>Per second</small><b id="autoValue">0</b></div>
+          </div>
+          <div class="stat" id="shardStat" hidden>
+            <span class="ico" id="shardIcon"></span>
+            <div><small>Shards</small><b id="shards">0</b></div>
+          </div>
+        </div>
+        <div class="top-tools">
+          <button
+            id="soundToggle"
+            class="tool sound-tool"
+            aria-label="Mute sound"
+            aria-pressed="true"
+            title="Mute sound"
+          >
+            🔊</button
+          ><button id="settings" class="tool" aria-label="Settings">⚙</button>
+        </div>
+      </header>
+      <section class="board-frame" id="board" aria-label="Treasure field">
+        <canvas id="terrain" aria-hidden="true"></canvas>
+        <div class="vignette"></div>
+        <div class="board-top">
+          <div class="quest">
+            <b id="questTitle">Chapter 01 · First steps</b
+            ><span id="questText"
+              >Press the red button. Treasure may fall!</span
+            >
+            <div class="world-readout">
+              <b id="worldName">Grasslands</b>
+              <span id="worldStatus">Wild Growth · 0/25</span>
+              <div class="world-meter" aria-hidden="true">
+                <i id="worldFill"></i>
+              </div>
+            </div>
+          </div>
+          <div class="stage-tag">FIELD LV.<b id="level">01</b></div>
+        </div>
+        <div class="altar">
+          <svg viewBox="0 0 112 112" shape-rendering="crispEdges">
+            <path
+              fill="#174c37"
+              d="M36 2h40v12h18v22h16v40H94v18H76v16H36V94H18V76H2V36h16V14h18z"
+            />
+            <path
+              fill="#b97435"
+              d="M38 4h36v13h18v21h16v36H92v18H74v16H38V92H20V74H4V38h16V17h18z"
+            />
+            <path
+              fill="#eab450"
+              d="M38 6h36v13h16v21h16v32H90v18H72v16H40V90H22V72H6V40h16V19h16z"
+            />
+            <path fill="#fbd47b" d="M40 8h32v13h16v21h16v12H8V42h16V21h16z" />
+            <path fill="#f0be5a" d="M36 29h40v54H36zM29 36h54v40H29z" />
+            <path
+              stroke="#bd8539"
+              stroke-width="1"
+              fill="none"
+              d="M22 40h18V19m32 0v21h18M22 72h18v20m32 0V72h18M6 56h20m60 0h20M56 6v20m0 60v20"
+            />
+            <path
+              fill="#ffe7a3"
+              d="M12 44h4v4h-4zm84 20h4v4h-4zM46 12h4v4h-4zm18 84h4v4h-4z"
+            />
+          </svg>
+        </div>
+        <div class="chest-layer" id="chests"></div>
+        <div class="center">
+          <button id="press" aria-label="Press red button">
+            <svg
+              viewBox="0 0 112 112"
+              shape-rendering="crispEdges"
+              aria-hidden="true"
+            >
+              <ellipse cx="56" cy="81" rx="49" ry="27" fill="#294045" />
+              <path fill="#132a33" d="M22 54h68l15 16v15L90 99H22L7 85V70z" />
+              <path fill="#8eaaa9" d="M22 52h68l14 15v14L89 95H23L8 81V67z" />
+              <path fill="#e7ecdc" d="M25 53h62l12 14v7L87 87H25L13 74v-7z" />
+              <path
+                fill="#5b7379"
+                d="M13 74l12 13h62l12-13v6L86 92H26L13 80z"
+              />
+              <g class="cap">
+                <path fill="#541b28" d="M28 17h56l20 20v33L84 88H28L8 70V37z" />
+                <path fill="#a5162b" d="M12 39h88v29L82 84H30L12 68z" />
+                <path fill="#d42e34" d="M12 39h88v9L82 66H30L12 48z" />
+                <path fill="#77192b" d="M82 66l18-18v20L82 84z" />
+                <path fill="#c12629" d="M28 13h56l20 20v11L84 64H28L8 44V33z" />
+                <path
+                  fill="#ff4537"
+                  d="M29 12h54l18 18v12L82 60H30L11 42V30z"
+                />
+                <path fill="#ff6c43" d="M29 15h54l15 15H14z" />
+                <path fill="#ff8b62" d="M31 18h36v4H27zm-9 8h8v4h-8z" />
+                <path fill="#ec302c" d="M15 41h15l10 11h41l15-11h4L82 60H30z" />
+                <path fill="#ff5540" d="M41 30h33v5H41zm-8 7h10v5H33z" />
+              </g>
+            </svg>
+          </button>
+          <div class="power-label" id="powerLabel">
+            +1<small>COINS / PRESS</small>
+          </div>
+        </div>
+        <div
+          class="progress"
+          id="progress"
+          role="progressbar"
+          aria-label="Next field level"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="progress-fill" id="progressFill"></div>
+          <span class="progress-num" id="progressNum">0%</span>
+        </div>
+        <div class="effects" id="effects"></div>
+        <div class="toast" id="toast" hidden aria-live="polite"></div>
+        <div class="bottom-board">
+          <div class="ticker" id="ticker">
+            <b>Welcome, explorer!</b> Your first treasure is waiting to be
+            discovered.
+          </div>
+          <div class="field-status">
+            <button
+              class="field-wheel"
+              id="wheel"
+              hidden
+              aria-label="Collect milestone reward"
+              title="Milestone reward ready"
+            >
+              <span class="field-wheel-disc" aria-hidden="true"></span>
+            </button>
+            <div class="mini" id="boardInfo">0 chests on field</div>
+          </div>
+        </div>
+      </section>
+      <footer class="dock">
+        <div class="dock-left">
+          <span id="saveStatus">Local save</span> · <span>Space to press</span>
+        </div>
+        <div class="dock-right">
+          <button class="nav-btn" id="progressionGuide">Guide</button>
+          <button class="nav-btn worlds-btn" id="worlds">Worlds</button>
+          <button class="nav-btn inventory" id="inventory" hidden>
+            Gear <span class="count" id="invCount">0</span></button
+          ><button class="nav-btn" id="upgrades" hidden>Workshop</button
+          ><button class="nav-btn skill" id="skills" hidden>Skill tree</button
+          ><button class="nav-btn" id="collection" hidden>Collection</button>
+        </div>
+      </footer>
+    </main>
+    <div class="modal" id="modal" hidden>
+      <section
+        class="window"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <header class="window-head">
+          <h2 id="modalTitle"></h2>
+          <button id="close" aria-label="Close dialog">✕</button>
+        </header>
+        <div class="window-body" id="modalBody"></div>
+      </section>
+    </div>
+    <div id="skillTooltip" class="skill-tooltip" role="tooltip" hidden></div>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
