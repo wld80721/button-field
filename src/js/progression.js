@@ -120,7 +120,7 @@ function nextCoinUnlocks(state) {
     ...Object.values(worlds).map((world) => [
       world.at,
       world.name,
-      "Travel there from the Worlds menu.",
+      "Use the Grasslands Trade gate or the Worlds menu in other fields.",
     ]),
   ].filter(([amount]) => !hasRunCoins(state, amount));
   const grouped = new Map();

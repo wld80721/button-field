@@ -1,13 +1,11 @@
 import { blueprints, signatureLoadout, signatureText } from "./blacksmith-data.js";
 import { materialOffer } from "./gear.js";
 import { costText } from "./site-view.js";
-import { gatheredRecipeCost } from "./sites.js";
 import {
   buildProfile,
   builds,
   canPay,
   craftAt,
-  craftCost,
   evolutionOffer,
   recipePayment,
 } from "./build-gear.js";
@@ -55,9 +53,11 @@ function forgeMarkup(item) {
     <h3>${itemName(item)}</h3><div id="forgeStat" class="item-stat"></div></div></div>
     <p class="subtext">Each rank adds 12% of the current base stat. Salvage spare gear for scrap. Salvaging a forged item gives its usual salvage reward.</p>
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
-    <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
-    <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
-    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button></div>`;
+    <div class="gear-filters recipe-controls">
+      <label id="forgePaymentRow" hidden>Temper payment <select id="forgePayment"><option value="standard">Coins and scrap</option><option value="materials">Gathered materials</option></select></label>
+      <button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
+      <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button>
+    </div>`;
 }
 
 function updateForge() {
@@ -104,22 +104,18 @@ function updateForge() {
     );
   }
   const temper = materialOffer(s, item);
-  setValue($("temperGear"), "hidden", !temper);
-  setValue($("temperGear"), "disabled", !temper?.available);
-  if (temper)
-    setText($("temperGear"), "Material temper · " + costText(temper.cost));
-  setValue(button, "disabled", !offer.available);
+  const useMaterials = Boolean(temper && $("forgePayment").value === "materials");
+  const payment = useMaterials ? temper : offer;
+  setValue($("forgePaymentRow"), "hidden", !temper);
+  setValue(button.dataset, "payment", useMaterials ? "materials" : "standard");
+  setValue(button, "disabled", !payment.available);
   setText(
     button,
     offer.maxed
       ? "Fully forged"
       : offer.locked
         ? "Unlocks at " + fmtExact(forgeUnlock) + " coins earned"
-        : "Forge · " +
-          fmtExact(offer.cost.coins) +
-          " coins + " +
-          fmtExact(offer.cost.scrap) +
-          " scrap",
+        : "Temper · " + costText(payment.cost),
   );
 }
 
@@ -191,10 +187,9 @@ function recipesMarkup() {
       .map(([id, set]) => `<option value="${id}">${set.name}</option>`)
       .join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
-    </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
-    <button id="craftGear" class="action gold">Craft · ${costLabel(craftCost)}</button>
-    <button id="craftGatheredGear" class="action gold">Craft with materials · ${costText(gatheredRecipeCost)}</button>
-    <p id="gatheredBalance"></p>
+    <label id="recipePaymentRow">Payment <select id="recipePayment"><option value="standard">Coins, scrap, and shards</option><option value="materials">Gathered materials</option></select></label>
+    </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p>
+    <p id="recipeBalance" hidden></p><button id="craftGear" class="action gold">Craft</button>
     </div>
     <details class="smith-blueprints"><summary>Rare blueprints</summary>${Object.entries(blueprints).map(([id, def]) =>
       `<article style="--plate:${def.color}"><strong>${def.name} · ${def.signature}</strong>
@@ -209,34 +204,17 @@ function updateRecipes() {
   setValue($("recipeGate"), "hidden", unlocked);
   const full = s.items.length >= gearBagLimit;
   const set = $("recipeSet").value;
-  const cost = recipePayment(s, set, false);
-  const gathered = recipePayment(s, set, true);
   const rare = Object.hasOwn(blueprints, set);
-  setValue($("craftGatheredGear"), "hidden", rare);
-  setText($("craftGear"), cost ? "Craft · " + costText(cost) : rare
+  const useMaterials = !rare && $("recipePayment").value === "materials";
+  const cost = recipePayment(s, set, useMaterials);
+  const button = $("craftGear");
+  setValue($("recipePaymentRow"), "hidden", rare);
+  setValue(button.dataset, "payment", useMaterials ? "materials" : "standard");
+  setText(button, cost ? "Craft · " + costText(cost) : rare
     ? "Unlocks at " + fmtExact(blueprints[set].at) + " earned" : "Craft");
-  setText(
-    $("recipeBalance"),
-    full
-      ? "Gear bag is full."
-      : "Available · " +
-          costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards }),
-  );
-  setText(
-    $("gatheredBalance"),
-    "Gathered materials · " +
-      costText({ copperOre: s.copperOre, glowleaf: s.glowleaf }),
-  );
-  setValue(
-    $("craftGatheredGear"),
-    "disabled",
-    !gathered || full || !canPay(s, gathered),
-  );
-  setValue(
-    $("craftGear"),
-    "disabled",
-    !cost || full || !canPay(s, cost),
-  );
+  setValue($("recipeBalance"), "hidden", !full);
+  if (full) setText($("recipeBalance"), "Gear bag is full.");
+  setValue(button, "disabled", !cost || full || !canPay(s, cost));
 }
 
 const equipModes = {

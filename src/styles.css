@@ -1512,12 +1512,12 @@ textarea {
   position: relative;
 }
 .milestone-wheel .window-head h2 {
-  position: absolute;
-  left: 12px;
+  margin-right: auto;
   font-size: 14px;
   letter-spacing: 0.17em;
   color: #fff;
 }
+.milestone-wheel #close { min-height: 44px; }
 .milestone-wheel .window-body {
   padding: 0;
   overflow: visible;
@@ -1751,9 +1751,6 @@ textarea {
 }
 .wheel-claim:disabled {
   opacity: 0.7;
-}
-.wheel-controls .action {
-  background: #28364c;
 }
 @media (max-width: 600px) {
   .wheel-track {
@@ -2558,9 +2555,7 @@ textarea {
 }
 .site-upgrades button,
 .site-plot button,
-.site-controls button,
-#temperGear,
-#craftGatheredGear {
+.site-controls button {
   white-space: normal;
 }
 .mine-vein {
@@ -3563,9 +3558,11 @@ textarea {
 .smith-bench { position: sticky; bottom: 0; z-index: 4; background: #30232b; border: 1px solid #ba835e; padding: 8px; }
 .smith-bench p { margin: 5px 0; }
 .smith-bench .actions { margin: 0; flex-wrap: wrap; align-items: center; }
-.smith-meter { position: relative; height: 14px; border: 2px solid #c8916e; background: #261e2a; margin: 4px 5px; }
+.smith-meter { position: relative; overflow: hidden; height: 14px; border: 2px solid #c8916e; background: #261e2a; margin: 4px 5px; }
 .smith-meter i { position: absolute; height: 100%; background: #b1d578; }
-.smith-meter b { position: absolute; width: 4px; height: 130%; top: -15%; background: #fff6da; }
+.smith-meter b { position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; }
+.smith-meter b::before { content: ""; display: block; width: 4px; height: 100%; background: #fff6da; }
+#smithPanel #forgeBalance { display: none; }
 .smith-wallet { margin: 6px 0 12px; color: #f5d5a9; font-size: .9rem; }
 .smith-blueprints article { border-left: 3px solid var(--plate); margin: 7px 2px; padding: 4px 9px; background: #251d25; }
 .smith-blueprints strong { color: var(--plate); }
@@ -3593,8 +3590,6 @@ textarea {
   .smith-room *, .field-signature, .smith-fireball { animation: none !important; }
 }
 [data-location="forge"][data-recipes-ready="false"] #smith-table { display: grid; }
-.smith-meter { container-type: inline-size; }
-.smith-meter b { left: 0; }
 .smith-result { margin: 8px 0 0; color: #ffdb98; }
 .smith-result:empty { margin: 0; }
 #press.phantom-press .cap { transform: translateY(6px); filter: drop-shadow(0 0 8px #e1beff); }
@@ -3607,4 +3602,33 @@ textarea {
   box-shadow: inset 0 4px #aa76534d, inset 0 0 40px #211a284d;
   background: linear-gradient(90deg, transparent 28%, #342631b3 28% 29%, #af785948 29% 29.5%, transparent 29.5% 69%, #342631b3 69% 70%, #af785948 70% 70.5%, transparent 70.5%);
   pointer-events: none;
+}
+
+.living-landmark small {
+  display: block;
+  font-size: .68rem;
+  color: #d1e6bc;
+}
+.smith-current span { border-color: #f2c17e; color: #ffe0a3; }
+.smith-current { cursor: default; }
+
+@media (max-height: 450px) {
+  .modal[data-location="forge"] .window-head { padding: 5px 12px; }
+  .modal[data-location="forge"] .window-body { padding: 8px; }
+  .smith-room {
+    min-height: 138px;
+    grid-template-rows: 52px 66px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .smith-station, .smith-bins { gap: 1px; padding: 1px; }
+  .smith-station svg, .smith-bins svg { max-height: 37px; }
+  .smith-furnace svg { max-height: 59px; }
+  .smith-banners { min-height: 0; align-self: start; }
+  .smith-banners span { font-size: .65rem; padding: 0 3px; }
+  .smith-piece { bottom: 49px; }
+  .smith-piece svg { width: 30px; }
+  .smith-bench { position: static; padding: 3px 6px; }
+  .smith-bench .actions button { min-height: 34px; }
+  .smith-room:has(+ .smith-bench:not([hidden])) ~ .smith-wallet { display: none; }
 }

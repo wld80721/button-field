@@ -65,7 +65,7 @@ import {
 } from "./state.js";
 import { $, setText, setValue } from "./ui-dom.js";
 import { placeReel, wheelMarkup, wheelReady } from "./wheel.js";
-import { recordWorld, worlds } from "./world-data.js";
+import { firstWorld, recordWorld, worlds } from "./world-data.js";
 import {
   isKnownWorld,
   updateWorlds,
@@ -178,7 +178,7 @@ function inventory(inForge) {
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>— Empty —</b>"}</div>`;
     })
     .join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
-    ${inForge ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " · " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
+    ${inForge || s.world === firstWorld ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " · " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
     <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
     <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
 }
@@ -253,10 +253,11 @@ function openModal(type, id, location = runtime.fieldLocation) {
   $("modal").classList.toggle("constellation", type === "skills");
   $("modal").classList.toggle("milestone-wheel", type === "wheel");
   renderLocationScene(s, runtime.fieldLocation, entering);
-  $("close").textContent = landmark ? "Return to field" : type === "skills" ? "DONE" : "✕";
+  const returnsToField = landmark || type === "wheel";
+  $("close").textContent = returnsToField ? "Return to field" : type === "skills" ? "DONE" : "✕";
   $("close").setAttribute(
     "aria-label",
-    landmark ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog",
+    returnsToField ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog",
   );
   const oldLegend = $("treeLegend");
   if (oldLegend) oldLegend.remove();
@@ -397,6 +398,28 @@ function openModal(type, id, location = runtime.fieldLocation) {
   if (type === "skills") updateBuyButtons();
   $("close").focus();
 }
+function refreshBlacksmithDialog() {
+  const type = runtime.modalType;
+  if (type !== "forge" && type !== "recipes") {
+    refreshBlacksmith();
+    return;
+  }
+  const id = type === "forge" ? Number($("forgeBuy").dataset.forge) : undefined;
+  if (!runtime.fieldLocation && fieldLocationFor(s, "forge", type)) {
+    const selection = type === "recipes" && [$("recipeSet").value, $("recipeSlot").value];
+    openModal(type, id, "forge");
+    if (selection) {
+      $("recipeSet").value = selection[0];
+      $("recipeSlot").value = selection[1];
+      updateRecipes();
+    }
+    return;
+  }
+  refreshBlacksmith();
+  if (type === "forge") updateForge();
+  else updateRecipes();
+}
+
 function closeModal() {
   clearWork();
   hideSkillTip();
@@ -516,6 +539,7 @@ export {
   closeModal,
   iconMarkup,
   openModal,
+  refreshBlacksmithDialog,
   showCollection,
   updateBuyButtons,
 };

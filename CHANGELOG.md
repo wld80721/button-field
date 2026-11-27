@@ -4,6 +4,12 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
+## 2026-11-28 · Navigation and Blacksmith fixes
+
+- Grasslands activities open from their landmarks. Regional fields keep the shortcuts they need, and the Garden and Mine landmarks show their current status.
+- The reward wheel uses one return button, and the Boss Board has one field entrance. Crafting and tempering each use one action with a payment selector.
+- The Blacksmith opens in place when passive earnings reach its unlock. Short landscape screens keep the anvil and timing meter visible together. The Garden returns to ordinary Glowleaf after you plant your last magical seed.
+
 ## 2026-11-27 · The Legendary Blacksmith
 
 - **The Legendary Blacksmith.** Visit the Grasslands Forge to heat, hammer, and quench equipment. Use Timing Assist to shape pieces one strike at a time. Mythic and Celestial evolution reveal a new look at the anvil.

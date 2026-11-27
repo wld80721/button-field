@@ -52,6 +52,11 @@ function browserTest(name, run, { init, viewport = { width: 390, height: 844 }, 
   });
 }
 
+const fieldEntrances = {
+  "#upgrades": "workshop", "#skills": "grove", "#companions": "camp",
+  "#farm": "farm", "#mine": "mine", "#bosses": "bosses", "#worlds": "gate",
+};
+const visibleEntrance = (selector) => `${selector}:visible, [data-landmark="${fieldEntrances[selector]}"]:visible`;
 const click = (page, selector) => page.locator(selector).click();
 async function finishWork(page, selector, strikes) {
   await click(page, selector);
@@ -142,9 +147,9 @@ browserTest("guide timing, spoiler policy, keyboard focus and live Workshop reve
   assert.ok(await page.locator(".window").evaluate((el) => el.scrollWidth <= el.clientWidth + 1));
   await escape(page);
   assert.ok(await page.locator(guide).evaluate((el) => el === document.activeElement));
-  assert.ok(await page.locator("#upgrades").isHidden());
+  assert.ok(await page.locator(visibleEntrance("#upgrades")).isHidden());
 
-  await click(page, "#worlds");
+  await click(page, visibleEntrance("#worlds"));
   let worlds = await text(page, "#modalBody");
   assert.match(worlds, /Grasslands/);
   assert.match(worlds, /Desert/);
@@ -188,7 +193,7 @@ browserTest("guide timing, spoiler policy, keyboard focus and live Workshop reve
   await escape(page);
 
   await importSave(page, { ...fresh, total: 140, coins: 500, up: { auto: 1 } });
-  await click(page, "#upgrades");
+  await click(page, visibleEntrance("#upgrades"));
   assert.ok(await page.locator("[data-buy='1']").isDisabled());
   await page.clock.runFor(3800);
   assert.ok(await page.locator("[data-buy='1']").isEnabled());
@@ -197,7 +202,7 @@ browserTest("guide timing, spoiler policy, keyboard focus and live Workshop reve
   await escape(page);
 
   await importSave(page, { ...fresh, total: 10000, coins: 300, world: "grasslands" });
-  await click(page, "#worlds");
+  await click(page, visibleEntrance("#worlds"));
   worlds = await text(page, "#modalBody");
   assert.match(worlds, /Dune Surge/);
   assert.match(worlds, /Frozen Lands/);
@@ -210,11 +215,11 @@ browserTest("guide timing, spoiler policy, keyboard focus and live Workshop reve
 browserTest("Ascension preview shows only its requirement until eligible", async (page) => {
   const fresh = await saved(page);
   await importSave(page, { ...fresh, total: 600, opened: 1, presses: 20 });
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   assert.ok(await page.locator("[data-tree-tab='ascend']").isHidden());
   await escape(page);
   await importSave(page, { ...fresh, total: 5000, opened: 1, presses: 20 });
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   const ascend = page.locator("[data-tree-tab='ascend']");
   assert.ok(await ascend.isVisible());
   assert.ok(await ascend.isDisabled());
@@ -222,7 +227,7 @@ browserTest("Ascension preview shows only its requirement until eligible", async
   assert.equal(await page.locator("[data-asc-buy]").count(), 0);
   await escape(page);
   await importSave(page, { ...fresh, total: 10000, coins: 10000 });
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   assert.ok(await ascend.isEnabled());
   await ascend.click();
   assert.equal(await page.locator("[data-asc-buy]").count(), 6);
@@ -302,7 +307,7 @@ browserTest("home-field play, terrain travel and both regional-set thresholds", 
   assert.equal(await page.locator(".set-active").count(), 2);
   await escape(page);
   for (const id of ["desert", "frozen", "volcano", "celestial"]) {
-    await click(page, "#worlds");
+    await click(page, visibleEntrance("#worlds"));
     await click(page, `[data-travel="${id}"]`);
     terrains.add(await page.locator("#terrain").evaluate((el) => el.toDataURL()));
   }
@@ -351,7 +356,7 @@ browserTest("home-field play, terrain travel and both regional-set thresholds", 
 browserTest("skill prerequisites, passive income, chest speed and local Auto Chest", async (page) => {
   const fresh = await saved(page);
   await importSave(page, { ...fresh, total: 600, coins: 5000, shards: 30 });
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   await click(page, "[data-node='autoChest']");
   assert.ok(await page.locator("[data-learn='autoChest']").isDisabled());
   await click(page, "[data-node='helper']");
@@ -360,7 +365,7 @@ browserTest("skill prerequisites, passive income, chest speed and local Auto Che
   await click(page, "[data-learn='autoChest']");
   assert.equal((await saved(page)).skills.autoChest, 1);
   await escape(page);
-  await click(page, "#upgrades");
+  await click(page, visibleEntrance("#upgrades"));
   await click(page, "[data-buy='3']");
   assert.equal((await saved(page)).up.chestSpeed, 1);
   await escape(page);
@@ -399,7 +404,7 @@ browserTest("all milestone wheel rewards and Ascension reset", async (page) => {
     assert.equal(after.coins, [100, 0, 0, 250, 0, 0][reward]);
     assert.equal(after.shards, [0, 3, 0, 0, 5, 0][reward]);
     assert.deepEqual(after.chests.map((item) => item.r), [[], [], [2], [], [], [3]][reward]);
-    await click(page, "#wheelNext");
+    await click(page, "#close");
     assert.ok(await page.locator("#wheel").isHidden());
   }
 
@@ -412,11 +417,11 @@ browserTest("all milestone wheel rewards and Ascension reset", async (page) => {
     presses: 10,
     world: "desert",
   });
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   await click(page, "[data-tree-tab='ascend']");
   await click(page, "[data-asc-start]");
   await escape(page);
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   assert.equal(await page.locator("[data-asc-confirm]").count(), 0);
   await click(page, "[data-asc-start]");
   await click(page, "[data-asc-confirm]");
@@ -434,7 +439,7 @@ browserTest("all milestone wheel rewards and Ascension reset", async (page) => {
   await click(page, "[data-asc-buy='might']");
   assert.equal((await saved(page)).asc.up.might, 1);
   await escape(page);
-  assert.ok(await page.locator("#skills").isVisible(), "Skilltree remains accessible on subsequent runs");
+  assert.ok(await page.locator(visibleEntrance("#skills")).isVisible(), "Skilltree remains accessible on subsequent runs");
 });
 
 const legacySaves = [
@@ -672,8 +677,8 @@ test("compare stable tick and full-inventory work with the previous release", { 
 
 browserTest("craft, compare by keyboard, lock, filter, evolve and reload", async (page) => {
   await importSave(page, { total: 1e7, coins: 2e6, scrap: 500, shards: 250, opened: 1 });
-  await click(page, "#inventory");
-  await click(page, "[data-open=recipes]");
+  await click(page, landmark("forge"));
+  await click(page, "#smith-table");
   await page.locator("#recipeSet").selectOption("hammerhand");
   await page.locator("#recipeSlot").selectOption("0");
   await finishWork(page, "#craftGear", 3);
@@ -791,35 +796,35 @@ browserTest("mobile farming and mining gates stay below the board and fund both 
   await importSave(page, { total: 599, coins: 1000, opened: 1 });
   assert.ok(await page.locator("#fieldSites").isHidden());
   await fieldPresses(page, 1);
-  assert.ok(await page.locator("#farm").isVisible());
-  assert.ok(await page.locator("#mine").isHidden());
-  await click(page, "#farm");
-  assert.match(await text(page, "#modalTitle"), /Farming/);
+  assert.ok(await page.locator(visibleEntrance("#farm")).isVisible());
+  assert.ok(await page.locator(visibleEntrance("#mine")).isHidden());
+  await click(page, visibleEntrance("#farm"));
+  assert.match(await text(page, "#modalTitle"), /Garden/);
   assert.ok(await page.locator("#plot-1").isHidden());
   await escape(page);
 
   await importSave(page, { total: 2500, coins: 1000, opened: 1, scrap: 2 });
-  assert.ok(await page.locator("#mine").isVisible());
+  assert.ok(await page.locator(visibleEntrance("#mine")).isVisible());
   const geometry = await page.evaluate(() => {
-    const sites = document.getElementById("fieldSites").getBoundingClientRect();
+    const sites = document.getElementById("livingField").getBoundingClientRect();
     const board = document.getElementById("board").getBoundingClientRect();
-    return { below: sites.top >= board.bottom - 1, fits: document.documentElement.scrollWidth <= innerWidth + 1 };
+    return { below: sites.top >= board.bottom - 13, fits: document.documentElement.scrollWidth <= innerWidth + 1 };
   });
   assert.deepEqual(geometry, { below: true, fits: true });
   for (let i = 0; i < 2; i++) {
-    await click(page, "#farm");
+    await click(page, visibleEntrance("#farm"));
     await click(page, "#plant-0");
     await escape(page);
     const before = (await saved(page)).sites.plots[0].remaining;
     await fieldPresses(page, 1);
     assert.ok((await saved(page)).sites.plots[0].remaining <= before - 1000);
-    await click(page, "#mine");
+    await click(page, visibleEntrance("#mine"));
     assert.match(await text(page, "#pickStatus"), /Stone Pick/);
     for (let hit = 0; hit < 3; hit++) await click(page, "#mine-copper");
     assert.ok(await page.locator("#mine-copper").isDisabled());
     assert.match(await text(page, "#siteResult"), /4 Copper Ore/);
     await escape(page);
-    await click(page, "#farm");
+    await click(page, visibleEntrance("#farm"));
     await page.clock.runFor(12500);
     await click(page, "#harvest-0");
     assert.match(await text(page, "#siteResult"), /3 Glowleaf/);
@@ -830,14 +835,16 @@ browserTest("mobile farming and mining gates stay below the board and fund both 
   assert.equal(run.copperOre, 8);
   assert.equal(run.presses, 2);
   assert.equal(run.wheelNextAt, 50);
-  await click(page, "#inventory");
-  await click(page, "[data-open=recipes]");
+  await click(page, landmark("forge"));
+  await click(page, "#smith-table");
   assert.ok(await page.locator("#craftGear").isDisabled());
-  await finishWork(page, "#craftGatheredGear", 3);
+  await page.locator("#recipePayment").selectOption("materials");
+  await finishWork(page, "#craftGear", 3);
   await click(page, "[data-open=inventory]");
   const id = (await saved(page)).items[0].id;
   await click(page, `[data-open-forge="${id}"]`);
-  await finishWork(page, "#temperGear", 2);
+  await page.locator("#forgePayment").selectOption("materials");
+  await finishWork(page, "#forgeBuy", 2);
   run = await saved(page);
   assert.deepEqual([run.glowleaf, run.copperOre, run.scrap], [0, 1, 0]);
   assert.equal(run.items[0].forge, 1);
@@ -845,7 +852,7 @@ browserTest("mobile farming and mining gates stay below the board and fund both 
 
 browserTest("visible site timers pause in a hidden tab and retain progress on reload", async (page) => {
   await importSave(page, { total: 2500, coins: 1000, opened: 1 });
-  await click(page, "#farm");
+  await click(page, visibleEntrance("#farm"));
   await click(page, "#plant-0");
   await page.evaluate(() => {
     window.testHidden = true;
@@ -857,7 +864,7 @@ browserTest("visible site timers pause in a hidden tab and retain progress on re
   assert.equal((await saved(page)).sites.plots[0].remaining, remaining);
   await page.reload();
   assert.equal((await saved(page)).sites.plots[0].remaining, remaining);
-  await click(page, "#farm");
+  await click(page, visibleEntrance("#farm"));
   await page.clock.runFor(13000);
   assert.ok(await page.locator("#harvest-0").isVisible());
 }, { init: () => {
@@ -868,7 +875,7 @@ browserTest("visible site timers pause in a hidden tab and retain progress on re
 browserTest("research, tools, automation, travel and Ascension use the same saved sites", async (page) => {
   await importSave(page, { total: 50000, coins: 10000, glowleaf: 30, rootFiber: 30,
     silverOre: 30, copperOre: 30, starCrystals: 30 });
-  await click(page, "#farm");
+  await click(page, visibleEntrance("#farm"));
   for (const id of ["extraPlot", "irrigation", "harvester"]) await click(page, "#research-" + id);
   assert.ok(await page.locator("#plot-1").isVisible());
   await page.locator("#autoHarvest").check();
@@ -876,7 +883,7 @@ browserTest("research, tools, automation, travel and Ascension use the same save
   assert.match(await text(page, "#seedInfo-1"), /21s/);
   await click(page, "#plant-1");
   await escape(page);
-  await click(page, "#mine");
+  await click(page, visibleEntrance("#mine"));
   await click(page, "#buyPick");
   assert.match(await text(page, "#pickStatus"), /Copper Pick/);
   await click(page, "#buyPick");
@@ -888,10 +895,10 @@ browserTest("research, tools, automation, travel and Ascension use the same save
   assert.match(await text(page, "#siteResult"), /4 Copper Ore/);
   assert.ok(await page.locator("#mine-copper").isDisabled());
   await escape(page);
-  await click(page, "#worlds");
+  await click(page, visibleEntrance("#worlds"));
   await click(page, "[data-travel=desert]");
   assert.equal(await text(page, "#worldName"), "Desert");
-  await click(page, "#farm");
+  await click(page, visibleEntrance("#farm"));
   await page.clock.runFor(22000);
   const gathered = await saved(page);
   assert.equal(gathered.sites.plots[1], null);
@@ -899,7 +906,7 @@ browserTest("research, tools, automation, travel and Ascension use the same save
   assert.equal(gathered.sites.crystalFocus, true);
   assert.equal(gathered.sites.pick, 2);
   await escape(page);
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   await click(page, "[data-tree-tab=ascend]");
   await click(page, "[data-asc-start]");
   await click(page, "[data-asc-confirm]");
@@ -916,9 +923,9 @@ const petCard = (id) => `.pet-card[data-pet-arg="${id}"]`;
 const petAction = (command, arg) => `[data-pet-command="${command}"]${arg === undefined ? "" : `[data-pet-arg="${arg}"]`}`;
 
 browserTest("recruit companions and claim an offline trip exactly once", async (page) => {
-  assert.ok(await page.locator("#companions").isHidden());
+  assert.ok(await page.locator(visibleEntrance("#companions")).isHidden());
   await importSave(page, { total: 2500, coins: 100, opened: 1, scrap: 3 });
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   assert.equal(await page.locator(".pet-card").count(), 15);
   assert.match(await text(page, petCard("beetle")), /Button Beetle.*Home/s);
   assert.match(await text(page, petCard("ferret")), /Locked/);
@@ -934,7 +941,7 @@ browserTest("recruit companions and claim an offline trip exactly once", async (
   assert.equal(dispatched.companions.trips[0].duration, 90000);
   await page.clock.setSystemTime(dispatched.companions.trips[0].finishAt + 100);
   await page.reload();
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   assert.match(await text(page, "#petTrips"), /Ready to claim/);
   assert.equal((await saved(page)).glowleaf, 0);
   await click(page, petAction("claim", "0"));
@@ -948,7 +955,7 @@ browserTest("recruit companions and claim an offline trip exactly once", async (
   await click(page, petAction("gear", "bell"));
   assert.equal((await saved(page)).companions.pets.beetle.gear, "bell");
   await page.reload();
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   assert.equal(await page.locator(petAction("claim")).count(), 0);
   assert.equal((await saved(page)).glowleaf, 3);
   await click(page, petCard("sparrow"));
@@ -962,7 +969,7 @@ browserTest("recruit companions and claim an offline trip exactly once", async (
 
 browserTest("field companions animate, pause in menus and hidden tabs, and use normal chest and tap rewards", async (page) => {
   await importSave(page, { total: 50000, coins: 100, presses: 7, opened: 5, chests: [chest(2, "grasslands", 1)] });
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   await click(page, petCard("beetle"));
   await click(page, petAction("field", "0"));
   await click(page, petCard("mouse"));
@@ -1002,7 +1009,7 @@ browserTest("field companions animate, pause in menus and hidden tabs, and use n
   assert.equal(collected.chests.length, 0);
   assert.equal(collected.presses, 7);
   assert.equal(await page.locator(".chest.opening").count(), 1);
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   await click(page, petCard("mouse"));
   await click(page, petAction("rest"));
   await escape(page);
@@ -1022,7 +1029,7 @@ browserTest("train and evolve companions, assist field sites, and retain growth 
   await importSave(page, { total: 50000, coins: 6000, shards: 12, rootFiber: 3,
     sites: { research: { extraPlot: true }, pick: 1, plots: [{ crop: "glowleaf", remaining: 1 }] },
     companions: { pets: { slime, mole }, artifacts: ["bell"] } });
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   await click(page, petCard("slime"));
   await click(page, petAction("role", "field"));
   await click(page, petAction("evolve"));
@@ -1041,7 +1048,7 @@ browserTest("train and evolve companions, assist field sites, and retain growth 
   assert.equal(field.coins, 4500);
   assert.equal(field.sites.plots[0], null);
   assert.equal(field.companions.pets.slime.xp, 162);
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   await click(page, '[data-tree-tab="ascend"]');
   await click(page, "[data-asc-start]");
   assert.match(await text(page, ".asc-confirm"), /unclaimed expedition rewards/);
@@ -1061,7 +1068,7 @@ browserTest("advanced expedition routes offer separate slots and apply specializ
   await importSave(page, { total: 250000, coins: 2000, sites: { pick: 1 },
     companions: { pets: { beetle: { xp: 90, role: "scout", gear: "lens" }, sparrow: { xp: 40, gear: "satchel" } },
       artifacts: ["lens", "satchel"] } });
-  await click(page, "#companions");
+  await click(page, visibleEntrance("#companions"));
   await click(page, petCard("beetle"));
   assert.match(await text(page, ".pet-route:has([data-pet-arg=star])"), /Star Ruins · 252s/);
   await click(page, petAction("send", "star"));
@@ -1085,7 +1092,7 @@ browserTest("advanced expedition routes offer separate slots and apply specializ
 });
 
 const startBoss = async (page, id) => {
-  await click(page, "#bosses");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, `[data-boss-select="${id}"]`);
   await click(page, `[data-boss-start="${id}"]`);
 };
@@ -1094,11 +1101,11 @@ browserTest("combat unlocks from ordinary earnings and a keyboard victory keeps 
   await importSave(page, {total: 4999, coins: 2000, opened: 1, presses: 48, up: {power: 8},
     items: [equipment(0, {value: 7}), equipment(1, {value: 45})], equip: {0: 1, 1: 2},
     sites: {plots: [{crop: "glowleaf", remaining: 10000}]}});
-  assert.ok(await page.locator("#bosses").isHidden());
+  assert.ok(await page.locator(visibleEntrance("#bosses")).isHidden());
   await click(page, "#press");
-  assert.ok(await page.locator("#bosses").isVisible());
+  assert.ok(await page.locator(visibleEntrance("#bosses")).isVisible());
   assert.equal((await saved(page)).presses, 49);
-  await click(page, "#bosses");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, "[data-boss-select=bramble]");
   assert.match(await text(page, ".boss-detail"), /20,000.*Mossguard/s);
   assert.ok(await page.locator("[data-boss-start=bramble]").isDisabled());
@@ -1138,7 +1145,7 @@ browserTest("combat unlocks from ordinary earnings and a keyboard victory keeps 
   assert.equal((await saved(page)).combat.clears.mossguard, "unclaimed");
   assert.equal((await saved(page)).combat.records.mossguard.wins, 1);
   assert.ok((await saved(page)).blacksmith.recipes.includes("dragonfire"));
-  await click(page, "#combatDone");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, "[data-boss-claim=mossguard]");
   const won = await saved(page);
   const reward = won.items.find(item => item.set === "wardweaver");
@@ -1189,7 +1196,7 @@ browserTest("mobile Guard, mid-fight refresh, hidden tabs, travel confirmation a
   await page.evaluate(() => document.getElementById("press").click());
   assert.equal(await page.locator(".combat-number").count(), 0);
   assert.equal(await page.locator("#combatSprite").evaluate(el => getComputedStyle(el).animationName), "none");
-  await click(page, "#worlds");
+  await click(page, visibleEntrance("#worlds"));
   page.once("dialog", async dialog => {
     assert.match(dialog.message(), /end your current boss fight/);
     await dialog.dismiss();
@@ -1212,14 +1219,14 @@ browserTest("recover rewards from a full bag, keep boss records on Ascension, an
   const items = Array.from({ length: 300 }, (_, i) => equipment(0, {id: i + 1}));
   await importSave(page, {total: 10000, world: "grasslands", opened: 5, items,
     combat: { records: {mossguard: {wins: 1, best: 12000}}, clears: {mossguard: "unclaimed"} }});
-  await click(page, "#bosses");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, "[data-boss-claim=mossguard]");
   assert.match(await text(page, "#bossMessage"), /Free a slot/);
   await page.reload();
   await click(page, "#inventory");
   await click(page, "[data-salvage='300']");
   await escape(page);
-  await click(page, "#bosses");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, "[data-boss-claim=mossguard]");
   assert.equal((await saved(page)).items.at(-1).set, "wardweaver");
   await click(page, "[data-boss-start=mossguard]");
@@ -1228,7 +1235,7 @@ browserTest("recover rewards from a full bag, keep boss records on Ascension, an
   });
   assert.equal(await page.locator(".combat-number").count(), 8);
   assert.ok((await saved(page)).combat.attempt.hp < 340);
-  await click(page, "#skills");
+  await click(page, visibleEntrance("#skills"));
   await click(page, '[data-tree-tab="ascend"]');
   await click(page, "[data-asc-start]");
   assert.match(await text(page, ".asc-confirm"), /active boss fight will end/);
@@ -1245,7 +1252,7 @@ browserTest("a defeat leaves earnings alone and provides a fresh retry", async p
   assert.match(await text(page, "#combatTell"), /Defeated/);
   assert.equal((await saved(page)).coins, 160);
   assert.deepEqual((await saved(page)).combat.records, {});
-  await click(page, "#combatDone");
+  await click(page, visibleEntrance("#bosses"));
   await click(page, "[data-boss-start=mossguard]");
   assert.equal(await text(page, "#playerHpText"), "100 / 100");
   await click(page, "#combatRetreat");
@@ -1337,7 +1344,8 @@ browserTest("Living Field garden, mine and Forge form a playable mobile route", 
   await page.locator(landmark("forge")).tap();
   await click(page, "[data-open=recipes]");
   assert.equal(await page.locator("#modal").getAttribute("data-location"), "forge");
-  await finishWork(page, "#craftGatheredGear", 3);
+  await page.locator("#recipePayment").selectOption("materials");
+  await finishWork(page, "#craftGear", 3);
   assert.equal((await saved(page)).items.length, 1);
   await escape(page);
   assert.ok(await page.locator(landmark("forge")).evaluate(el => el === document.activeElement));
@@ -1587,3 +1595,57 @@ browserTest("a specialized Dragonfire set primes fireballs on entry and after a 
   assert.ok(await page.locator(".smith-fireball").isVisible());
   assert.equal((await saved(page)).combat.attempt.fireballReady, false);
 }, { viewport: { width: 1280, height: 800 } });
+
+browserTest("Grasslands landmarks replace duplicate shortcuts and regional fields retain access", async (page) => {
+  await importSave(page, { total: 50000, coins: 1000, opened: 1 });
+  for (const [shortcut, id] of Object.entries(fieldEntrances)) {
+    assert.ok(await page.locator(shortcut).isHidden(), shortcut);
+    assert.equal(await page.locator(visibleEntrance(shortcut)).count(), 1, id);
+  }
+  assert.match(await text(page, "#landmark-farm-status"), /Ready to plant/);
+  assert.match(await text(page, "#landmark-mine-status"), /available/);
+  await click(page, landmark("gate"));
+  await click(page, "[data-travel=desert]");
+  for (const [shortcut, id] of Object.entries(fieldEntrances)) {
+    assert.ok(await page.locator(landmark(id)).isHidden(), id);
+    assert.equal(await page.locator(visibleEntrance(shortcut)).count(), 1, shortcut);
+  }
+});
+
+browserTest("the forge opens in place when passive earnings reach its unlock", async (page) => {
+  await importSave(page, { total: 139, coins: 200, scrap: 10, items: [equipment(2, {value: 4})], equip: {2: 3} });
+  await click(page, "#inventory");
+  await click(page, '[data-open-forge="3"]');
+  assert.ok(await page.locator("#forgeBuy").isDisabled());
+  await page.clock.runFor(4000);
+  assert.ok(await page.locator("#smithRoom").isVisible());
+  await finishWork(page, "#forgeBuy", 2);
+  assert.equal((await saved(page)).items[0].forge, 1);
+});
+
+browserTest("the timing meter leaves the anvil tappable on a short viewport", async (page) => {
+  await importSave(page, { total: 150, coins: 200, scrap: 10, items: [equipment(0)] });
+  await click(page, "#inventory");
+  await click(page, "[data-open-forge]");
+  await click(page, "#forgeBuy");
+  await click(page, "#smith-furnace");
+  for (let strike = 0; strike < 2; strike++) {
+    await page.clock.runFor(900);
+    const target = await page.evaluate(() => {
+      const anvil = document.querySelector("#smith-anvil");
+      const rect = anvil.getBoundingClientRect();
+      const meter = document.querySelector("#smithMeter").getBoundingClientRect();
+      const x = (rect.left + rect.right) / 2;
+      const y = (rect.top + rect.bottom) / 2;
+      return {
+        x, y, uncovered: anvil.contains(document.elementFromPoint(x, y)),
+        meterVisible: meter.top >= 0 && meter.bottom <= innerHeight,
+      };
+    });
+    assert.equal(target.uncovered, true);
+    assert.equal(target.meterVisible, true);
+    await page.touchscreen.tap(target.x, target.y);
+  }
+  await click(page, "#smith-quench");
+  assert.equal((await saved(page)).items[0].forge, 1);
+}, { viewport: { width: 568, height: 320 }, touch: true, motion: "no-preference" });
