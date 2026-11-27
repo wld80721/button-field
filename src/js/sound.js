@@ -2,6 +2,18 @@ import { KEY } from "./saves.js";
 import { $ } from "./ui-dom.js";
 
 const soundTones = {
+  combatStart: [
+    [145, 200, 0.15, 0, "triangle", 0.06],
+    [293, 390, 0.12, 0.12, "triangle", 0.045],
+  ],
+  combatGuard: [[520, 320, 0.1, 0, "triangle", 0.055]],
+  combatHurt: [[160, 72, 0.17, 0, "triangle", 0.075]],
+  combatWin: [
+    [392, 392, 0.12, 0, "triangle", 0.06],
+    [523, 523, 0.14, 0.1, "triangle", 0.06],
+    [659, 659, 0.16, 0.2, "triangle", 0.06],
+    [784, 784, 0.28, 0.32, "triangle", 0.05],
+  ],
   tap: [[180, 115, 0.065, 0, "triangle", 0.09]],
   menu: [[450, 350, 0.075, 0, "triangle", 0.045]],
   chest: [

@@ -1,11 +1,16 @@
+import {
+  renderBossBoard,
+  resetCombatClock,
+  syncCombat,
+} from "./combat-view.js";
 import { companionMarkup, renderCompanions } from "./companion-view.js";
 import { companionsAt } from "./companions.js";
 import { farmMarkup, mineMarkup, renderSites } from "./site-view.js";
 import { farmAt, mineAt } from "./sites.js";
-import { builds, craftAt, designKey } from "./build-gear.js";
+import { builds, craftAt, designKey, hasSetDesign } from "./build-gear.js";
 import { ascCoinGoal } from "./prestige.js";
 import { gearValue, salvageYield } from "./gear.js";
-import { rarity, slots, upgrades } from "./data.js";
+import { milestones, rarity, slots, upgrades } from "./data.js";
 import {
   equippedSetsMarkup,
   forgeMarkup,
@@ -35,6 +40,7 @@ import {
   readPreExpansionSave,
   readPreSitesSave,
   readPreCompanionsSave,
+  readPreCombatSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -177,7 +183,7 @@ function showCollection(id) {
   const designs = slots
     .flatMap((slotName, slot) =>
       rarity.map((grade, r) => {
-        if (set && r < 2) return null;
+        if (set && !hasSetDesign(set, slot, r)) return null;
         const item = set ? { slot, r, set } : { slot, r, world: id };
         const found = s.found.includes(designKey(item));
         return {
@@ -201,7 +207,13 @@ function showCollection(id) {
       s.found.length +
       "/" +
       (rarity.length * slots.length * Object.keys(worlds).length +
-        (rarity.length - 2) * slots.length * Object.keys(builds).length) +
+        Object.values(builds).reduce(
+          (total, def) =>
+            total +
+            (rarity.length - (def.baseRarity || 2)) *
+              (def.rewardSlots?.length || slots.length),
+          0,
+        )) +
       " across all fields and sets.",
   );
   $("collectionGrid").innerHTML = designs
@@ -216,10 +228,12 @@ function openModal(type, id) {
   if (
     (type === "farm" && s.total < farmAt) ||
     (type === "mine" && s.total < mineAt) ||
-    (type === "companions" && s.total < companionsAt)
+    (type === "companions" && s.total < companionsAt) ||
+    (type === "bosses" && s.total < milestones.combat)
   )
     return;
   if (type === "wheel" && !wheelReady()) return;
+  syncCombat();
   hideSkillTip();
   hideComparison();
   sound("menu");
@@ -274,6 +288,10 @@ function openModal(type, id) {
     b.innerHTML = forgeMarkup(item);
     b.closest(".window").scrollTop = 0;
     updateForge();
+  } else if (type === "bosses") {
+    t.textContent = "Boss Board";
+    renderBossBoard();
+    b.closest(".window").scrollTop = 0;
   } else if (type === "companions") {
     t.textContent = "Companions";
     b.innerHTML = companionMarkup();
@@ -319,8 +337,17 @@ function openModal(type, id) {
     b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world or set">${worldOptions()}${
       s.total >= craftAt || s.found.some((key) => key.startsWith("set:"))
         ? `<optgroup label="Crafted sets">${Object.entries(builds)
+            .filter(([, set]) => !set.rewardSlots)
             .map(([id, set]) => `<option value="${id}">${set.name}</option>`)
-            .join("")}</optgroup>`
+            .join("")}</optgroup>` +
+          (s.total >= milestones.combat || Object.keys(s.combat.records).length
+            ? `<optgroup label="Boss sets">${Object.entries(builds)
+                .filter(([, set]) => set.rewardSlots)
+                .map(
+                  ([id, set]) => `<option value="${id}">${set.name}</option>`,
+                )
+                .join("")}</optgroup>`
+            : "")
         : ""
     }</select></div>
       <p class="subtext">Base chest rarities: Common 60%, Uncommon 26%, Rare 10%, Epic 3.5%, Legendary 0.5%.</p><div id="collectionGrid" class="item-grid"></div>`;
@@ -335,6 +362,7 @@ function openModal(type, id) {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreCombatSave() ? '<button class="action secondary" id="exportPreCombat">Export pre-combat backup</button>' : ""}
         ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
@@ -362,6 +390,7 @@ function closeModal() {
   $("modal").hidden = true;
   $("game").inert = false;
   runtime.modalType = "";
+  resetCombatClock();
   if (runtime.lastFocus?.isConnected && !runtime.lastFocus.closest("[hidden]"))
     runtime.lastFocus.focus();
   else $("press").focus();

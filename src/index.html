@@ -93,6 +93,12 @@
             />
           </svg>
         </div>
+        <div
+          id="combatActor"
+          class="combat-actor"
+          aria-hidden="true"
+          hidden
+        ></div>
         <div class="chest-layer" id="chests"></div>
         <div class="center">
           <button id="press" aria-label="Press red button">
@@ -165,6 +171,44 @@
         </div>
       </section>
       <section
+        id="combatPanel"
+        class="combat-panel"
+        aria-label="Boss encounter"
+        hidden
+      >
+        <div class="combat-portrait">
+          <div id="combatSprite"></div>
+          <div id="combatEffects" aria-hidden="true"></div>
+        </div>
+        <div class="combat-info">
+          <strong id="combatName"></strong>
+          <div class="combat-meters" id="combatMeters">
+            <div>
+              <span>Boss HP</span><span id="bossHpText"></span
+              ><progress id="bossHp" aria-label="Boss health"></progress>
+            </div>
+            <div>
+              <span>Your HP</span><span id="playerHpText"></span
+              ><progress id="playerHp" aria-label="Your health"></progress>
+            </div>
+          </div>
+          <div class="combat-tell">
+            <b id="combatTell"></b> <span id="combatWarnTime"></span>
+          </div>
+          <span class="visually-hidden" id="combatStatus" role="status"></span>
+        </div>
+        <div class="combat-actions">
+          <button id="combatGuard" class="action gold">
+            Guard <kbd>G</kbd>
+          </button>
+          <button id="combatRetreat" class="action secondary">Retreat</button>
+          <button id="combatDone" class="action gold" hidden>Boss Board</button>
+          <button id="combatDismiss" class="action secondary" hidden>
+            Dismiss
+          </button>
+        </div>
+      </section>
+      <section
         class="field-sites"
         id="fieldSites"
         aria-label="Field sites"
@@ -218,6 +262,9 @@
         <div class="dock-right">
           <button class="nav-btn" id="progressionGuide">Guide</button>
           <button class="nav-btn" id="companions" hidden>Companions</button>
+          <button class="nav-btn boss-nav" id="bosses" hidden>
+            Boss Board
+          </button>
           <button class="nav-btn worlds-btn" id="worlds">Worlds</button>
           <button class="nav-btn inventory" id="inventory" hidden>
             Gear <span class="count" id="invCount">0</span></button

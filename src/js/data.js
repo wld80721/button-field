@@ -96,6 +96,7 @@ const milestones = Object.freeze({
   helper: 2500,
   companions: 150,
   expeditions: 2500,
+  combat: 5000,
   secondCompanionSlot: 50000,
   secondExpeditionSlot: 250000,
   ascension: 10000,

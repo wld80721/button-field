@@ -1,3 +1,14 @@
+import {
+  claimFightReward,
+  leaveFight,
+  prepareFight,
+  renderCombatField,
+  resetCombatClock,
+  resetCombatView,
+  selectBoss,
+  syncCombat,
+  tryGuard,
+} from "./combat-view.js";
 import { companionButton, updatePetTrips } from "./companion-view.js";
 import { advanceSites } from "./sites.js";
 import {
@@ -52,6 +63,7 @@ import {
   readPreExpansionSave,
   readPreSitesSave,
   readPreCompanionsSave,
+  readPreCombatSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -87,6 +99,20 @@ $("tapIcon").innerHTML = itemIcon(0, 0);
 $("autoIcon").innerHTML = itemIcon(2, 1);
 $("shardIcon").innerHTML = itemIcon(3, 3);
 $("press").addEventListener("click", press);
+$("combatGuard").addEventListener("click", () => {
+  tryGuard();
+  $("press").focus({ preventScroll: true });
+});
+$("combatRetreat").addEventListener("click", () => {
+  if (confirm("Retreat and end this boss fight?")) leaveFight();
+  else resetCombatClock();
+});
+$("combatDone").addEventListener("click", () => openModal("bosses"));
+$("combatDismiss").addEventListener("click", () => {
+  resetCombatView();
+  renderCombatField();
+  $("press").focus({ preventScroll: true });
+});
 $("chests").addEventListener("click", (e) => {
   const b = e.target.closest("[data-chest]");
   if (b) openChest(+b.dataset.chest);
@@ -95,6 +121,7 @@ for (const id of [
   "worlds",
   "farm",
   "companions",
+  "bosses",
   "mine",
   "progressionGuide",
   "inventory",
@@ -154,6 +181,26 @@ $("modalBody").addEventListener("change", (e) => {
 $("modalBody").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
+  if (runtime.modalType === "bosses") {
+    if (b.dataset.bossSelect) {
+      selectBoss(b.dataset.bossSelect);
+      return;
+    }
+    if (b.dataset.bossStart && prepareFight(b.dataset.bossStart)) {
+      closeModal();
+      render();
+      $("press").focus({ preventScroll: true });
+      save();
+      return;
+    }
+    if (b.dataset.bossClaim) {
+      if (claimFightReward(b.dataset.bossClaim)) {
+        render();
+        save();
+      }
+      return;
+    }
+  }
   if (b.dataset.petCommand && runtime.modalType === "companions") {
     const { changed, message } = companionButton(b);
     render();
@@ -374,6 +421,7 @@ $("modalBody").addEventListener("click", (e) => {
       "exportStoredSave",
       "exportPreSites",
       "exportPreCompanions",
+      "exportPreCombat",
       "exportPreExpansion",
       "exportPreFoundation",
     ].includes(b.id)
@@ -387,7 +435,9 @@ $("modalBody").addEventListener("click", (e) => {
             ? readPreExpansionSave()
             : b.id === "exportPreCompanions"
               ? readPreCompanionsSave()
-              : readPreFoundationSave();
+              : b.id === "exportPreCombat"
+                ? readPreCombatSave()
+                : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();
@@ -468,6 +518,22 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (
+    e.code === "KeyG" &&
+    !e.repeat &&
+    !e.ctrlKey &&
+    !e.altKey &&
+    !e.metaKey &&
+    $("modal").hidden &&
+    s.combat.attempt &&
+    !document.activeElement?.matches(
+      "input, select, textarea, [contenteditable]",
+    )
+  ) {
+    e.preventDefault();
+    tryGuard();
+    return;
+  }
+  if (
     e.code === "Space" &&
     !e.repeat &&
     $("modal").hidden &&
@@ -488,7 +554,10 @@ window.addEventListener("resize", () => {
 function savePassiveIncome() {
   if (runtime.saveDirty) save();
 }
-window.addEventListener("pagehide", savePassiveIncome);
+window.addEventListener("pagehide", () => {
+  syncCombat();
+  savePassiveIncome();
+});
 renderChests();
 render();
 save();
@@ -496,6 +565,7 @@ let last = performance.now();
 let sitesLast = last;
 document.addEventListener("visibilitychange", () => {
   sitesLast = performance.now();
+  resetCombatClock();
   if (document.hidden) savePassiveIncome();
 });
 setInterval(() => {
@@ -504,6 +574,7 @@ setInterval(() => {
   last = now;
   const elapsedVisible = document.hidden ? 0 : clamp(now - sitesLast, 0, 1000);
   sitesLast = now;
+  syncCombat(now);
   const siteTick = advanceSites(s, elapsedVisible);
   if (siteTick.changed) runtime.saveDirty = true;
   showSiteRewards(siteTick.rewards);

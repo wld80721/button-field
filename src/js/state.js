@@ -1,4 +1,5 @@
 import { freshCompanions } from "./companions.js";
+import { freshCombat } from "./combat.js";
 import { freshSites } from "./sites.js";
 import {
   builds,
@@ -27,7 +28,7 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 4;
+const schemaVersion = 5;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
@@ -35,6 +36,7 @@ const fresh = () =>
   initializeResources({
     schemaVersion,
     sites: freshSites(),
+    combat: freshCombat(),
     companions: freshCompanions(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),

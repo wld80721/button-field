@@ -1,3 +1,4 @@
+import { retreatFight } from "./combat.js";
 import { closeModal } from "./dialogs.js";
 import { terrain } from "./effects.js";
 import { regionalSets, worldChargeGoal } from "./gear.js";
@@ -122,6 +123,8 @@ function updateWorlds() {
 function travel(id) {
   const world = Object.hasOwn(worlds, id) && worlds[id];
   if (!world || !hasRunCoins(s, world.at) || s.world === id) return;
+  if (s.combat.attempt && !confirm("Travel and end your current boss fight?")) return;
+  retreatFight(s);
   s.world = id;
   clearFieldEffects();
   renderChests();

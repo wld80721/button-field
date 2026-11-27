@@ -41,6 +41,11 @@ const coinUnlocks = [
     "Send a companion to find crafting materials and artifacts.",
   ],
   [
+    progressionThresholds.combat,
+    "Boss Board",
+    "Challenge a field boss to earn combat gear and a trophy.",
+  ],
+  [
     progressionThresholds.secondCompanionSlot,
     "Second field companion",
     "Assign a second pet to help on the field.",

@@ -1,3 +1,4 @@
+import { keepCombat } from "./combat.js";
 import { keepCompanions } from "./companions.js";
 import { progressionThresholds } from "./progression.js";
 import { creditResource, spendResource } from "./resources.js";
@@ -36,6 +37,7 @@ function performAscension(state) {
   if (stars < 1) return null;
   const run = fresh();
   run.companions = keepCompanions(state);
+  run.combat = keepCombat(state);
   run.lootRules = { ...state.lootRules };
   run.asc = {
     ...state.asc,

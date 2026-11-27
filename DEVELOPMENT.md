@@ -89,3 +89,11 @@ The Forge offers material payment buttons alongside the standard set recipes and
 At level 4, a pet at home can train as a Field Hand or Scout. At level 5 and 10,000 run earnings, it can evolve for 1,500 coins, eight shards, and three Root Fiber. The three expedition routes unlock through earnings, mining tools, and pet levels. Trips begin at 2,500 run earnings and a second slot opens at 250,000. Trips continue while the game is closed. Claim finished trips to receive materials, XP, and a first-clear artifact.
 
 Ascension retains pets, XP, training, evolution, and artifacts. It clears assignments, expedition rewards, and field timers. The first local migration to schema 4 keeps the original save as a backup that players can export from **Save & settings**.
+
+## Combat and field bosses
+
+The **Boss Board** opens at 5,000 coins earned in the run. Each world has two optional fights. The second requires its local first boss and a higher earnings milestone in the current run. Combat presses also keep earning coins, rolling chests, progressing the wheel, and advancing field sites.
+
+Read attack warnings and use **Guard** or **G** before the hit resolves. A successful Guard blocks the attack and empowers the next strike. The Boss Board previews the contribution of gear, Workshop reinforcement, skills, and assigned pets. Vanguard rewards aggressive combos, Wardweaver rewards Guard, and Starbound helps break through armor. Combat uses the loadout at the start of the fight.
+
+Each first win earns a permanent trophy. The first win of each run also queues one equipment piece to claim from the Boss Board when there is room in the bag. Gear claims start locked. Fight timing pauses in menus and while the tab is hidden. Saving and reloading keeps the in-flight fight. Travel or Ascension ends it after confirmation. Ascension retains trophies, wins, and best times and resets combat gear and pending claims. Settings can export the original local save from before migration to schema 5.

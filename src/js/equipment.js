@@ -135,6 +135,10 @@ function buildSummary() {
     .filter(([, info]) => info.count)
     .map(([id, info]) => {
       const set = builds[id];
+      if (set.rewardSlots) {
+        return `<details class="gear-sets"><summary>${set.name} · ${info.count}/${set.rewardSlots.length} · ${info.count >= 2 ? "Active in combat" : "Bonus inactive"}</summary>
+          <p>Boss Board reward</p><p>2 pieces · ${set.two}</p>${set.four ? "<p>4 pieces · " + set.four + "</p>" : ""}</details>`;
+      }
       const cap = info.count >= 2;
       const current = {
         hammerhand:
@@ -168,6 +172,7 @@ function recipesMarkup() {
     <div id="recipeForm" ${available ? "" : "hidden"}><div class="forge-details">${Object.values(
       builds,
     )
+      .filter((set) => !set.rewardSlots)
       .map(
         (set) =>
           `<details><summary>${set.name} · ${set.style}</summary><p>${slots[set.slot]} or 2 pieces · ${set.ability}</p><p>2 pieces · ${set.two}</p><p>4 pieces · ${set.four}</p></details>`,
@@ -175,6 +180,7 @@ function recipesMarkup() {
       .join("")}</div>
     <div class="gear-filters recipe-controls">
     <label>Set <select id="recipeSet">${Object.entries(builds)
+      .filter(([, set]) => !set.rewardSlots)
       .map(([id, set]) => `<option value="${id}">${set.name}</option>`)
       .join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>

@@ -4,7 +4,7 @@ import { after, before, test } from "node:test";
 import { chromium } from "playwright-core";
 
 const saveKey = "treasure-grove-v3";
-const migrationKey = saveKey + "-before-companions";
+const migrationKey = saveKey + "-before-combat";
 const documentUrl = "https://button-field.test/";
 const standalone = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const executablePath = process.env.CHROMIUM_PATH ||
@@ -152,7 +152,9 @@ browserTest("guide timing, spoiler policy, keyboard focus and live Workshop reve
     [599, /Skilltree|[Ss]hards/],
     [600, /Garden [Hh]elper/],
     [2499, /Garden [Hh]elper/],
-    [2500, /Desert|Ascension/],
+    [2500, /Boss Board/],
+    [4999, /Boss Board/],
+    [5000, /Desert|Ascension/],
     [9999, /Desert|Ascension/],
     [10000, /Frozen Lands/],
     [49999, /Frozen Lands/],
@@ -203,7 +205,7 @@ browserTest("Ascension preview shows only its requirement until eligible", async
   await click(page, "#skills");
   assert.ok(await page.locator("[data-tree-tab='ascend']").isHidden());
   await escape(page);
-  await importSave(page, { ...fresh, total: 2500, opened: 1, presses: 20 });
+  await importSave(page, { ...fresh, total: 5000, opened: 1, presses: 20 });
   await click(page, "#skills");
   const ascend = page.locator("[data-tree-tab='ascend']");
   assert.ok(await ascend.isVisible());
@@ -446,12 +448,14 @@ legacySaves.push(["Equipment Expansion", { schemaVersion: 2, total: 10000, coins
 legacySaves.push(["Farming and Mining", { schemaVersion: 3, total: 10000, coins: 1100, opened: 5,
   glowleaf: 5, copperOre: 4, sites: { plots: [{ crop: "glowleaf", remaining: 4321 }], pick: 1,
     veins: { silver: { hp: 3, remaining: 0 } } } }]);
+legacySaves.push(["Companions", { schemaVersion: 4, total: 5000, coins: 1200, opened: 7,
+  companions: { pets: { beetle: { xp: 12, cooldown: 4321, gear: "bell" } }, field: ["beetle"], artifacts: ["bell"] } }]);
 for (const [release, legacy] of legacySaves) {
   const raw = JSON.stringify(legacy, null, 2);
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 4);
+    assert.equal(migrated.schemaVersion, 5);
     assert.equal(await stored(page, migrationKey), raw);
     assert.equal(migrated.lootRules.equip, "off");
     assert.equal(migrated.lootRules.salvage, false);
@@ -468,7 +472,14 @@ for (const [release, legacy] of legacySaves) {
       assert.deepEqual(migrated.sites.plots, [null, null]);
       assert.equal(migrated.sites.pick, 0);
     }
-    assert.equal(await stored(page, saveKey + "-before-farming-mining"), legacy.sites ? null : raw);
+    assert.equal(await stored(page, saveKey + "-before-farming-mining"), legacy.schemaVersion >= 3 ? null : raw);
+    assert.equal(await stored(page, saveKey + "-before-companions"), legacy.schemaVersion === 4 ? null : raw);
+    assert.deepEqual(migrated.combat, { records: {}, clears: {}, attempt: null });
+    if (legacy.companions) {
+      assert.equal(migrated.companions.pets.beetle.cooldown, 4321);
+      assert.equal(migrated.companions.pets.beetle.gear, "bell");
+      assert.deepEqual(migrated.companions.field, ["beetle", null]);
+    }
     assert.equal(migrated.sites.autoHarvest, false);
     assert.equal(migrated.sites.autoMine, false);
     for (const field of ["total", "coins", "presses", "scrap", "world", "items", "equip", "chests", "wheelClaims", "wheelNextAt"]) {
@@ -479,7 +490,7 @@ for (const [release, legacy] of legacySaves) {
     await page.reload();
     assert.deepEqual(await saved(page), migrated);
     await click(page, "#settings");
-    await click(page, "#exportPreCompanions");
+    await click(page, "#exportPreCombat");
     assert.equal(await page.locator("#saveText").inputValue(), raw);
   }, {
     init: (() => {
@@ -510,7 +521,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 4);
+    assert.equal((await saved(page)).schemaVersion, 5);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -526,7 +537,7 @@ browserTest("backup storage failure suspends automatic writes", async (page) => 
     localStorage.setItem("treasure-grove-v3", '{"coins":12,"total":12}');
     const set = Storage.prototype.setItem;
     Storage.prototype.setItem = function (key, value) {
-      if (key === "treasure-grove-v3-before-companions") throw new DOMException("Simulated quota", "QuotaExceededError");
+      if (key === "treasure-grove-v3-before-combat") throw new DOMException("Simulated quota", "QuotaExceededError");
       return set.call(this, key, value);
     };
   },
@@ -1060,4 +1071,171 @@ browserTest("advanced expedition routes offer separate slots and apply specializ
   assert.equal(result.starCrystals, 2);
   assert.equal(result.prismEssence, 1);
   assert.deepEqual(result.companions.trips, [null, null]);
+});
+
+const startBoss = async (page, id) => {
+  await click(page, "#bosses");
+  await click(page, `[data-boss-select="${id}"]`);
+  await click(page, `[data-boss-start="${id}"]`);
+};
+
+browserTest("combat unlocks from ordinary earnings and a keyboard victory keeps the original button loop", async page => {
+  await importSave(page, {total: 4999, coins: 2000, opened: 1, presses: 48, up: {power: 8},
+    items: [equipment(0, {value: 7}), equipment(1, {value: 45})], equip: {0: 1, 1: 2},
+    sites: {plots: [{crop: "glowleaf", remaining: 10000}]}});
+  assert.ok(await page.locator("#bosses").isHidden());
+  await click(page, "#press");
+  assert.ok(await page.locator("#bosses").isVisible());
+  assert.equal((await saved(page)).presses, 49);
+  await click(page, "#bosses");
+  await click(page, "[data-boss-select=bramble]");
+  assert.match(await text(page, ".boss-detail"), /20,000.*Mossguard/s);
+  assert.ok(await page.locator("[data-boss-start=bramble]").isDisabled());
+  await click(page, "[data-boss-select=mossguard]");
+  assert.match(await text(page, ".boss-detail"), /Guard Root Slam/);
+  assert.match(await text(page, ".boss-loadout"), /base damage/);
+  await click(page, "[data-boss-start=mossguard]");
+  assert.equal(await page.locator("#bossHp").getAttribute("value"), "340");
+  assert.ok(await page.locator("#combatActor .boss-sprite").isVisible());
+  assert.ok(await page.locator("#combatGuard").isDisabled());
+  const before = await saved(page);
+  await page.evaluate(() => { window.testRandom = () => .1; });
+  await page.keyboard.press("Space");
+  const hit = await saved(page);
+  assert.equal(hit.presses, 50);
+  assert.equal(hit.wheelNextAt, 50);
+  assert.ok(await page.locator("#wheel").isVisible());
+  assert.ok(hit.coins > before.coins);
+  assert.equal(hit.chests.length, 1);
+  assert.ok(hit.sites.plots[0].remaining <= before.sites.plots[0].remaining - 1000);
+  assert.ok(hit.combat.attempt.hp < before.combat.attempt.hp);
+  assert.ok(await page.locator(".combat-number").count() > 0);
+  await page.evaluate(() => { window.testRandom = () => .99; });
+  await page.clock.runFor(3350);
+  assert.match(await text(page, "#combatTell"), /Root Slam/);
+  await page.keyboard.press("g");
+  assert.match(await text(page, "#combatTell"), /Guard ready/);
+  await page.clock.runFor(2000);
+  assert.equal(await text(page, "#playerHpText"), "100 / 100");
+  assert.match(await text(page, "#combatStatus"), /Blocked/);
+  for (let i = 0; i < 45 && await page.locator("#combatMeters").isVisible(); i++) {
+    if (await page.locator("#combatGuard").isEnabled()) await page.keyboard.press("g");
+    await page.evaluate(() => document.getElementById("press").click());
+    await page.clock.runFor(350);
+  }
+  assert.match(await text(page, "#combatTell"), /Victory/);
+  assert.equal((await saved(page)).combat.clears.mossguard, "unclaimed");
+  assert.equal((await saved(page)).combat.records.mossguard.wins, 1);
+  await click(page, "#combatDone");
+  await click(page, "[data-boss-claim=mossguard]");
+  const won = await saved(page);
+  const reward = won.items.find(item => item.set === "wardweaver");
+  assert.ok(reward.locked);
+  assert.equal(won.combat.clears.mossguard, "claimed");
+  assert.ok(won.found.includes("set:wardweaver:1:2"));
+  await page.locator(".gear-sets summary").click();
+  assert.match(await text(page, ".gear-sets"), /Living Acorn.*Best/s);
+  await escape(page);
+  await click(page, "#inventory");
+  assert.match(await text(page, ".item-card:has-text('Wardweaver Ring')"), /Combat defense/);
+}, { viewport: { width: 1280, height: 800 }, motion: "no-preference" });
+
+browserTest("mobile Guard, mid-fight refresh, hidden tabs, travel confirmation and reduced motion", async page => {
+  await importSave(page, {total: 35000, world: "desert", opened: 2,
+    combat: {records: {scarab: {wins: 1, best: 12000}}, clears: {scarab: "claimed"}}});
+  await startBoss(page, "jackal");
+  assert.ok(await page.locator("#combatPanel").evaluate(el => el.getBoundingClientRect().right <= innerWidth));
+  await page.clock.runFor(3150);
+  assert.match(await text(page, "#combatTell"), /Feint/);
+  assert.ok(await page.locator("#combatGuard").isDisabled());
+  await page.clock.runFor(1600);
+  assert.match(await text(page, "#combatTell"), /Pounce/);
+  await page.locator("#combatGuard").tap();
+  const armed = (await saved(page)).combat.attempt;
+  assert.equal(armed.guarded, true);
+  await click(page, "#settings");
+  await page.clock.fastForward(9000);
+  assert.equal(await text(page, "#playerHpText"), "100 / 100");
+  await escape(page);
+  await page.evaluate(() => {
+    window.testHidden = true;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.clock.fastForward(9000);
+  const frozen = (await saved(page)).combat.attempt;
+  assert.equal(frozen.guarded, true);
+  assert.ok(armed.remaining - frozen.remaining < 700);
+  await page.reload();
+  assert.equal((await saved(page)).combat.attempt.remaining, frozen.remaining);
+  assert.equal((await saved(page)).combat.attempt.guarded, true);
+  await page.clock.runFor(frozen.remaining + 300);
+  assert.equal(await text(page, "#playerHpText"), "100 / 100");
+  await page.evaluate(() => document.getElementById("press").click());
+  assert.equal(await page.locator(".combat-number").count(), 0);
+  assert.equal(await page.locator("#combatSprite").evaluate(el => getComputedStyle(el).animationName), "none");
+  await click(page, "#worlds");
+  page.once("dialog", async dialog => {
+    assert.match(dialog.message(), /end your current boss fight/);
+    await dialog.dismiss();
+  });
+  await click(page, "[data-travel=grasslands]");
+  assert.equal((await saved(page)).combat.attempt.id, "jackal");
+  page.once("dialog", dialog => dialog.accept());
+  await click(page, "[data-travel=grasslands]");
+  assert.equal((await saved(page)).combat.attempt, null);
+  assert.ok(await page.locator("#combatPanel").isHidden());
+}, {
+  viewport: { width: 320, height: 700 }, touch: true,
+  init: () => {
+    window.testHidden = false;
+    Object.defineProperty(document, "hidden", { get: () => window.testHidden });
+  },
+});
+
+browserTest("recover rewards from a full bag, keep boss records on Ascension, and bound rapid damage effects", async page => {
+  const items = Array.from({ length: 300 }, (_, i) => equipment(0, {id: i + 1}));
+  await importSave(page, {total: 10000, world: "grasslands", opened: 5, items,
+    combat: { records: {mossguard: {wins: 1, best: 12000}}, clears: {mossguard: "unclaimed"} }});
+  await click(page, "#bosses");
+  await click(page, "[data-boss-claim=mossguard]");
+  assert.match(await text(page, "#bossMessage"), /Free a slot/);
+  await page.reload();
+  await click(page, "#inventory");
+  await click(page, "[data-salvage='300']");
+  await escape(page);
+  await click(page, "#bosses");
+  await click(page, "[data-boss-claim=mossguard]");
+  assert.equal((await saved(page)).items.at(-1).set, "wardweaver");
+  await click(page, "[data-boss-start=mossguard]");
+  await page.evaluate(() => {
+    for (let i = 0; i < 32; i++) document.getElementById("press").click();
+  });
+  assert.equal(await page.locator(".combat-number").count(), 8);
+  assert.ok((await saved(page)).combat.attempt.hp < 340);
+  await click(page, "#skills");
+  await click(page, '[data-tree-tab="ascend"]');
+  await click(page, "[data-asc-start]");
+  assert.match(await text(page, ".asc-confirm"), /active boss fight will end/);
+  await click(page, "[data-asc-confirm]");
+  const next = await saved(page);
+  assert.deepEqual(next.combat, {records: {mossguard: {wins: 1, best: 12000}}, clears: {}, attempt: null});
+  assert.deepEqual(next.items, []);
+}, { motion: "no-preference" });
+
+browserTest("a defeat leaves earnings alone and provides a fresh retry", async page => {
+  await importSave(page, {total: 5000, coins: 160, opened: 1});
+  await startBoss(page, "mossguard");
+  await page.clock.runFor(20500);
+  assert.match(await text(page, "#combatTell"), /Defeated/);
+  assert.equal((await saved(page)).coins, 160);
+  assert.deepEqual((await saved(page)).combat.records, {});
+  await click(page, "#combatDone");
+  await click(page, "[data-boss-start=mossguard]");
+  assert.equal(await text(page, "#playerHpText"), "100 / 100");
+  await click(page, "#combatRetreat");
+  assert.ok(await page.locator("#combatPanel").isVisible());
+  page.once("dialog", dialog => dialog.accept());
+  await click(page, "#combatRetreat");
+  assert.equal((await saved(page)).combat.attempt, null);
+  assert.ok(await page.locator("#combatPanel").isHidden());
 });

@@ -1,3 +1,11 @@
+import { strikeBoss } from "./combat.js";
+import {
+  renderCombatField,
+  resetBossSelection,
+  resetCombatView,
+  showCombatEvents,
+  syncCombat,
+} from "./combat-view.js";
 import {
   animatePetAction,
   clearPetActions,
@@ -59,6 +67,7 @@ function replaceRun(run) {
   runtime.ascConfirm = false;
   runtime.selectedSkill = "root";
   runtime.petSelected = "";
+  resetBossSelection();
   runtime.pendingWorldUnlock = null;
   clearFieldEffects();
   renderChests();
@@ -73,6 +82,7 @@ function clearFieldEffects() {
   $("chests").replaceChildren();
   $("effects").replaceChildren();
   clearPetActions();
+  resetCombatView();
 }
 
 function notice(text) {
@@ -125,6 +135,7 @@ function fieldSnapshot() {
 }
 
 function press() {
+  syncCombat();
   sound("tap");
   const before = stageIndex();
   const totalBefore = s.total;
@@ -143,6 +154,8 @@ function press() {
     snapshot.profile,
   );
   recordEarnings(totalBefore);
+  if (s.combat.attempt && !document.hidden && !runtime.modalType)
+    showCombatEvents(strikeBoss(s));
   if (chest) revealChest(chest);
   if (opened) showOpenedChest(opened);
   showSiteRewards(advanceSites(s, 1000, true).rewards);
@@ -269,6 +282,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   renderSites();
   if (recruitPets(s).length) runtime.saveDirty = true;
   renderCompanions();
+  renderCombatField();
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
   if (runtime.modalType === "forge") updateForge();

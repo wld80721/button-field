@@ -1,3 +1,4 @@
+import { combatSets } from "./boss-data.js";
 import { gatheredRecipeCost } from "./sites.js";
 import { creditCoins, creditResource, spendResource } from "./resources.js";
 import { recordWorld, worldTag, worlds, discoveryKey } from "./world-data.js";
@@ -8,6 +9,7 @@ const craftAt = milestones.helper;
 const craftCost = { coins: 800, scrap: 10, shards: 4 };
 const slotBases = [1, 8, 1, 2];
 const builds = {
+  ...combatSets,
   hammerhand: {
     name: "Hammerhand",
     slot: 0,
@@ -129,6 +131,15 @@ function buildProfile(gear) {
   );
 }
 
+function hasSetDesign(set, slot, grade) {
+  if (!Object.hasOwn(builds, set)) return false;
+  const def = builds[set];
+  return (
+    grade >= (def.baseRarity || 2) &&
+    (!def.rewardSlots || def.rewardSlots.includes(slot))
+  );
+}
+
 function designKey(item) {
   return item.set
     ? `set:${item.set}:${item.slot}:${item.r}`
@@ -177,6 +188,7 @@ function buildRecipe(
   const cost = gathered ? gatheredRecipeCost : craftCost;
   if (
     !Object.hasOwn(builds, set) ||
+    builds[set].rewardSlots ||
     !Number.isInteger(slot) ||
     slot < 0 ||
     slot >= slots.length ||
@@ -307,6 +319,7 @@ export {
   normalizeAbilityProgress,
   buildProfile,
   designKey,
+  hasSetDesign,
   discover,
   lootValue,
   buildRecipe,

@@ -1,7 +1,9 @@
+import { normalizeCombat } from "./combat.js";
 import { normalizeCompanions } from "./companions.js";
 import { normalizeSites } from "./sites.js";
 import {
   builds,
+  hasSetDesign,
   legendary,
   normalizeAbilityProgress,
   normalizeLootRules,
@@ -134,9 +136,7 @@ function normalizeRun(o) {
           value,
           ...worldTag(recordWorld(item)),
           ...(forge ? { forge } : {}),
-          ...(typeof item.set === "string" &&
-          Object.hasOwn(builds, item.set) &&
-          r >= 2
+          ...(typeof item.set === "string" && hasSetDesign(item.set, slot, r)
             ? { set: item.set }
             : {}),
           ...(item.locked === true ? { locked: true } : {}),
@@ -159,7 +159,8 @@ function normalizeRun(o) {
   for (const id of Object.keys(builds))
     for (const slot of slots.keys())
       for (let r = 2; r < rarity.length; r++)
-        validDesigns.add(`set:${id}:${slot}:${r}`);
+        if (hasSetDesign(id, slot, r))
+          validDesigns.add(`set:${id}:${slot}:${r}`);
   if (Array.isArray(o.found))
     f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
 
@@ -203,10 +204,12 @@ function normalizeRun(o) {
     ...f.chests.map((c) => c.id + 1),
   );
   normalizeCompanions(f, o.companions);
+  normalizeCombat(f, o.combat);
   return f;
 }
 const KEY = "treasure-grove-v3";
 const preForgeSaveKey = KEY + "-before-forge";
+const preCombatSaveKey = KEY + "-before-combat";
 const preCompanionsSaveKey = KEY + "-before-companions";
 const preSitesSaveKey = KEY + "-before-farming-mining";
 const preExpansionSaveKey = KEY + "-before-equipment-expansion";
@@ -224,6 +227,10 @@ function readBackup(key) {
 
 function readPreForgeSave() {
   return readBackup(preForgeSaveKey);
+}
+
+function readPreCombatSave() {
+  return readBackup(preCombatSaveKey);
 }
 
 function readPreCompanionsSave() {
@@ -302,7 +309,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preCompanionsSaveKey, raw);
+      preserveBackup(preCombatSaveKey, raw);
+      if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
       if (version < 3) preserveBackup(preSitesSaveKey, raw);
       if (version < 2) preserveBackup(preExpansionSaveKey, raw);
       if (version < 1) preserveBackup(preFoundationSaveKey, raw);
@@ -345,6 +353,7 @@ export {
   readPreExpansionSave,
   readPreSitesSave,
   readPreCompanionsSave,
+  readPreCombatSave,
   readPreFoundationSave,
   resumeSaving,
   save,

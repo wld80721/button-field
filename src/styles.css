@@ -2730,3 +2730,278 @@ textarea {
     animation: none;
   }
 }
+
+/* Boss encounters */
+#game {
+  --combat-space: 0px;
+}
+#game:has(.combat-panel:not([hidden])) {
+  --combat-space: 117px;
+}
+#game:has(.combat-panel:not([hidden])) .board-frame {
+  min-height: 320px;
+  height: calc(100dvh - 134px - var(--field-site-space) - var(--combat-space));
+}
+.boss-nav {
+  background: linear-gradient(#b8515b, #843944);
+}
+.combat-panel {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  background: #192e36;
+  border: 2px solid #58767c;
+  border-radius: 5px;
+  box-shadow: inset 0 2px #aec2b630;
+}
+.combat-actor {
+  position: absolute;
+  top: 39%;
+  right: 17%;
+  width: clamp(64px, 11vw, 125px);
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(2px 5px 0 #142d35aa);
+}
+.combat-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 76px;
+  background: #10272b;
+  border: 2px solid #35545a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#combatSprite {
+  width: 63px;
+  line-height: 0;
+}
+.boss-sprite {
+  width: 100%;
+  height: auto;
+}
+.combat-enter {
+  animation: combat-enter 350ms ease-out both;
+}
+.combat-hit {
+  filter: brightness(1.65);
+  margin-left: 3px;
+}
+.combat-finish {
+  animation: combat-finish 720ms ease-out both;
+}
+#combatName {
+  color: #fff2bf;
+  font-size: 16px;
+}
+.combat-meters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.combat-meters > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 5px;
+  font-size: 12px;
+}
+.combat-meters progress {
+  width: 100%;
+  height: 10px;
+  grid-column: 1 / -1;
+  accent-color: #d96063;
+}
+#playerHp {
+  accent-color: #83d99d;
+}
+.combat-tell {
+  min-height: 20px;
+  margin-top: 3px;
+  color: #c5dfd7;
+}
+.combat-warning {
+  border-color: #e89461;
+}
+.combat-warning .combat-tell {
+  color: #ffcf9a;
+}
+#combatWarnTime {
+  font-size: 11px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+.combat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.combat-actions button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+.combat-actions kbd {
+  margin-left: 2px;
+  font-size: 10px;
+}
+#combatStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+#combatEffects {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.combat-number {
+  grid-area: 1 / 1;
+  color: #fff1a6;
+  font-size: 16px;
+  text-shadow: 1px 2px #090f17;
+  animation: combat-number 600ms ease-out both;
+}
+.combat-number:nth-child(even) {
+  margin-inline-start: 13px;
+}
+.combat-hurt {
+  color: #ff939b;
+}
+.combat-block {
+  color: #b1facc;
+  font-size: 11px;
+}
+@keyframes combat-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+}
+@keyframes combat-finish {
+  36% {
+    transform: scale(1.2);
+    filter: brightness(2.4);
+  }
+  to {
+    transform: scale(0.63);
+    opacity: 0.45;
+  }
+}
+@keyframes combat-number {
+  from {
+    transform: translateY(12px);
+  }
+  to {
+    transform: translateY(-25px);
+    opacity: 0;
+  }
+}
+.boss-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.boss-card {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 7px;
+  padding: 6px;
+  min-width: 0;
+  background: #19363c;
+  border: 2px solid #49706e;
+  border-radius: 5px;
+}
+.boss-card[aria-pressed="true"],
+.boss-card:hover {
+  border-color: var(--boss-color);
+  background: #28454b;
+}
+.boss-card span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.boss-card small {
+  display: block;
+  color: #c4ded5;
+}
+.boss-card .boss-sprite {
+  width: 44px;
+  flex: none;
+}
+.boss-detail h3,
+.boss-loadout h3,
+.boss-claims h3 {
+  margin: 0 0 5px;
+}
+.boss-loadout,
+.boss-claims {
+  margin: 12px 0;
+}
+.boss-loadout p {
+  margin: 3px 0;
+}
+.boss-claims button {
+  margin: 2px 4px 4px 0;
+}
+@media (max-width: 650px) {
+  #game:has(.combat-panel:not([hidden])) .board-frame {
+    min-height: 305px;
+    height: calc(
+      100dvh - 188px - var(--field-site-space) - var(--combat-space)
+    );
+  }
+  .combat-panel {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 5px 8px;
+    padding: 5px 6px;
+  }
+  .combat-actor {
+    top: 63%;
+    right: 13%;
+    width: clamp(36px, 13vw, 64px);
+  }
+  .combat-portrait {
+    height: 54px;
+  }
+  #combatSprite {
+    width: 38px;
+  }
+  .combat-meters {
+    gap: 5px;
+  }
+  .combat-meters > div {
+    font-size: 10px;
+  }
+  .combat-actions {
+    grid-column: 1 / -1;
+    justify-content: end;
+  }
+  .combat-actions button {
+    min-height: 36px;
+    padding: 4px 10px;
+  }
+  .boss-card .boss-sprite {
+    width: 33px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .combat-enter,
+  .combat-finish,
+  .combat-number {
+    animation: none;
+  }
+  .combat-hit {
+    margin-left: 0;
+    filter: none;
+  }
+}

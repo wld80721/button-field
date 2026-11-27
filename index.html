@@ -2740,6 +2740,281 @@ textarea {
     animation: none;
   }
 }
+
+/* Boss encounters */
+#game {
+  --combat-space: 0px;
+}
+#game:has(.combat-panel:not([hidden])) {
+  --combat-space: 117px;
+}
+#game:has(.combat-panel:not([hidden])) .board-frame {
+  min-height: 320px;
+  height: calc(100dvh - 134px - var(--field-site-space) - var(--combat-space));
+}
+.boss-nav {
+  background: linear-gradient(#b8515b, #843944);
+}
+.combat-panel {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 10px;
+  background: #192e36;
+  border: 2px solid #58767c;
+  border-radius: 5px;
+  box-shadow: inset 0 2px #aec2b630;
+}
+.combat-actor {
+  position: absolute;
+  top: 39%;
+  right: 17%;
+  width: clamp(64px, 11vw, 125px);
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(2px 5px 0 #142d35aa);
+}
+.combat-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 76px;
+  background: #10272b;
+  border: 2px solid #35545a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+#combatSprite {
+  width: 63px;
+  line-height: 0;
+}
+.boss-sprite {
+  width: 100%;
+  height: auto;
+}
+.combat-enter {
+  animation: combat-enter 350ms ease-out both;
+}
+.combat-hit {
+  filter: brightness(1.65);
+  margin-left: 3px;
+}
+.combat-finish {
+  animation: combat-finish 720ms ease-out both;
+}
+#combatName {
+  color: #fff2bf;
+  font-size: 16px;
+}
+.combat-meters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.combat-meters > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 5px;
+  font-size: 12px;
+}
+.combat-meters progress {
+  width: 100%;
+  height: 10px;
+  grid-column: 1 / -1;
+  accent-color: #d96063;
+}
+#playerHp {
+  accent-color: #83d99d;
+}
+.combat-tell {
+  min-height: 20px;
+  margin-top: 3px;
+  color: #c5dfd7;
+}
+.combat-warning {
+  border-color: #e89461;
+}
+.combat-warning .combat-tell {
+  color: #ffcf9a;
+}
+#combatWarnTime {
+  font-size: 11px;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+.combat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.combat-actions button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+.combat-actions kbd {
+  margin-left: 2px;
+  font-size: 10px;
+}
+#combatStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+#combatEffects {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.combat-number {
+  grid-area: 1 / 1;
+  color: #fff1a6;
+  font-size: 16px;
+  text-shadow: 1px 2px #090f17;
+  animation: combat-number 600ms ease-out both;
+}
+.combat-number:nth-child(even) {
+  margin-inline-start: 13px;
+}
+.combat-hurt {
+  color: #ff939b;
+}
+.combat-block {
+  color: #b1facc;
+  font-size: 11px;
+}
+@keyframes combat-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.85);
+  }
+}
+@keyframes combat-finish {
+  36% {
+    transform: scale(1.2);
+    filter: brightness(2.4);
+  }
+  to {
+    transform: scale(0.63);
+    opacity: 0.45;
+  }
+}
+@keyframes combat-number {
+  from {
+    transform: translateY(12px);
+  }
+  to {
+    transform: translateY(-25px);
+    opacity: 0;
+  }
+}
+.boss-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 10px;
+}
+.boss-card {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 7px;
+  padding: 6px;
+  min-width: 0;
+  background: #19363c;
+  border: 2px solid #49706e;
+  border-radius: 5px;
+}
+.boss-card[aria-pressed="true"],
+.boss-card:hover {
+  border-color: var(--boss-color);
+  background: #28454b;
+}
+.boss-card span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.boss-card small {
+  display: block;
+  color: #c4ded5;
+}
+.boss-card .boss-sprite {
+  width: 44px;
+  flex: none;
+}
+.boss-detail h3,
+.boss-loadout h3,
+.boss-claims h3 {
+  margin: 0 0 5px;
+}
+.boss-loadout,
+.boss-claims {
+  margin: 12px 0;
+}
+.boss-loadout p {
+  margin: 3px 0;
+}
+.boss-claims button {
+  margin: 2px 4px 4px 0;
+}
+@media (max-width: 650px) {
+  #game:has(.combat-panel:not([hidden])) .board-frame {
+    min-height: 305px;
+    height: calc(
+      100dvh - 188px - var(--field-site-space) - var(--combat-space)
+    );
+  }
+  .combat-panel {
+    grid-template-columns: 54px minmax(0, 1fr);
+    gap: 5px 8px;
+    padding: 5px 6px;
+  }
+  .combat-actor {
+    top: 63%;
+    right: 13%;
+    width: clamp(36px, 13vw, 64px);
+  }
+  .combat-portrait {
+    height: 54px;
+  }
+  #combatSprite {
+    width: 38px;
+  }
+  .combat-meters {
+    gap: 5px;
+  }
+  .combat-meters > div {
+    font-size: 10px;
+  }
+  .combat-actions {
+    grid-column: 1 / -1;
+    justify-content: end;
+  }
+  .combat-actions button {
+    min-height: 36px;
+    padding: 4px 10px;
+  }
+  .boss-card .boss-sprite {
+    width: 33px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .combat-enter,
+  .combat-finish,
+  .combat-number {
+    animation: none;
+  }
+  .combat-hit {
+    margin-left: 0;
+    filter: none;
+  }
+}
 </style>
   </head>
   <body>
@@ -2826,6 +3101,12 @@ textarea {
             />
           </svg>
         </div>
+        <div
+          id="combatActor"
+          class="combat-actor"
+          aria-hidden="true"
+          hidden
+        ></div>
         <div class="chest-layer" id="chests"></div>
         <div class="center">
           <button id="press" aria-label="Press red button">
@@ -2898,6 +3179,44 @@ textarea {
         </div>
       </section>
       <section
+        id="combatPanel"
+        class="combat-panel"
+        aria-label="Boss encounter"
+        hidden
+      >
+        <div class="combat-portrait">
+          <div id="combatSprite"></div>
+          <div id="combatEffects" aria-hidden="true"></div>
+        </div>
+        <div class="combat-info">
+          <strong id="combatName"></strong>
+          <div class="combat-meters" id="combatMeters">
+            <div>
+              <span>Boss HP</span><span id="bossHpText"></span
+              ><progress id="bossHp" aria-label="Boss health"></progress>
+            </div>
+            <div>
+              <span>Your HP</span><span id="playerHpText"></span
+              ><progress id="playerHp" aria-label="Your health"></progress>
+            </div>
+          </div>
+          <div class="combat-tell">
+            <b id="combatTell"></b> <span id="combatWarnTime"></span>
+          </div>
+          <span class="visually-hidden" id="combatStatus" role="status"></span>
+        </div>
+        <div class="combat-actions">
+          <button id="combatGuard" class="action gold">
+            Guard <kbd>G</kbd>
+          </button>
+          <button id="combatRetreat" class="action secondary">Retreat</button>
+          <button id="combatDone" class="action gold" hidden>Boss Board</button>
+          <button id="combatDismiss" class="action secondary" hidden>
+            Dismiss
+          </button>
+        </div>
+      </section>
+      <section
         class="field-sites"
         id="fieldSites"
         aria-label="Field sites"
@@ -2951,6 +3270,9 @@ textarea {
         <div class="dock-right">
           <button class="nav-btn" id="progressionGuide">Guide</button>
           <button class="nav-btn" id="companions" hidden>Companions</button>
+          <button class="nav-btn boss-nav" id="bosses" hidden>
+            Boss Board
+          </button>
           <button class="nav-btn worlds-btn" id="worlds">Worlds</button>
           <button class="nav-btn inventory" id="inventory" hidden>
             Gear <span class="count" id="invCount">0</span></button
@@ -3075,6 +3397,7 @@ textarea {
     helper: 2500,
     companions: 150,
     expeditions: 2500,
+    combat: 5e3,
     secondCompanionSlot: 5e4,
     secondExpeditionSlot: 25e4,
     ascension: 1e4,
@@ -3383,6 +3706,321 @@ textarea {
     }
   ];
 
+  // src/js/boss-data.js
+  var combatSets = {
+    vanguard: {
+      name: "Vanguard",
+      style: "Combat offense",
+      rewardSlots: [0, 1, 2, 3],
+      baseRarity: 2,
+      two: "Direct strikes deal 20% more damage.",
+      four: "Every fifth strike between warnings deals 10 extra damage."
+    },
+    wardweaver: {
+      name: "Wardweaver",
+      style: "Combat defense",
+      rewardSlots: [0, 1, 2, 3],
+      baseRarity: 2,
+      two: "Take 30% less damage from missed Guards.",
+      four: "A successful Guard restores 8 HP and adds 12 damage to the next strike."
+    },
+    starbound: {
+      name: "Starbound",
+      style: "Combat armor break",
+      rewardSlots: [2, 3],
+      baseRarity: 3,
+      two: "The next two strikes after a successful Guard ignore percentage-based armor."
+    }
+  };
+  var move = (name, damage, options = {}) => ({
+    name,
+    damage,
+    opening: 3e3,
+    warning: 1800,
+    ...options
+  });
+  var reward = (set, slot) => ({ set, slot });
+  var bosses = {
+    mossguard: {
+      name: "Mossguard",
+      world: "grasslands",
+      at: milestones.combat,
+      hp: 340,
+      title: "Living Acorn",
+      reward: reward("wardweaver", 1),
+      color: "#a0df79",
+      intro: "Guard Root Slam. Mossguard is exposed for two seconds after a successful block.",
+      art: [
+        "...1111.....",
+        "..112211....",
+        "..12222111..",
+        ".1122222311.",
+        "112422242211",
+        "112222222211",
+        ".1113333111.",
+        "..13333331..",
+        "..11133111..",
+        ".1111..1111."
+      ],
+      phases: [[move("Root Slam", 28, { kind: "expose", warning: 2e3 })]]
+    },
+    bramble: {
+      name: "Bramble Crown",
+      world: "grasslands",
+      at: 2e4,
+      requires: "mossguard",
+      hp: 410,
+      title: "Thorn Circlet",
+      reward: reward("wardweaver", 3),
+      color: "#c7e771",
+      intro: "Land four hits during Thorn Bloom to stop its heal. Guard the sweep inside the same warning.",
+      art: [
+        "1..1....1..1",
+        "111211112111",
+        ".1222222221.",
+        "..13222231..",
+        ".1122442211.",
+        "112222222211",
+        "..11222211..",
+        ".1122112211.",
+        "11221..12211",
+        "11........11"
+      ],
+      phases: [
+        [
+          move("Thorn Bloom \xB7 four hits stop healing", 31, {
+            kind: "bloom",
+            warning: 2600
+          })
+        ]
+      ]
+    },
+    scarab: {
+      name: "Sandglass Scarab",
+      world: "desert",
+      at: milestones.ascension,
+      hp: 420,
+      title: "Amber Carapace",
+      reward: reward("vanguard", 0),
+      color: "#f4c871",
+      intro: "Use the opening to strike. The shell closes during Sand Gust and halves incoming damage.",
+      art: [
+        "..1......1..",
+        "...1....1...",
+        "...144441...",
+        "1.11233211.1",
+        ".1122332211.",
+        "112223322211",
+        ".1122332211.",
+        "112223322211",
+        ".1112332111.",
+        "...111111..."
+      ],
+      phases: [
+        [move("Sand Gust \xB7 shell closed", 30, { kind: "shell", warning: 2e3 })]
+      ]
+    },
+    jackal: {
+      name: "Mirage Jackal",
+      world: "desert",
+      at: 35e3,
+      requires: "scarab",
+      hp: 490,
+      title: "Mirage Fang",
+      reward: reward("vanguard", 1),
+      color: "#ffb45d",
+      intro: "Watch the labels. The Feint is harmless and comes just before the real Pounce.",
+      art: [
+        "....1...1...",
+        "....11..11..",
+        "....121.121.",
+        "....1222221.",
+        "....1232421.",
+        "...112222311",
+        "111222222211",
+        ".111223211..",
+        "..11.11.11..",
+        ".11..11..11."
+      ],
+      phases: [
+        [
+          move("Feint \xB7 wait for Pounce", 0, { warning: 1600 }),
+          move("Pounce", 36, { opening: 0 })
+        ]
+      ]
+    },
+    rimeback: {
+      name: "Rimeback",
+      world: "frozen",
+      at: milestones.frozen,
+      hp: 595,
+      title: "Hoarfrost Horn",
+      reward: reward("vanguard", 2),
+      color: "#9fecff",
+      intro: "Ice armor cuts damage by 60%. Guard Frost Charge to crack the armor until the next warning.",
+      art: [
+        "...3..33....",
+        "..3333333...",
+        "..13323331..",
+        "..1223222111",
+        ".12222222431",
+        "112222222231",
+        "122221222111",
+        ".112111211..",
+        "..1.1.1.1...",
+        "..111.111..."
+      ],
+      phases: [[move("Frost Charge", 35, { kind: "crack" })]]
+    },
+    wisp: {
+      name: "Mirror Wisp",
+      world: "frozen",
+      at: 125e3,
+      requires: "rimeback",
+      hp: 680,
+      title: "Stillwater Mirror",
+      reward: reward("wardweaver", 0),
+      color: "#c1a9ff",
+      intro: "Wait during Mirror Pulse. Your first four strikes in that warning each reflect 5 HP of damage.",
+      art: [
+        "....3.3.....",
+        "...3.1.3....",
+        "..3.121.3...",
+        "...12321....",
+        "..1234321...",
+        "..1243421...",
+        "...12321....",
+        "..3.121.3...",
+        "...3.1.3....",
+        "....3.3....."
+      ],
+      phases: [
+        [
+          move("Mirror Pulse \xB7 strikes reflect", 32, {
+            kind: "reflect",
+            warning: 2200
+          })
+        ]
+      ]
+    },
+    furnace: {
+      name: "Cinder Furnace",
+      world: "volcano",
+      at: milestones.volcano,
+      hp: 775,
+      title: "Cinder Grate",
+      reward: reward("wardweaver", 2),
+      color: "#ff8f5d",
+      intro: "Eight strikes or six seconds trigger Vent. Guard it to release the heat safely.",
+      art: [
+        ".....3..3...",
+        "...3..33....",
+        "...111111...",
+        "..11222211..",
+        ".1121111211.",
+        "112143341211",
+        "112134431211",
+        ".1121111211.",
+        "..11222211..",
+        "..11111111.."
+      ],
+      phases: [
+        [move("Vent", 28, { kind: "vent", opening: 6e3, warning: 2e3 })]
+      ]
+    },
+    weaver: {
+      name: "Magma Weaver",
+      world: "volcano",
+      at: 6e5,
+      requires: "furnace",
+      hp: 940,
+      title: "Molten Silk",
+      reward: reward("vanguard", 3),
+      color: "#fa9299",
+      intro: "Guard each wave separately. Its silk barrier absorbs 30% of damage between waves and 45% during either warning.",
+      art: [
+        "1..........1",
+        ".11......11.",
+        "...111111...",
+        "111122221111",
+        "..12233221..",
+        "112244442211",
+        "1..122221..1",
+        ".1111111111.",
+        "11..1..1..11",
+        "1..11..11..1"
+      ],
+      phases: [
+        [
+          move("Magma Wave \xB7 first", 26),
+          move("Magma Wave \xB7 second", 38, { opening: 0 })
+        ]
+      ]
+    },
+    mantis: {
+      name: "Eclipse Mantis",
+      world: "celestial",
+      at: milestones.celestial,
+      hp: 1200,
+      title: "Eclipse Wing",
+      reward: reward("starbound", 2),
+      color: "#bea1fa",
+      intro: "Three quick hits interrupt Pounce and expose the boss. The Mantis takes 60% less damage during Moon Scythe.",
+      art: [
+        "1..........1",
+        ".11..33..11.",
+        "..11.11.11..",
+        "...124421...",
+        "..11222211..",
+        ".1331221331.",
+        "133.1221.331",
+        "....1221....",
+        "...112211...",
+        "..11....11.."
+      ],
+      phases: [
+        [
+          move("Pounce \xB7 three hits interrupt", 35, {
+            kind: "interrupt",
+            warning: 2400
+          }),
+          move("Moon Scythe \xB7 wings closed", 44, { kind: "cloak" })
+        ]
+      ]
+    },
+    orrery: {
+      name: "Astral Orrery",
+      world: "celestial",
+      at: 25e5,
+      requires: "mantis",
+      hp: 1320,
+      title: "Astral Keystone",
+      reward: reward("starbound", 3),
+      color: "#a6dcfc",
+      intro: "Crack the shell with Guard. Prepare for paired strikes below 70% HP and faster strikes below 35%.",
+      art: [
+        "..3......3..",
+        "...111111...",
+        ".3112332113.",
+        ".1121331211.",
+        "112134431211",
+        "112134431211",
+        ".1121331211.",
+        ".3112332113.",
+        "...111111...",
+        "..3......3.."
+      ],
+      phases: [
+        [move("Orbital Shell", 34, { kind: "crack", warning: 2200 })],
+        [
+          move("Twin Orbit \xB7 first", 27),
+          move("Twin Orbit \xB7 second", 38, { opening: 0 })
+        ],
+        [move("Falling Star", 45, { opening: 2e3, warning: 1600 })]
+      ]
+    }
+  };
+
   // src/js/resources.js
   var resourceCatalog = Object.freeze({
     coins: { max: Number.MAX_VALUE },
@@ -3554,8 +4192,8 @@ textarea {
     { silverOre: 2, rootFiber: 2 },
     { starCrystals: 1, prismEssence: 1 }
   ];
-  function temperCost(standard, rank) {
-    const ingredients = temperIngredients[rank];
+  function temperCost(standard, rank2) {
+    const ingredients = temperIngredients[rank2];
     return ingredients && {
       coins: Math.ceil(standard.coins * 0.75),
       scrap: Math.ceil(standard.scrap * 0.5),
@@ -3959,6 +4597,7 @@ textarea {
   var craftCost = { coins: 800, scrap: 10, shards: 4 };
   var slotBases = [1, 8, 1, 2];
   var builds = {
+    ...combatSets,
     hammerhand: {
       name: "Hammerhand",
       slot: 0,
@@ -4066,6 +4705,11 @@ textarea {
       })
     );
   }
+  function hasSetDesign(set, slot, grade) {
+    if (!Object.hasOwn(builds, set)) return false;
+    const def = builds[set];
+    return grade >= (def.baseRarity || 2) && (!def.rewardSlots || def.rewardSlots.includes(slot));
+  }
   function designKey(item) {
     return item.set ? `set:${item.set}:${item.slot}:${item.r}` : discoveryKey(item.slot, item.r, recordWorld(item));
   }
@@ -4092,7 +4736,7 @@ textarea {
   }
   function buildRecipe(state, set, slot, level2, nextId, put, limit, gathered = false) {
     const cost = gathered ? gatheredRecipeCost : craftCost;
-    if (!Object.hasOwn(builds, set) || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, cost))
+    if (!Object.hasOwn(builds, set) || builds[set].rewardSlots || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, cost))
       return null;
     const item = {
       id: nextId(state),
@@ -4134,9 +4778,9 @@ textarea {
     const matches = (gear) => gear.slot === item.slot && recordWorld(gear) === recordWorld(item) && !gear.set;
     const salvage = !equip && !strong && rules.salvage && !firstDiscovery && !item.locked && !item.set && item.r <= rules.ceiling && (!rules.duplicates || state.items.some((gear) => designKey(gear) === designKey(item))) && state.items.some((gear) => matches(gear) && value(gear) >= value(item));
     if (salvage) {
-      const reward = payout(item);
-      creditCoins(state, reward.coins);
-      creditResource(state, "scrap", reward.scrap);
+      const reward2 = payout(item);
+      creditCoins(state, reward2.coins);
+      creditResource(state, "scrap", reward2.scrap);
       return "salvaged";
     }
     put(state, item);
@@ -4230,6 +4874,11 @@ textarea {
       progressionThresholds.expeditions,
       "Expeditions",
       "Send a companion to find crafting materials and artifacts."
+    ],
+    [
+      progressionThresholds.combat,
+      "Boss Board",
+      "Challenge a field boss to earn combat gear and a trophy."
     ],
     [
       progressionThresholds.secondCompanionSlot,
@@ -4390,8 +5039,8 @@ textarea {
     return Math.round(item.value * (100 + 12 * item.forge)) / 100;
   }
   function salvageYield(item) {
-    const rank = Math.min(4, item.r);
-    return { coins: 2 + rank * 3, scrap: 1 + rank };
+    const rank2 = Math.min(4, item.r);
+    return { coins: 2 + rank2 * 3, scrap: 1 + rank2 };
   }
   function salvageGear(state, item) {
     if (!item || item.locked || state.equip[item.slot] === item.id || !removeGearItem(state, item.id))
@@ -4402,19 +5051,19 @@ textarea {
     return payout;
   }
   function forgeCost(item) {
-    const rank = item.forge || 0;
+    const rank2 = item.forge || 0;
     return {
-      coins: 25 * (item.r + 1) * (rank + 1) ** 2,
-      scrap: 2 + item.r + 2 * rank
+      coins: 25 * (item.r + 1) * (rank2 + 1) ** 2,
+      scrap: 2 + item.r + 2 * rank2
     };
   }
   function forgeOffer(state, item) {
-    const rank = item.forge || 0;
+    const rank2 = item.forge || 0;
     const cost = forgeCost(item);
-    const maxed = rank >= maxForgeRank;
+    const maxed = rank2 >= maxForgeRank;
     const locked = !hasRunCoins(state, forgeUnlock);
     return {
-      rank,
+      rank: rank2,
       maxed,
       cost,
       available: !maxed && !locked && state.coins >= cost.coins && state.scrap >= cost.scrap,
@@ -4567,15 +5216,15 @@ textarea {
   }
   function applyPress(state, rates, pieces, random = Math.random, profile = getBuild(state)) {
     const oldest = profile.hammerhand.active && oldestLocalChest(state);
-    const result = basePress(state, rates, pieces, random, profile);
+    const result2 = basePress(state, rates, pieces, random, profile);
     const { active, count } = profile.hammerhand;
-    if (!active) return result;
+    if (!active) return result2;
     const progress2 = state.abilityProgress;
     const target = count >= 2 ? 15 : 20;
     progress2.hammerhand = Math.min(20, progress2.hammerhand + 1);
-    if (progress2.hammerhand < target) return result;
+    if (progress2.hammerhand < target) return result2;
     if (oldest && state.items.length < gearBagLimit) {
-      result.opened = collectChest(
+      result2.opened = collectChest(
         state,
         oldest.id,
         pieces,
@@ -4583,13 +5232,13 @@ textarea {
         "ability",
         profile
       );
-      result.ability = "Hammerhand";
+      result2.ability = "Hammerhand";
     } else if (count >= 4 && !oldestLocalChest(state)) {
-      result.chest = spawnChest(state, { forcedRarity: 0, random });
-      if (result.chest) result.ability = "Hammerhand";
+      result2.chest = spawnChest(state, { forcedRarity: 0, random });
+      if (result2.chest) result2.ability = "Hammerhand";
     }
-    if (result.ability) progress2.hammerhand = 0;
-    return result;
+    if (result2.ability) progress2.hammerhand = 0;
+    return result2;
   }
   function tickClockwork(state, seconds3, rates, pieces, profile, random = Math.random) {
     const { active, count } = profile.clockwork;
@@ -5147,7 +5796,7 @@ textarea {
       pet.cooldown = Math.max(0, before - dt);
       changed ||= before !== pet.cooldown;
       if (pet.cooldown > 0) continue;
-      const result = actPet(
+      const result2 = actPet(
         state,
         roster[id],
         rates,
@@ -5155,11 +5804,11 @@ textarea {
         busy,
         random
       );
-      if (!result) continue;
+      if (!result2) continue;
       pet.xp = Math.min(maxXp, pet.xp + 2);
       pet.cooldown = cooldown(id, pet);
-      pet.last = result.text;
-      results.push({ id, ...result });
+      pet.last = result2.text;
+      results.push({ id, ...result2 });
       changed = true;
     }
     return { changed, results };
@@ -5278,6 +5927,344 @@ textarea {
     };
   }
 
+  // src/js/combat.js
+  var assistInterval = 8e3;
+  var maxFightTime = 864e5;
+  var freshCombat = () => ({ records: {}, clears: {}, attempt: null });
+  var known = (id) => Object.hasOwn(bosses, id);
+  var bound = (value, max) => Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
+  var rank = (value, max) => Math.floor(bound(value, max));
+  function combatLoadout(state, gear) {
+    const gearBonus = Math.min(
+      10,
+      Math.floor(2 * Math.log2(1 + gearValue(gear[0]) + gearValue(gear[1]) / 8))
+    );
+    const workshop = Math.min(4, Math.floor(state.up.power / 3));
+    const skills2 = 2 * Number(state.skills.force > 0) + Number(state.skills.sun > 0);
+    const sets = Object.fromEntries(
+      Object.keys(combatSets).map((set) => [
+        set,
+        gear.filter((item) => item?.set === set).length
+      ])
+    );
+    const pets = state.companions.field.filter(Boolean).map((id) => {
+      const pet = state.companions.pets[id];
+      const action = roster[id].action;
+      const role = ["grow", "harvest"].includes(action) ? "heal" : ["mine", "recover", "hybrid"].includes(action) ? "break" : "strike";
+      return {
+        id,
+        role,
+        power: 2 + Math.floor(petLevel(pet) / 3) + Number(pet.evolved) * 2,
+        ready: false
+      };
+    });
+    return {
+      gearBonus,
+      workshop,
+      skills: skills2,
+      sets,
+      pets,
+      damage: 4 + gearBonus + workshop + skills2,
+      maxHp: state.skills.star > 0 ? 115 : 100,
+      echo: state.skills.echo > 0 ? 2 : 0
+    };
+  }
+  function bossAccess(state, id) {
+    if (!known(id) || state.total < milestones.combat) return false;
+    const def = bosses[id];
+    return state.world === def.world && state.total >= def.at && (!def.requires || Boolean(state.combat.clears[def.requires]));
+  }
+  function startFight(state, id, gear) {
+    if (state.combat.attempt || !bossAccess(state, id)) return false;
+    const def = bosses[id];
+    const loadout = combatLoadout(state, gear);
+    state.combat.attempt = {
+      id,
+      hp: def.hp,
+      playerHp: loadout.maxHp,
+      time: 0,
+      phase: 0,
+      step: 0,
+      mode: "open",
+      remaining: def.phases[0][0].opening,
+      guarded: false,
+      hits: 0,
+      heat: 0,
+      streak: 0,
+      armorBreak: false,
+      exposed: 0,
+      riposte: 0,
+      pierce: 0,
+      assist: assistInterval,
+      loadout
+    };
+    return true;
+  }
+  var currentMove = (attempt) => bosses[attempt.id].phases[attempt.phase][attempt.step];
+  function startWarning(attempt, events) {
+    const move2 = currentMove(attempt);
+    attempt.mode = "warn";
+    attempt.remaining = move2.warning;
+    attempt.guarded = false;
+    attempt.hits = 0;
+    attempt.streak = 0;
+    attempt.armorBreak = false;
+    events.push({ type: "warning", name: move2.name });
+  }
+  function nextMove(attempt, events) {
+    const def = bosses[attempt.id];
+    const nextPhase = attempt.id === "orrery" && attempt.hp <= def.hp * 0.7 ? attempt.hp <= def.hp * 0.35 ? 2 : 1 : 0;
+    attempt.step = nextPhase !== attempt.phase ? 0 : (attempt.step + 1) % def.phases[attempt.phase].length;
+    if (nextPhase !== attempt.phase)
+      events.push({ type: "phase", phase: nextPhase });
+    attempt.phase = nextPhase;
+    attempt.mode = "open";
+    attempt.guarded = false;
+    attempt.heat = 0;
+    attempt.remaining = currentMove(attempt).opening;
+    if (!attempt.remaining) startWarning(attempt, events);
+  }
+  function guardFight(state) {
+    const attempt = state.combat.attempt;
+    if (!attempt || attempt.mode !== "warn" || attempt.guarded || !currentMove(attempt).damage)
+      return false;
+    attempt.guarded = true;
+    return true;
+  }
+  function heal(attempt, amount) {
+    const gain = Math.min(amount, attempt.loadout.maxHp - attempt.playerHp);
+    attempt.playerHp += gain;
+    return gain;
+  }
+  function settleAttack(state, attempt, events) {
+    const move2 = currentMove(attempt);
+    if (move2.kind === "bloom" && attempt.hits < 4) {
+      const def = bosses[attempt.id];
+      const healed = Math.min(def.hp - attempt.hp, Math.ceil(def.hp * 0.08));
+      attempt.hp += healed;
+      if (healed) events.push({ type: "bossHeal", amount: healed });
+    }
+    if (move2.damage && attempt.guarded) {
+      const ward = attempt.loadout.sets.wardweaver >= 4;
+      attempt.riposte = (ward ? 12 : 6) + attempt.loadout.echo;
+      if (attempt.loadout.sets.starbound >= 2) attempt.pierce = 2;
+      if (move2.kind === "crack") attempt.armorBreak = true;
+      if (move2.kind === "expose") attempt.exposed = 2e3;
+      let recovery = ward ? 8 : 0;
+      for (const pet of attempt.loadout.pets) {
+        if (!pet.ready || pet.role !== "heal") continue;
+        recovery += pet.power;
+        pet.ready = false;
+      }
+      events.push({ type: "block", amount: heal(attempt, recovery) });
+    } else if (move2.damage) {
+      const base = move2.damage + (move2.kind === "vent" ? attempt.heat * 2 : 0);
+      const amount = attempt.loadout.sets.wardweaver >= 2 ? Math.ceil(base * 0.7) : base;
+      if (damagePlayer(state, attempt, amount, events)) return;
+    }
+    nextMove(attempt, events);
+  }
+  function damagePlayer(state, attempt, amount, events) {
+    const lost = Math.min(attempt.playerHp, amount);
+    attempt.playerHp -= lost;
+    events.push({ type: "hurt", amount: lost });
+    if (attempt.playerHp > 0) return false;
+    state.combat.attempt = null;
+    events.push({ type: "defeat", id: attempt.id });
+    return true;
+  }
+  function advanceFight(state, elapsed) {
+    const events = [];
+    let left = bound(elapsed, 1e3);
+    while (state.combat.attempt && left > 0) {
+      const attempt = state.combat.attempt;
+      const span = Math.min(left, attempt.remaining);
+      left -= span;
+      attempt.remaining -= span;
+      attempt.time = Math.min(maxFightTime, attempt.time + span);
+      attempt.exposed = Math.max(0, attempt.exposed - span);
+      attempt.assist -= span;
+      if (attempt.assist <= 0) {
+        attempt.assist += assistInterval;
+        for (const pet of attempt.loadout.pets) pet.ready = true;
+      }
+      if (attempt.remaining > 0) break;
+      if (attempt.mode === "open") startWarning(attempt, events);
+      else settleAttack(state, attempt, events);
+    }
+    return events;
+  }
+  function strikeBoss(state) {
+    const attempt = state.combat.attempt;
+    if (!attempt) return [];
+    const events = [];
+    const move2 = currentMove(attempt);
+    const warning = attempt.mode === "warn";
+    const ice = attempt.id === "rimeback" || attempt.id === "orrery" && attempt.phase === 0;
+    const armor = ice && !attempt.armorBreak ? 0.4 : attempt.id === "weaver" ? warning ? 0.55 : 0.7 : warning && move2.kind === "shell" ? 0.5 : warning && move2.kind === "cloak" ? 0.4 : 1;
+    const { loadout } = attempt;
+    let amount = loadout.damage;
+    if (loadout.sets.vanguard >= 2) amount *= 1.2;
+    if (!warning && loadout.sets.vanguard >= 4 && ++attempt.streak === 5) {
+      amount += 10;
+      attempt.streak = 0;
+    }
+    amount += attempt.riposte;
+    attempt.riposte = 0;
+    for (const pet of loadout.pets) {
+      if (!pet.ready || pet.role === "heal") continue;
+      amount += pet.power * (pet.role === "break" && armor < 1 ? 2 : 1);
+      pet.ready = false;
+    }
+    if (attempt.pierce > 0) attempt.pierce--;
+    else amount *= armor;
+    if (attempt.exposed > 0) amount *= 1.25;
+    const damage = Math.min(attempt.hp, Math.max(1, Math.round(amount)));
+    attempt.hp -= damage;
+    events.push({ type: "strike", amount: damage });
+    if (attempt.hp === 0) {
+      const old = state.combat.records[attempt.id];
+      const time = Math.max(1, Math.round(attempt.time));
+      state.combat.records[attempt.id] = {
+        wins: Math.min(Number.MAX_SAFE_INTEGER, (old?.wins || 0) + 1),
+        best: Math.min(time, old?.best ?? time)
+      };
+      const reward2 = !state.combat.clears[attempt.id];
+      if (reward2) state.combat.clears[attempt.id] = "unclaimed";
+      state.combat.attempt = null;
+      events.push({ type: "victory", id: attempt.id, reward: reward2 });
+      return events;
+    }
+    if (warning) {
+      const reflects = move2.kind === "reflect" && attempt.hits < 4;
+      attempt.hits = Math.min(4, attempt.hits + 1);
+      if (reflects) damagePlayer(state, attempt, 5, events);
+      if (move2.kind === "interrupt" && attempt.hits === 3) {
+        attempt.exposed = 2e3;
+        events.push({ type: "interrupt" });
+        nextMove(attempt, events);
+      }
+    } else if (move2.kind === "vent" && ++attempt.heat === 8) {
+      startWarning(attempt, events);
+    }
+    return events;
+  }
+  function retreatFight(state) {
+    if (!state.combat.attempt) return false;
+    state.combat.attempt = null;
+    return true;
+  }
+  function claimBossGear(state, id) {
+    if (!known(id) || state.combat.clears[id] !== "unclaimed" || state.items.length >= gearBagLimit)
+      return null;
+    const def = bosses[id];
+    const { set, slot } = def.reward;
+    const r = combatSets[set].baseRarity;
+    const level2 = fieldLevel({ total: def.at });
+    const item = {
+      id: nextEntityId(state),
+      set,
+      slot,
+      r,
+      level: level2,
+      value: lootValue(def.world, level2, slot, rarity[r].scale),
+      ...worldTag(def.world),
+      locked: true
+    };
+    addGearItem(state, item);
+    discover(state, item);
+    state.combat.clears[id] = "claimed";
+    return item;
+  }
+  function normalizeCombat(state, raw) {
+    const combat = state.combat;
+    for (const id of Object.keys(bosses)) {
+      const record = raw?.records?.[id];
+      const wins = rank(record?.wins, Number.MAX_SAFE_INTEGER);
+      const best = rank(record?.best, maxFightTime);
+      if (wins && best) combat.records[id] = { wins, best };
+      const clear = raw?.clears?.[id];
+      if (combat.records[id] && ["unclaimed", "claimed"].includes(clear))
+        combat.clears[id] = clear;
+    }
+    const a = raw?.attempt;
+    if (!a || !bossAccess(state, a.id) || !a.loadout || !["open", "warn"].includes(a.mode))
+      return;
+    const def = bosses[a.id];
+    const maxHp = a.loadout.maxHp === 115 ? 115 : 100;
+    const hp = rank(a.hp, def.hp);
+    const playerHp = rank(a.playerHp, maxHp);
+    if (!hp || !playerHp) return;
+    const phase = rank(a.phase, def.phases.length - 1);
+    const step = rank(a.step, def.phases[phase].length - 1);
+    const move2 = def.phases[phase][step];
+    const gearBonus = rank(a.loadout.gearBonus, 10);
+    const workshop = rank(a.loadout.workshop, 4);
+    const skills2 = rank(a.loadout.skills, 3);
+    const ids = /* @__PURE__ */ new Set();
+    const pets = Array.isArray(a.loadout.pets) ? a.loadout.pets.slice(0, 2).flatMap((pet) => {
+      if (!pet || !Object.hasOwn(state.companions.pets, pet.id) || ids.has(pet.id) || !["strike", "heal", "break"].includes(pet.role))
+        return [];
+      ids.add(pet.id);
+      return [
+        {
+          id: pet.id,
+          role: pet.role,
+          power: rank(pet.power, 7),
+          ready: pet.ready === true
+        }
+      ];
+    }) : [];
+    combat.attempt = {
+      id: a.id,
+      hp,
+      playerHp,
+      phase,
+      step,
+      mode: a.mode,
+      time: bound(a.time, maxFightTime),
+      remaining: bound(
+        a.remaining,
+        a.mode === "open" ? move2.opening : move2.warning
+      ),
+      guarded: a.mode === "warn" && Boolean(move2.damage) && a.guarded === true,
+      hits: rank(a.hits, 4),
+      heat: rank(a.heat, 8),
+      streak: rank(a.streak, 4),
+      armorBreak: a.armorBreak === true,
+      exposed: bound(a.exposed, 2e3),
+      riposte: rank(a.riposte, 14),
+      pierce: rank(a.pierce, 2),
+      assist: bound(a.assist, assistInterval),
+      loadout: {
+        gearBonus,
+        workshop,
+        skills: skills2,
+        damage: 4 + gearBonus + workshop + skills2,
+        sets: Object.fromEntries(
+          Object.entries(combatSets).map(([id, set]) => [
+            id,
+            rank(a.loadout.sets?.[id], set.rewardSlots.length)
+          ])
+        ),
+        pets,
+        maxHp,
+        echo: rank(a.loadout.echo, 2)
+      }
+    };
+  }
+  function keepCombat(state) {
+    return {
+      ...freshCombat(),
+      records: Object.fromEntries(
+        Object.entries(state.combat.records).map(([id, record]) => [
+          id,
+          { ...record }
+        ])
+      )
+    };
+  }
+
   // src/js/runtime.js
   var runtime = {
     filter: "all",
@@ -5297,11 +6284,12 @@ textarea {
   };
 
   // src/js/state.js
-  var schemaVersion = 4;
+  var schemaVersion = 5;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
     sites: freshSites(),
+    combat: freshCombat(),
     companions: freshCompanions(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),
@@ -5402,6 +6390,631 @@ textarea {
   }
   function setText(element, value) {
     setValue(element, "textContent", String(value));
+  }
+
+  // src/js/saves.js
+  function saveVersion(payload) {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload))
+      throw new Error("Invalid save code.");
+    const version = Object.hasOwn(payload, "schemaVersion") ? payload.schemaVersion : 0;
+    if (!Number.isSafeInteger(version) || version < 0)
+      throw new Error("Invalid save version.");
+    if (version > schemaVersion)
+      throw new Error("This save is from a newer version of Button Field.");
+    for (const key of ["coins", "total", "presses"]) {
+      if (Object.hasOwn(payload, key) && !Number.isFinite(payload[key]))
+        throw new Error("Invalid save code.");
+    }
+    if (!["coins", "total", "presses"].some((key) => Object.hasOwn(payload, key)))
+      throw new Error("Invalid save code.");
+    for (const key of ["items", "chests", "found"]) {
+      if (Object.hasOwn(payload, key) && !Array.isArray(payload[key]))
+        throw new Error("Invalid save code.");
+    }
+    return version;
+  }
+  function normalize(o) {
+    saveVersion(o);
+    return normalizeRun(o);
+  }
+  function normalizeRun(o) {
+    const f = initializeResources(fresh(), o), num = (n, max = 1e15) => typeof n === "number" && Number.isFinite(n) ? clamp(n, 0, max) : 0;
+    f.lootRules = normalizeLootRules(o.lootRules);
+    f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
+    f.total = num(o.total, Number.MAX_VALUE);
+    normalizeSites(f, o.sites);
+    for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
+    for (const k of ["earned", "runs"])
+      f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
+    f.asc.life = num(o.asc?.life ?? f.total, Number.MAX_VALUE);
+    const world = recordWorld(o);
+    if (f.total >= worlds[world].at) f.world = world;
+    for (const [id, field] of Object.entries(worlds)) {
+      if (f.total >= field.at)
+        f.worldProgress[id] = Math.floor(num(o.worldProgress?.[id], field.limit));
+    }
+    if (typeof o.notice === "string") f.notice = o.notice;
+    for (const k of Object.keys(f.asc.up))
+      f.asc.up[k] = Math.floor(num(o.asc?.up?.[k], 30));
+    f.wheelClaims = Math.floor(
+      num(
+        o.wheelClaims,
+        Math.floor(f.presses / progressionThresholds.firstWheel)
+      )
+    );
+    f.wheelNextAt = typeof o.wheelNextAt === "number" && Number.isFinite(o.wheelNextAt) ? Math.max(
+      progressionThresholds.firstWheel,
+      Math.min(
+        f.presses + progressionThresholds.firstWheel,
+        Math.floor(o.wheelNextAt)
+      )
+    ) : Math.max(
+      progressionThresholds.firstWheel,
+      Math.min(
+        f.presses + progressionThresholds.firstWheel,
+        (f.wheelClaims + 1) * progressionThresholds.firstWheel
+      )
+    );
+    for (const { id, max = 100 } of upgrades)
+      f.up[id] = Math.floor(num(o.up?.[id], max));
+    for (const k of Object.keys(f.skills))
+      f.skills[k] = Math.floor(num(o.skills?.[k], 50));
+    const validItem = (i) => i && Number.isInteger(i.id) && i.id > 0 && Number.isInteger(i.slot) && i.slot >= 0 && i.slot < slots.length && Number.isInteger(i.r) && i.r >= 0 && i.r < rarity.length && Number.isInteger(i.level) && i.level >= 1 && i.level <= 1e3 && Number.isFinite(i.value) && i.value > 0 && i.value < 4e8;
+    const usedIds = /* @__PURE__ */ new Set();
+    function uniqueId(entry) {
+      if (!Number.isSafeInteger(entry.id) || entry.id < 1 || entry.id >= Number.MAX_SAFE_INTEGER || usedIds.has(entry.id))
+        return false;
+      usedIds.add(entry.id);
+      return true;
+    }
+    if (Array.isArray(o.items)) {
+      for (const item of o.items) {
+        if (validItem(item) && uniqueId(item)) {
+          const { id, slot, r, level: level2, value } = item;
+          const forge = Math.floor(num(item.forge, maxForgeRank));
+          f.items.push({
+            id,
+            slot,
+            r,
+            level: level2,
+            value,
+            ...worldTag(recordWorld(item)),
+            ...forge ? { forge } : {},
+            ...typeof item.set === "string" && hasSetDesign(item.set, slot, r) ? { set: item.set } : {},
+            ...item.locked === true ? { locked: true } : {}
+          });
+        }
+        if (f.items.length === gearBagLimit) break;
+      }
+    }
+    for (const k of slots.keys()) {
+      const id = o.equip?.[k];
+      if (f.items.some((i) => i.id === id && i.slot === k)) f.equip[k] = id;
+    }
+    const validDesigns = new Set(
+      Object.keys(worlds).flatMap(
+        (id) => slots.flatMap(
+          (_, slot) => rarity.map((_2, r) => discoveryKey(slot, r, id))
+        )
+      )
+    );
+    for (const id of Object.keys(builds))
+      for (const slot of slots.keys())
+        for (let r = 2; r < rarity.length; r++)
+          if (hasSetDesign(id, slot, r))
+            validDesigns.add(`set:${id}:${slot}:${r}`);
+    if (Array.isArray(o.found))
+      f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
+    const chestCounts = /* @__PURE__ */ Object.create(null);
+    if (Array.isArray(o.chests)) {
+      for (const chest of o.chests) {
+        if (!chest || !Number.isInteger(chest.r) || chest.r < 0 || chest.r > legendary || !Number.isFinite(chest.x) || !Number.isFinite(chest.y) || !Number.isInteger(chest.level) || chest.level < 1 || chest.level > 1e3)
+          continue;
+        const id = recordWorld(chest);
+        if (f.total < worlds[id].at || chestCounts[id] === worldChestLimit || !uniqueId(chest))
+          continue;
+        chestCounts[id] = (chestCounts[id] || 0) + 1;
+        f.chests.push({
+          id: chest.id,
+          r: chest.r,
+          level: chest.level,
+          x: clamp(chest.x, 11.5, 86.5),
+          y: clamp(chest.y, 22, 79),
+          ...worldTag(id)
+        });
+      }
+    }
+    f.nextId = Math.max(
+      1,
+      Math.floor(num(o.nextId, 1e12)),
+      ...f.items.map((i) => i.id + 1),
+      ...f.chests.map((c) => c.id + 1)
+    );
+    normalizeCompanions(f, o.companions);
+    normalizeCombat(f, o.combat);
+    return f;
+  }
+  var KEY = "treasure-grove-v3";
+  var preForgeSaveKey = KEY + "-before-forge";
+  var preCombatSaveKey = KEY + "-before-combat";
+  var preCompanionsSaveKey = KEY + "-before-companions";
+  var preSitesSaveKey = KEY + "-before-farming-mining";
+  var preExpansionSaveKey = KEY + "-before-equipment-expansion";
+  var preFoundationSaveKey = KEY + "-before-foundation";
+  var saveWarning = "";
+  var blockedSave = null;
+  function readBackup(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  }
+  function readPreForgeSave() {
+    return readBackup(preForgeSaveKey);
+  }
+  function readPreCombatSave() {
+    return readBackup(preCombatSaveKey);
+  }
+  function readPreCompanionsSave() {
+    return readBackup(preCompanionsSaveKey);
+  }
+  function readPreSitesSave() {
+    return readBackup(preSitesSaveKey);
+  }
+  function readPreExpansionSave() {
+    return readBackup(preExpansionSaveKey);
+  }
+  function readPreFoundationSave() {
+    return readBackup(preFoundationSaveKey);
+  }
+  function readBlockedSave() {
+    return blockedSave;
+  }
+  function getSaveWarning() {
+    return saveWarning;
+  }
+  function pauseSaving(warning, raw) {
+    saveWarning = warning;
+    blockedSave = raw;
+  }
+  function resumeSaving() {
+    saveWarning = "";
+    blockedSave = null;
+  }
+  function preserveBackup(key, raw) {
+    if (localStorage.getItem(key) === null) localStorage.setItem(key, raw);
+  }
+  function loadStoredRun() {
+    let raw;
+    try {
+      raw = localStorage.getItem(KEY);
+    } catch {
+      pauseSaving(
+        "Could not read the stored save. Import a save or start a new game to resume autosave.",
+        null
+      );
+      setRunState(fresh());
+      return;
+    }
+    if (raw === null) {
+      setRunState(fresh());
+      return;
+    }
+    let payload, version, run;
+    try {
+      payload = JSON.parse(raw);
+      version = saveVersion(payload);
+      run = normalizeRun(payload);
+    } catch (error) {
+      const reason = error instanceof SyntaxError ? "Invalid save code." : error.message;
+      pauseSaving(
+        reason + " The stored save is preserved. Import a supported save or start a new game to resume autosave.",
+        raw
+      );
+      setRunState(fresh());
+      return;
+    }
+    setRunState(run);
+    if (version < schemaVersion) {
+      try {
+        preserveBackup(preCombatSaveKey, raw);
+        if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
+        if (version < 3) preserveBackup(preSitesSaveKey, raw);
+        if (version < 2) preserveBackup(preExpansionSaveKey, raw);
+        if (version < 1) preserveBackup(preFoundationSaveKey, raw);
+        if (!Object.hasOwn(payload, "scrap"))
+          preserveBackup(preForgeSaveKey, raw);
+      } catch {
+        pauseSaving(
+          "Could not back up the stored save before migration. Import a save or start a new game to resume autosave.",
+          raw
+        );
+      }
+    }
+  }
+  function save() {
+    if (saveWarning) {
+      runtime.saveDirty = false;
+      setText($("saveStatus"), "Autosave paused");
+      return false;
+    }
+    try {
+      localStorage.setItem(KEY, JSON.stringify(s));
+      runtime.saveDirty = false;
+      setText($("saveStatus"), "Saved locally");
+      return true;
+    } catch {
+      runtime.saveDirty = true;
+      setText($("saveStatus"), "Local save unavailable");
+      return false;
+    }
+  }
+
+  // src/js/sound.js
+  var soundTones = {
+    combatStart: [
+      [145, 200, 0.15, 0, "triangle", 0.06],
+      [293, 390, 0.12, 0.12, "triangle", 0.045]
+    ],
+    combatGuard: [[520, 320, 0.1, 0, "triangle", 0.055]],
+    combatHurt: [[160, 72, 0.17, 0, "triangle", 0.075]],
+    combatWin: [
+      [392, 392, 0.12, 0, "triangle", 0.06],
+      [523, 523, 0.14, 0.1, "triangle", 0.06],
+      [659, 659, 0.16, 0.2, "triangle", 0.06],
+      [784, 784, 0.28, 0.32, "triangle", 0.05]
+    ],
+    tap: [[180, 115, 0.065, 0, "triangle", 0.09]],
+    menu: [[450, 350, 0.075, 0, "triangle", 0.045]],
+    chest: [
+      [220, 115, 0.09, 0, "triangle", 0.07],
+      [410, 410, 0.1, 0.065, "triangle", 0.05],
+      [520, 520, 0.11, 0.13, "triangle", 0.04]
+    ],
+    upgrade: [
+      [392, 392, 0.1, 0, "triangle", 0.06],
+      [523, 523, 0.12, 0.09, "triangle", 0.055],
+      [659, 659, 0.16, 0.18, "triangle", 0.045]
+    ],
+    equip: [
+      [330, 330, 0.08, 0, "triangle", 0.05],
+      [440, 440, 0.12, 0.07, "triangle", 0.05]
+    ],
+    ascend: [
+      [262, 262, 0.24, 0, "sine", 0.07],
+      [392, 392, 0.24, 0.1, "sine", 0.065],
+      [523, 523, 0.3, 0.2, "sine", 0.055]
+    ]
+  };
+  var soundOn = true;
+  var audioCtx = null;
+  var soundLast = 0;
+  function syncSound() {
+    const b = $("soundToggle");
+    b.textContent = soundOn ? "\u{1F50A}" : "\u{1F507}";
+    b.setAttribute("aria-pressed", String(soundOn));
+    b.setAttribute("aria-label", soundOn ? "Mute sound" : "Enable sound");
+    b.title = soundOn ? "Mute sound" : "Enable sound";
+  }
+  function initAudio() {
+    if (!soundOn) return null;
+    try {
+      const C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      if (!audioCtx) audioCtx = new C();
+      if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {
+      });
+      return audioCtx;
+    } catch {
+      return null;
+    }
+  }
+  function sound(kind) {
+    if (!soundOn) return;
+    const ctx = initAudio();
+    if (!ctx || ctx.state === "closed") return;
+    const t = ctx.currentTime;
+    if (kind === "tap" && t - soundLast < 0.042 && soundLast > 0) return;
+    if (kind === "tap") soundLast = t;
+    for (const [f, end, d, offset, type, vol] of soundTones[kind] || soundTones.menu) {
+      try {
+        const o = ctx.createOscillator(), g = ctx.createGain(), start = t + offset;
+        o.type = type;
+        o.frequency.setValueAtTime(f, start);
+        o.frequency.exponentialRampToValueAtTime(end, start + d);
+        g.gain.setValueAtTime(1e-4, start);
+        g.gain.exponentialRampToValueAtTime(vol, start + 8e-3);
+        g.gain.exponentialRampToValueAtTime(1e-4, start + d);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(start);
+        o.stop(start + d + 0.01);
+        o.onended = () => {
+          o.disconnect();
+          g.disconnect();
+        };
+      } catch {
+      }
+    }
+  }
+  function initSound() {
+    try {
+      soundOn = localStorage.getItem(KEY + "-sound") !== "off";
+    } catch {
+    }
+    syncSound();
+    $("soundToggle").addEventListener("click", () => {
+      soundOn = !soundOn;
+      try {
+        localStorage.setItem(KEY + "-sound", soundOn ? "on" : "off");
+      } catch {
+      }
+      syncSound();
+      if (soundOn) sound("menu");
+      else if (audioCtx) audioCtx.suspend().catch(() => {
+      });
+    });
+  }
+
+  // src/js/combat-view.js
+  var lastTick;
+  var selected = "";
+  var result = null;
+  var boardMessage = "";
+  var pictures = /* @__PURE__ */ new Map();
+  var spriteIds = ["combatSprite", "combatActor"];
+  function bossSprite(id) {
+    if (pictures.has(id)) return pictures.get(id);
+    const { art, color } = bosses[id];
+    const paths = ["", "", "", "", ""];
+    for (const [y, row] of art.entries())
+      for (const [x, pixel] of Array.from(row).entries())
+        if (pixel !== ".") paths[pixel] += `M${x} ${y}h1v1h-1z`;
+    const palette = ["", "#16242d", color, "#896291", "#fff2b5"];
+    const sprite = `<svg viewBox="0 0 12 10" shape-rendering="crispEdges" class="boss-sprite" aria-hidden="true">${paths.slice(1).map((d, i) => `<path fill="${palette[i + 1]}" d="${d}"/>`).join("")}</svg>`;
+    pictures.set(id, sprite);
+    return sprite;
+  }
+  function rewardName(id) {
+    const { set, slot } = bosses[id].reward;
+    return combatSets[set].name + " " + slots[slot];
+  }
+  function timeLabel(ms) {
+    return (ms / 1e3).toFixed(1) + "s";
+  }
+  function loadoutMarkup() {
+    const { damage, gearBonus, workshop, skills: skills2, maxHp, echo, sets, pets } = combatLoadout(s, equippedGear());
+    const active = Object.entries(sets).filter(([, count]) => count >= 2).map(([id]) => combatSets[id].name);
+    const assists = {
+      strike: "strike",
+      heal: "Guard heal",
+      break: "armor damage"
+    };
+    return `<p><strong>${damage} base damage</strong> \xB7 ${maxHp} HP \xB7 +${6 + echo} base riposte damage</p>
+    <p class="subtext">Damage \xB7 4 base + ${gearBonus} gear + ${workshop} Workshop + ${skills2} skills</p>
+    <p class="subtext">Active sets \xB7 ${active.join(", ") || "None"}</p>
+    <p class="subtext">Pet assists \xB7 ${pets.map((p) => assists[p.role]).join(", ") || "None assigned"}</p>`;
+  }
+  function boardMarkup() {
+    const local = Object.keys(bosses).filter(
+      (id) => bosses[id].world === s.world
+    );
+    if (!local.includes(selected)) selected = local[0];
+    const active = s.combat.attempt;
+    const cards = local.map((id) => {
+      const def2 = bosses[id];
+      const record = s.combat.records[id];
+      const access = bossAccess(s, id) ? "Available" : "Locked";
+      const status = record ? access + " \xB7 Trophy earned" : access;
+      return `<button class="boss-card" data-boss-select="${id}" aria-pressed="${selected === id}" style="--boss-color:${def2.color}">
+      ${bossSprite(id)}<span><strong>${def2.name}</strong><small>${status}</small></span></button>`;
+    }).join("");
+    const def = bosses[selected];
+    const requirement = bossAccess(s, selected) ? "" : `<p class="subtext">${fmtExact(def.at)} coins earned this run${def.requires ? " \xB7 Defeat " + bosses[def.requires].name + " this run" : ""}</p>`;
+    const reward2 = s.combat.clears[selected] ? "First-clear gear earned this run" : "First clear this run \xB7 " + rewardName(selected);
+    const pending = Object.keys(bosses).filter(
+      (id) => s.combat.clears[id] === "unclaimed"
+    );
+    const trophies = Object.entries(bosses).filter(([id]) => s.combat.records[id]).map(([id, boss]) => {
+      const { wins, best } = s.combat.records[id];
+      return `<li><strong>${boss.title}</strong> \xB7 ${boss.name} \xB7 ${fmtExact(wins)} wins \xB7 Best ${timeLabel(best)}</li>`;
+    }).join("");
+    return `<p class="subtext">${worlds[s.world].name} \xB7 Challenge a boss with your current gear, skills, and field companions.</p>
+    <div class="boss-roster">${cards}</div>
+    <article class="up-card boss-detail">
+      <h3>${def.name}</h3><p>${def.intro}</p>${requirement}
+      <p>${fmtExact(def.hp)} HP \xB7 ${reward2}</p>
+      <button class="action gold" data-boss-start="${selected}" ${active || !bossAccess(s, selected) ? "disabled" : ""}>Start fight</button>
+      ${active ? '<button class="action secondary" data-close="1">Resume current fight</button>' : ""}
+    </article>
+    <section class="boss-loadout"><h3>Combat loadout</h3>${loadoutMarkup()}</section>
+    ${pending.length ? `<section class="boss-claims"><h3>Unclaimed gear</h3>${pending.map(
+      (id) => `<button class="action gold" data-boss-claim="${id}">Claim ${rewardName(id)}</button>`
+    ).join("")}</section>` : ""}
+    <details class="gear-sets"><summary>Boss trophies</summary>${trophies ? `<ul>${trophies}</ul>` : '<p class="subtext">Defeat a boss to earn its trophy.</p>'}</details>
+    <p class="subtext" id="bossMessage" role="status"></p>`;
+  }
+  function renderBossBoard() {
+    $("modalBody").innerHTML = boardMarkup();
+    setText($("bossMessage"), boardMessage);
+  }
+  function selectBoss(id) {
+    if (!Object.hasOwn(bosses, id) || bosses[id].world !== s.world) return;
+    selected = id;
+    boardMessage = "";
+    renderBossBoard();
+    $("modalBody").querySelector(`[data-boss-select="${id}"]`)?.focus({ preventScroll: true });
+  }
+  function prepareFight(id) {
+    if (!startFight(s, id, equippedGear())) return false;
+    resetCombatView();
+    setText($("combatStatus"), "Fight started.");
+    renderCombatField();
+    sound("combatStart");
+    return true;
+  }
+  function claimFightReward(id) {
+    const item = claimBossGear(s, id);
+    boardMessage = item ? itemName(item) + " added to your gear bag." : "Free a slot in your gear bag to claim this reward.";
+    renderBossBoard();
+    ($("modalBody").querySelector("[data-boss-claim]") || $("close")).focus({
+      preventScroll: true
+    });
+    if (item) sound("chest");
+    return item;
+  }
+  function resetCombatClock() {
+    lastTick = performance.now();
+  }
+  function resetCombatView() {
+    result = null;
+    boardMessage = "";
+    $("combatEffects").replaceChildren();
+    for (const id of spriteIds) {
+      const sprite = $(id);
+      delete sprite.dataset.boss;
+      sprite.classList.remove("combat-hit", "combat-finish", "combat-enter");
+    }
+    setText($("combatStatus"), "");
+    resetCombatClock();
+  }
+  function resetBossSelection() {
+    selected = "";
+    resetCombatView();
+  }
+  function syncCombat(now = performance.now()) {
+    const elapsed = lastTick === void 0 ? 0 : Math.max(0, now - lastTick);
+    lastTick = now;
+    if (!s.combat.attempt || document.hidden || runtime.modalType || !elapsed)
+      return;
+    const events = advanceFight(s, elapsed);
+    runtime.saveDirty = true;
+    showCombatEvents(events);
+    renderCombatField();
+    if (!s.combat.attempt) save();
+  }
+  function tryGuard() {
+    if (document.hidden || runtime.modalType) return;
+    syncCombat();
+    if (!guardFight(s)) return;
+    setText($("combatStatus"), "Guard ready.");
+    renderCombatField();
+    sound("combatGuard");
+    save();
+  }
+  function leaveFight() {
+    if (!retreatFight(s)) return;
+    resetCombatView();
+    renderCombatField();
+    $("press").focus();
+    save();
+  }
+  function renderCombatField() {
+    const enabled = s.total >= milestones.combat;
+    setValue($("bosses"), "hidden", !enabled);
+    const a = s.combat.attempt;
+    const panel = $("combatPanel");
+    const shown = Boolean(a || result);
+    setValue(panel, "hidden", !shown);
+    setValue($("combatActor"), "hidden", !shown);
+    if (!shown) return;
+    const id = a?.id || result.id;
+    const def = bosses[id];
+    for (const spriteId of spriteIds) {
+      const sprite = $(spriteId);
+      if (sprite.dataset.boss === id) continue;
+      sprite.dataset.boss = id;
+      sprite.innerHTML = bossSprite(id);
+      sprite.classList.add("combat-enter");
+    }
+    setText($("combatName"), def.name);
+    setValue($("combatGuard"), "hidden", !a);
+    setValue($("combatRetreat"), "hidden", !a);
+    setValue($("combatDone"), "hidden", Boolean(a));
+    setValue($("combatDismiss"), "hidden", Boolean(a));
+    setValue($("combatMeters"), "hidden", !a);
+    setValue($("combatWarnTime"), "hidden", !a);
+    if (!a) {
+      setText(
+        $("combatTell"),
+        result.type === "victory" ? result.reward ? "Victory! Claim gear at the Boss Board." : "Victory! Rematch recorded." : "Defeated. You can try again from the Boss Board."
+      );
+      return;
+    }
+    const move2 = currentMove(a);
+    const warning = a.mode === "warn";
+    const meters = [
+      ["bossHp", a.hp, def.hp],
+      ["playerHp", a.playerHp, a.loadout.maxHp]
+    ];
+    for (const [name, value, max] of meters) {
+      setValue($(name), "max", max);
+      setValue($(name), "value", value);
+      setText($(name + "Text"), value + " / " + max);
+    }
+    const vent = !warning && move2.kind === "vent" ? " \xB7 Heat " + a.heat + "/8" : "";
+    setText(
+      $("combatTell"),
+      warning ? move2.name + (a.guarded ? " \xB7 Guard ready" : "") : (a.exposed > 0 ? "Exposed \xB7 strike now" : "Opening") + vent
+    );
+    setText($("combatWarnTime"), timeLabel(Math.ceil(a.remaining / 100) * 100));
+    setValue($("combatGuard"), "disabled", !warning || a.guarded || !move2.damage);
+    panel.classList.toggle("combat-warning", warning && Boolean(move2.damage));
+  }
+  function effectLabel(label, style) {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const layer = $("combatEffects");
+    if (layer.childElementCount >= 8) layer.firstElementChild.remove();
+    const el = document.createElement("span");
+    el.className = "combat-number " + style;
+    el.textContent = label;
+    layer.append(el);
+    setTimeout(() => el.remove(), 600);
+  }
+  function showCombatEvents(events) {
+    for (const event of events) {
+      if (event.type === "strike") {
+        effectLabel("\u2212" + event.amount, "combat-damage");
+        for (const id of spriteIds) {
+          const sprite = $(id);
+          if (sprite.classList.contains("combat-hit")) continue;
+          sprite.classList.add("combat-hit");
+          setTimeout(() => sprite.classList.remove("combat-hit"), 110);
+        }
+      } else if (event.type === "hurt") {
+        effectLabel("\u2212" + event.amount + " HP", "combat-hurt");
+        setText($("combatStatus"), "You took " + event.amount + " damage.");
+        sound("combatHurt");
+      } else if (event.type === "block") {
+        effectLabel(
+          event.amount ? "Block \xB7 +" + event.amount + " HP" : "Blocked!",
+          "combat-block"
+        );
+        setText($("combatStatus"), "Blocked. Riposte ready.");
+        sound("combatGuard");
+      } else if (event.type === "warning") {
+        setText($("combatStatus"), event.name);
+      } else if (event.type === "interrupt") {
+        setText($("combatStatus"), "Pounce interrupted. Strike while exposed.");
+        effectLabel("Interrupted", "combat-block");
+      } else if (event.type === "bossHeal") {
+        effectLabel("+" + event.amount + " boss HP", "combat-block");
+      } else if (event.type === "victory" || event.type === "defeat") {
+        result = event;
+        selected = event.id;
+        for (const id of spriteIds) $(id).classList.add("combat-finish");
+        $("combatPanel").classList.remove("combat-warning");
+        setText(
+          $("combatStatus"),
+          event.type === "victory" ? "Boss defeated." : "You were defeated."
+        );
+        if (event.type === "victory") {
+          effectLabel("Victory!", "combat-block");
+          sound("combatWin");
+        }
+      }
+    }
   }
 
   // src/js/site-view.js
@@ -5595,8 +7208,8 @@ textarea {
       if (action === "plant" && plant(s, index, $("seed-" + index).value))
         return "Crop planted.";
       if (action === "harvest") {
-        const reward = harvest(s, index);
-        if (reward) return "Harvested \xB7 " + rewardText([reward]);
+        const reward2 = harvest(s, index);
+        if (reward2) return "Harvested \xB7 " + rewardText([reward2]);
       }
       if (action === "research" && buyResearch(s, id))
         return research[id].name + " researched.";
@@ -5647,9 +7260,9 @@ textarea {
       (path, index) => path ? `<path fill="${colors[index]}" d="${path}"/>` : ""
     ).join("");
     const crest = evolved ? `<path fill="${def.color}" d="M5 0h1v1h1v1H4V1h1z"/><path fill="#fff6ad" d="M5 1h1v1H5zM0 2h1v1H0zm8 0h1v1H8z"/>` : "";
-    const result = `<svg viewBox="0 0 10 9" class="pet-icon" shape-rendering="crispEdges" aria-hidden="true">${pixels}${crest}</svg>`;
-    artCache.set(key, result);
-    return result;
+    const result2 = `<svg viewBox="0 0 10 9" class="pet-icon" shape-rendering="crispEdges" aria-hidden="true">${pixels}${crest}</svg>`;
+    artCache.set(key, result2);
+    return result2;
   }
   function companionMarkup() {
     return `<p class="subtext">Recruits join when their requirements are met. Field companions work while the field is open. Expeditions continue while you\u2019re away.</p>
@@ -5693,7 +7306,7 @@ textarea {
     updatePetField();
     if (runtime.modalType !== "companions") return;
     const camp = s.companions;
-    const selected = safePetSelection();
+    const selected2 = safePetSelection();
     paint(
       $("petSlots"),
       camp.field.map((id, i) => {
@@ -5709,12 +7322,12 @@ textarea {
         const pet2 = camp.pets[id];
         const duty = pet2 ? petDuty(s, id) : null;
         const label = !duty ? "Locked" : duty.type === "field" ? "Field" : duty.type === "trip" ? "Away" : "Home";
-        return `<button class="pet-card" data-pet-command="select" data-pet-arg="${id}" aria-pressed="${selected === id}" style="--pet-color:${def.color}">
+        return `<button class="pet-card" data-pet-command="select" data-pet-arg="${id}" aria-pressed="${selected2 === id}" style="--pet-color:${def.color}">
       ${petIcon(id, pet2?.evolved)}<span><strong>${def.name}</strong><small>${pet2 ? "Lv. " + petLevel(pet2) + " \xB7 " : ""}${label}</small></span></button>`;
       }).join("")
     );
-    paint($("petProfile"), profileMarkup(selected));
-    const pet = camp.pets[selected];
+    paint($("petProfile"), profileMarkup(selected2));
+    const pet = camp.pets[selected2];
     if (pet) {
       const level2 = petLevel(pet);
       const status = $("petProgress");
@@ -5727,7 +7340,7 @@ textarea {
       if (ready)
         setText(
           ready,
-          "Action \xB7 " + (pet.cooldown === 0 ? "Ready, waiting for a target" : seconds2(pet.cooldown ?? cooldown(selected, pet)) + " remaining")
+          "Action \xB7 " + (pet.cooldown === 0 ? "Ready, waiting for a target" : seconds2(pet.cooldown ?? cooldown(selected2, pet)) + " remaining")
         );
       if ($("petLast")) setText($("petLast"), pet.last || "No activity yet.");
     }
@@ -5830,9 +7443,9 @@ textarea {
     if (action === "cancel" && cancelTrip(s, +arg, now))
       message = "Expedition canceled. The companion returned without rewards.";
     if (action === "claim") {
-      const reward = claimTrip(s, +arg, now);
-      if (reward)
-        message = "Claimed \xB7 " + costText(reward.loot) + " + " + reward.xp + " XP" + (reward.artifact ? " \xB7 Discovered " + artifacts[reward.artifact].name + "." : ".");
+      const reward2 = claimTrip(s, +arg, now);
+      if (reward2)
+        message = "Claimed \xB7 " + costText(reward2.loot) + " + " + reward2.xp + " XP" + (reward2.artifact ? " \xB7 Discovered " + artifacts[reward2.artifact].name + "." : ".");
     }
     return { changed: Boolean(message), message };
   }
@@ -5869,8 +7482,8 @@ textarea {
       node.style.removeProperty("--pet-y");
     }
   }
-  function animatePetAction(result) {
-    const index = s.companions.field.indexOf(result.id);
+  function animatePetAction(result2) {
+    const index = s.companions.field.indexOf(result2.id);
     const node = $("fieldPet-" + index);
     if (!node) return;
     const locations = {
@@ -5879,7 +7492,7 @@ textarea {
       mine: [70, 81],
       roam: [index ? 72 : 28, 44]
     };
-    const [x, y] = result.opened ? [result.opened.chest.x, result.opened.chest.y] : locations[result.target];
+    const [x, y] = result2.opened ? [result2.opened.chest.x, result2.opened.chest.y] : locations[result2.target];
     node.style.setProperty("--pet-x", x + "%");
     node.style.setProperty("--pet-y", y + "%");
     clearTimeout(actionTimers.get(node));
@@ -5920,6 +7533,7 @@ textarea {
     if (stars < 1) return null;
     const run = fresh();
     run.companions = keepCompanions(state);
+    run.combat = keepCombat(state);
     run.lootRules = { ...state.lootRules };
     run.asc = {
       ...state.asc,
@@ -6147,352 +7761,6 @@ textarea {
       setText($("guideNextEarned"), guideProgress(s, secondTier.target));
   }
 
-  // src/js/saves.js
-  function saveVersion(payload) {
-    if (!payload || typeof payload !== "object" || Array.isArray(payload))
-      throw new Error("Invalid save code.");
-    const version = Object.hasOwn(payload, "schemaVersion") ? payload.schemaVersion : 0;
-    if (!Number.isSafeInteger(version) || version < 0)
-      throw new Error("Invalid save version.");
-    if (version > schemaVersion)
-      throw new Error("This save is from a newer version of Button Field.");
-    for (const key of ["coins", "total", "presses"]) {
-      if (Object.hasOwn(payload, key) && !Number.isFinite(payload[key]))
-        throw new Error("Invalid save code.");
-    }
-    if (!["coins", "total", "presses"].some((key) => Object.hasOwn(payload, key)))
-      throw new Error("Invalid save code.");
-    for (const key of ["items", "chests", "found"]) {
-      if (Object.hasOwn(payload, key) && !Array.isArray(payload[key]))
-        throw new Error("Invalid save code.");
-    }
-    return version;
-  }
-  function normalize(o) {
-    saveVersion(o);
-    return normalizeRun(o);
-  }
-  function normalizeRun(o) {
-    const f = initializeResources(fresh(), o), num = (n, max = 1e15) => typeof n === "number" && Number.isFinite(n) ? clamp(n, 0, max) : 0;
-    f.lootRules = normalizeLootRules(o.lootRules);
-    f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
-    f.total = num(o.total, Number.MAX_VALUE);
-    normalizeSites(f, o.sites);
-    for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
-    for (const k of ["earned", "runs"])
-      f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
-    f.asc.life = num(o.asc?.life ?? f.total, Number.MAX_VALUE);
-    const world = recordWorld(o);
-    if (f.total >= worlds[world].at) f.world = world;
-    for (const [id, field] of Object.entries(worlds)) {
-      if (f.total >= field.at)
-        f.worldProgress[id] = Math.floor(num(o.worldProgress?.[id], field.limit));
-    }
-    if (typeof o.notice === "string") f.notice = o.notice;
-    for (const k of Object.keys(f.asc.up))
-      f.asc.up[k] = Math.floor(num(o.asc?.up?.[k], 30));
-    f.wheelClaims = Math.floor(
-      num(
-        o.wheelClaims,
-        Math.floor(f.presses / progressionThresholds.firstWheel)
-      )
-    );
-    f.wheelNextAt = typeof o.wheelNextAt === "number" && Number.isFinite(o.wheelNextAt) ? Math.max(
-      progressionThresholds.firstWheel,
-      Math.min(
-        f.presses + progressionThresholds.firstWheel,
-        Math.floor(o.wheelNextAt)
-      )
-    ) : Math.max(
-      progressionThresholds.firstWheel,
-      Math.min(
-        f.presses + progressionThresholds.firstWheel,
-        (f.wheelClaims + 1) * progressionThresholds.firstWheel
-      )
-    );
-    for (const { id, max = 100 } of upgrades)
-      f.up[id] = Math.floor(num(o.up?.[id], max));
-    for (const k of Object.keys(f.skills))
-      f.skills[k] = Math.floor(num(o.skills?.[k], 50));
-    const validItem = (i) => i && Number.isInteger(i.id) && i.id > 0 && Number.isInteger(i.slot) && i.slot >= 0 && i.slot < slots.length && Number.isInteger(i.r) && i.r >= 0 && i.r < rarity.length && Number.isInteger(i.level) && i.level >= 1 && i.level <= 1e3 && Number.isFinite(i.value) && i.value > 0 && i.value < 4e8;
-    const usedIds = /* @__PURE__ */ new Set();
-    function uniqueId(entry) {
-      if (!Number.isSafeInteger(entry.id) || entry.id < 1 || entry.id >= Number.MAX_SAFE_INTEGER || usedIds.has(entry.id))
-        return false;
-      usedIds.add(entry.id);
-      return true;
-    }
-    if (Array.isArray(o.items)) {
-      for (const item of o.items) {
-        if (validItem(item) && uniqueId(item)) {
-          const { id, slot, r, level: level2, value } = item;
-          const forge = Math.floor(num(item.forge, maxForgeRank));
-          f.items.push({
-            id,
-            slot,
-            r,
-            level: level2,
-            value,
-            ...worldTag(recordWorld(item)),
-            ...forge ? { forge } : {},
-            ...typeof item.set === "string" && Object.hasOwn(builds, item.set) && r >= 2 ? { set: item.set } : {},
-            ...item.locked === true ? { locked: true } : {}
-          });
-        }
-        if (f.items.length === gearBagLimit) break;
-      }
-    }
-    for (const k of slots.keys()) {
-      const id = o.equip?.[k];
-      if (f.items.some((i) => i.id === id && i.slot === k)) f.equip[k] = id;
-    }
-    const validDesigns = new Set(
-      Object.keys(worlds).flatMap(
-        (id) => slots.flatMap(
-          (_, slot) => rarity.map((_2, r) => discoveryKey(slot, r, id))
-        )
-      )
-    );
-    for (const id of Object.keys(builds))
-      for (const slot of slots.keys())
-        for (let r = 2; r < rarity.length; r++)
-          validDesigns.add(`set:${id}:${slot}:${r}`);
-    if (Array.isArray(o.found))
-      f.found = [...new Set(o.found.filter((key) => validDesigns.has(key)))];
-    const chestCounts = /* @__PURE__ */ Object.create(null);
-    if (Array.isArray(o.chests)) {
-      for (const chest of o.chests) {
-        if (!chest || !Number.isInteger(chest.r) || chest.r < 0 || chest.r > legendary || !Number.isFinite(chest.x) || !Number.isFinite(chest.y) || !Number.isInteger(chest.level) || chest.level < 1 || chest.level > 1e3)
-          continue;
-        const id = recordWorld(chest);
-        if (f.total < worlds[id].at || chestCounts[id] === worldChestLimit || !uniqueId(chest))
-          continue;
-        chestCounts[id] = (chestCounts[id] || 0) + 1;
-        f.chests.push({
-          id: chest.id,
-          r: chest.r,
-          level: chest.level,
-          x: clamp(chest.x, 11.5, 86.5),
-          y: clamp(chest.y, 22, 79),
-          ...worldTag(id)
-        });
-      }
-    }
-    f.nextId = Math.max(
-      1,
-      Math.floor(num(o.nextId, 1e12)),
-      ...f.items.map((i) => i.id + 1),
-      ...f.chests.map((c) => c.id + 1)
-    );
-    normalizeCompanions(f, o.companions);
-    return f;
-  }
-  var KEY = "treasure-grove-v3";
-  var preForgeSaveKey = KEY + "-before-forge";
-  var preCompanionsSaveKey = KEY + "-before-companions";
-  var preSitesSaveKey = KEY + "-before-farming-mining";
-  var preExpansionSaveKey = KEY + "-before-equipment-expansion";
-  var preFoundationSaveKey = KEY + "-before-foundation";
-  var saveWarning = "";
-  var blockedSave = null;
-  function readBackup(key) {
-    try {
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  }
-  function readPreForgeSave() {
-    return readBackup(preForgeSaveKey);
-  }
-  function readPreCompanionsSave() {
-    return readBackup(preCompanionsSaveKey);
-  }
-  function readPreSitesSave() {
-    return readBackup(preSitesSaveKey);
-  }
-  function readPreExpansionSave() {
-    return readBackup(preExpansionSaveKey);
-  }
-  function readPreFoundationSave() {
-    return readBackup(preFoundationSaveKey);
-  }
-  function readBlockedSave() {
-    return blockedSave;
-  }
-  function getSaveWarning() {
-    return saveWarning;
-  }
-  function pauseSaving(warning, raw) {
-    saveWarning = warning;
-    blockedSave = raw;
-  }
-  function resumeSaving() {
-    saveWarning = "";
-    blockedSave = null;
-  }
-  function preserveBackup(key, raw) {
-    if (localStorage.getItem(key) === null) localStorage.setItem(key, raw);
-  }
-  function loadStoredRun() {
-    let raw;
-    try {
-      raw = localStorage.getItem(KEY);
-    } catch {
-      pauseSaving(
-        "Could not read the stored save. Import a save or start a new game to resume autosave.",
-        null
-      );
-      setRunState(fresh());
-      return;
-    }
-    if (raw === null) {
-      setRunState(fresh());
-      return;
-    }
-    let payload, version, run;
-    try {
-      payload = JSON.parse(raw);
-      version = saveVersion(payload);
-      run = normalizeRun(payload);
-    } catch (error) {
-      const reason = error instanceof SyntaxError ? "Invalid save code." : error.message;
-      pauseSaving(
-        reason + " The stored save is preserved. Import a supported save or start a new game to resume autosave.",
-        raw
-      );
-      setRunState(fresh());
-      return;
-    }
-    setRunState(run);
-    if (version < schemaVersion) {
-      try {
-        preserveBackup(preCompanionsSaveKey, raw);
-        if (version < 3) preserveBackup(preSitesSaveKey, raw);
-        if (version < 2) preserveBackup(preExpansionSaveKey, raw);
-        if (version < 1) preserveBackup(preFoundationSaveKey, raw);
-        if (!Object.hasOwn(payload, "scrap"))
-          preserveBackup(preForgeSaveKey, raw);
-      } catch {
-        pauseSaving(
-          "Could not back up the stored save before migration. Import a save or start a new game to resume autosave.",
-          raw
-        );
-      }
-    }
-  }
-  function save() {
-    if (saveWarning) {
-      runtime.saveDirty = false;
-      setText($("saveStatus"), "Autosave paused");
-      return false;
-    }
-    try {
-      localStorage.setItem(KEY, JSON.stringify(s));
-      runtime.saveDirty = false;
-      setText($("saveStatus"), "Saved locally");
-      return true;
-    } catch {
-      runtime.saveDirty = true;
-      setText($("saveStatus"), "Local save unavailable");
-      return false;
-    }
-  }
-
-  // src/js/sound.js
-  var soundTones = {
-    tap: [[180, 115, 0.065, 0, "triangle", 0.09]],
-    menu: [[450, 350, 0.075, 0, "triangle", 0.045]],
-    chest: [
-      [220, 115, 0.09, 0, "triangle", 0.07],
-      [410, 410, 0.1, 0.065, "triangle", 0.05],
-      [520, 520, 0.11, 0.13, "triangle", 0.04]
-    ],
-    upgrade: [
-      [392, 392, 0.1, 0, "triangle", 0.06],
-      [523, 523, 0.12, 0.09, "triangle", 0.055],
-      [659, 659, 0.16, 0.18, "triangle", 0.045]
-    ],
-    equip: [
-      [330, 330, 0.08, 0, "triangle", 0.05],
-      [440, 440, 0.12, 0.07, "triangle", 0.05]
-    ],
-    ascend: [
-      [262, 262, 0.24, 0, "sine", 0.07],
-      [392, 392, 0.24, 0.1, "sine", 0.065],
-      [523, 523, 0.3, 0.2, "sine", 0.055]
-    ]
-  };
-  var soundOn = true;
-  var audioCtx = null;
-  var soundLast = 0;
-  function syncSound() {
-    const b = $("soundToggle");
-    b.textContent = soundOn ? "\u{1F50A}" : "\u{1F507}";
-    b.setAttribute("aria-pressed", String(soundOn));
-    b.setAttribute("aria-label", soundOn ? "Mute sound" : "Enable sound");
-    b.title = soundOn ? "Mute sound" : "Enable sound";
-  }
-  function initAudio() {
-    if (!soundOn) return null;
-    try {
-      const C = window.AudioContext || window.webkitAudioContext;
-      if (!C) return null;
-      if (!audioCtx) audioCtx = new C();
-      if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {
-      });
-      return audioCtx;
-    } catch {
-      return null;
-    }
-  }
-  function sound(kind) {
-    if (!soundOn) return;
-    const ctx = initAudio();
-    if (!ctx || ctx.state === "closed") return;
-    const t = ctx.currentTime;
-    if (kind === "tap" && t - soundLast < 0.042 && soundLast > 0) return;
-    if (kind === "tap") soundLast = t;
-    for (const [f, end, d, offset, type, vol] of soundTones[kind] || soundTones.menu) {
-      try {
-        const o = ctx.createOscillator(), g = ctx.createGain(), start = t + offset;
-        o.type = type;
-        o.frequency.setValueAtTime(f, start);
-        o.frequency.exponentialRampToValueAtTime(end, start + d);
-        g.gain.setValueAtTime(1e-4, start);
-        g.gain.exponentialRampToValueAtTime(vol, start + 8e-3);
-        g.gain.exponentialRampToValueAtTime(1e-4, start + d);
-        o.connect(g);
-        g.connect(ctx.destination);
-        o.start(start);
-        o.stop(start + d + 0.01);
-        o.onended = () => {
-          o.disconnect();
-          g.disconnect();
-        };
-      } catch {
-      }
-    }
-  }
-  function initSound() {
-    try {
-      soundOn = localStorage.getItem(KEY + "-sound") !== "off";
-    } catch {
-    }
-    syncSound();
-    $("soundToggle").addEventListener("click", () => {
-      soundOn = !soundOn;
-      try {
-        localStorage.setItem(KEY + "-sound", soundOn ? "on" : "off");
-      } catch {
-      }
-      syncSound();
-      if (soundOn) sound("menu");
-      else if (audioCtx) audioCtx.suspend().catch(() => {
-      });
-    });
-  }
-
   // src/js/skills.js
   var skillById = (id) => skills.find((n) => n.id === id);
   var owned = (id) => hasSkill(s, id);
@@ -6538,8 +7806,8 @@ textarea {
     return `<div class="tree-tabs"><button class="tree-tab ${runtime.treeTab === "skills" ? "active" : ""}" data-tree-tab="skills">Skill tree</button><button class="tree-tab ${runtime.treeTab === "ascend" ? "active" : ""}" data-tree-tab="ascend" ${hasAscensionAccess(s) ? "" : "hidden"}>\u2726 Ascend</button></div>`;
   }
   function ascMarkup() {
-    const reward = ascReward(), next = ascCoinGoal(reward + 1), a = s.asc;
-    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses, wheel progress, farming and mining. Keeps Ascension Stars, permanent upgrades, and lifetime records. Companions keep their levels, training, evolutions, and artifacts. Field assignments and expeditions reset, including unclaimed rewards.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your field assignments and unclaimed expedition rewards will be cleared.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
+    const reward2 = ascReward(), next = ascCoinGoal(reward2 + 1), a = s.asc;
+    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward2 < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward2)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses, wheel progress, farming and mining. Keeps Ascension Stars, permanent upgrades, and lifetime records. Companions keep their levels, training, evolutions, and artifacts. Field assignments and expeditions reset, including unclaimed rewards. Boss trophies and lifetime records carry forward. Active fights, combat gear, and unclaimed boss gear reset.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your field assignments, unclaimed expedition rewards, and unclaimed boss gear will be cleared.${s.combat.attempt ? " Your active boss fight will end." : ""}</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
       const lv = a.up[u.id], cost = ascCost(u), locked = a.runs < u.req;
       return `<article class="asc-card ${locked ? "locked" : ""}">${itemIcon(...u.icon)}<h4>${u.name}</h4><p>${u.desc}</p><span class="asc-level">Level ${lv} / ${u.max}</span><span class="requirement">${locked ? "Requires " + u.req + " ascensions" : "Persists through every reset"}</span><button class="tree-buy" data-asc-buy="${u.id}" ${locked || lv >= u.max || a.stars < cost ? "disabled" : ""}>${locked ? "Locked" : lv >= u.max ? "Max level" : "Upgrade \xB7 " + fmtExact(cost) + " \u2605"}</button></article>`;
     }).join(
@@ -6793,6 +8061,7 @@ textarea {
     runtime.ascConfirm = false;
     runtime.selectedSkill = "root";
     runtime.petSelected = "";
+    resetBossSelection();
     runtime.pendingWorldUnlock = null;
     clearFieldEffects();
     renderChests();
@@ -6806,6 +8075,7 @@ textarea {
     $("chests").replaceChildren();
     $("effects").replaceChildren();
     clearPetActions();
+    resetCombatView();
   }
   function notice(text) {
     s.notice = text;
@@ -6849,6 +8119,7 @@ textarea {
     };
   }
   function press() {
+    syncCombat();
     sound("tap");
     const before = stageIndex();
     const totalBefore = s.total;
@@ -6867,6 +8138,8 @@ textarea {
       snapshot.profile
     );
     recordEarnings(totalBefore);
+    if (s.combat.attempt && !document.hidden && !runtime.modalType)
+      showCombatEvents(strikeBoss(s));
     if (chest) revealChest(chest);
     if (opened) showOpenedChest(opened);
     showSiteRewards(advanceSites(s, 1e3, true).rewards);
@@ -6972,6 +8245,7 @@ textarea {
     renderSites();
     if (recruitPets(s).length) runtime.saveDirty = true;
     renderCompanions();
+    renderCombatField();
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
     if (runtime.modalType === "forge") updateForge();
@@ -6988,12 +8262,12 @@ textarea {
     if (changed) runtime.saveDirty = true;
     if (!results.length) return;
     if (before !== s.total) recordEarnings(before);
-    for (const result of results) {
-      if (result.opened) showOpenedChest(result.opened);
-      animatePetAction(result);
-      if (result.coins) directionalFloat("+" + fmtRate(result.coins));
+    for (const result2 of results) {
+      if (result2.opened) showOpenedChest(result2.opened);
+      animatePetAction(result2);
+      if (result2.coins) directionalFloat("+" + fmtRate(result2.coins));
       notice(
-        roster[result.id].name + " \xB7 " + (result.gathered ? rewardText([result.gathered]) : result.text)
+        roster[result2.id].name + " \xB7 " + (result2.gathered ? rewardText([result2.gathered]) : result2.text)
       );
     }
     render();
@@ -7117,7 +8391,7 @@ textarea {
     const set = Object.hasOwn(builds, id) ? id : null;
     const designs = slots.flatMap(
       (slotName, slot) => rarity.map((grade, r) => {
-        if (set && r < 2) return null;
+        if (set && !hasSetDesign(set, slot, r)) return null;
         const item = set ? { slot, r, set } : { slot, r, world: id };
         const found = s.found.includes(designKey(item));
         return {
@@ -7131,16 +8405,20 @@ textarea {
     const discovered = designs.filter((design) => design.found).length;
     setText(
       $("collectionCount"),
-      discovered + "/" + designs.length + " item designs discovered in " + (set ? builds[set].name : worlds[id].name) + ". " + s.found.length + "/" + (rarity.length * slots.length * Object.keys(worlds).length + (rarity.length - 2) * slots.length * Object.keys(builds).length) + " across all fields and sets."
+      discovered + "/" + designs.length + " item designs discovered in " + (set ? builds[set].name : worlds[id].name) + ". " + s.found.length + "/" + (rarity.length * slots.length * Object.keys(worlds).length + Object.values(builds).reduce(
+        (total, def) => total + (rarity.length - (def.baseRarity || 2)) * (def.rewardSlots?.length || slots.length),
+        0
+      )) + " across all fields and sets."
     );
     $("collectionGrid").innerHTML = designs.map(
       ({ item, found, name, grade }) => `<div class="up-card" style="border-color:${found ? grade.color : "#3b6262"}"><div class="item-top" style="opacity:${found ? 1 : 0.45}">${iconMarkup(item)}<div><div class="rarity" style="--rarity:${grade.color}">${grade.name}</div><h3>${name}</h3></div></div></div>`
     ).join("");
   }
   function openModal(type, id) {
-    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt)
+    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt || type === "bosses" && s.total < milestones.combat)
       return;
     if (type === "wheel" && !wheelReady()) return;
+    syncCombat();
     hideSkillTip();
     hideComparison();
     sound("menu");
@@ -7191,6 +8469,10 @@ textarea {
       b.innerHTML = forgeMarkup(item);
       b.closest(".window").scrollTop = 0;
       updateForge();
+    } else if (type === "bosses") {
+      t.textContent = "Boss Board";
+      renderBossBoard();
+      b.closest(".window").scrollTop = 0;
     } else if (type === "companions") {
       t.textContent = "Companions";
       b.innerHTML = companionMarkup();
@@ -7233,7 +8515,9 @@ textarea {
       updateBuyButtons();
     } else if (type === "collection") {
       t.textContent = "Treasure collection";
-      b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world or set">${worldOptions()}${s.total >= craftAt || s.found.some((key) => key.startsWith("set:")) ? `<optgroup label="Crafted sets">${Object.entries(builds).map(([id2, set]) => `<option value="${id2}">${set.name}</option>`).join("")}</optgroup>` : ""}</select></div>
+      b.innerHTML = `<div class="inv-head"><p id="collectionCount" class="subtext collection-count"></p><select id="collectionWorld" aria-label="Collection world or set">${worldOptions()}${s.total >= craftAt || s.found.some((key) => key.startsWith("set:")) ? `<optgroup label="Crafted sets">${Object.entries(builds).filter(([, set]) => !set.rewardSlots).map(([id2, set]) => `<option value="${id2}">${set.name}</option>`).join("")}</optgroup>` + (s.total >= milestones.combat || Object.keys(s.combat.records).length ? `<optgroup label="Boss sets">${Object.entries(builds).filter(([, set]) => set.rewardSlots).map(
+        ([id2, set]) => `<option value="${id2}">${set.name}</option>`
+      ).join("")}</optgroup>` : "") : ""}</select></div>
       <p class="subtext">Base chest rarities: Common 60%, Uncommon 26%, Rare 10%, Epic 3.5%, Legendary 0.5%.</p><div id="collectionGrid" class="item-grid"></div>`;
       $("collectionWorld").value = s.world;
       showCollection(s.world);
@@ -7246,6 +8530,7 @@ textarea {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreCombatSave() ? '<button class="action secondary" id="exportPreCombat">Export pre-combat backup</button>' : ""}
         ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
@@ -7273,6 +8558,7 @@ textarea {
     $("modal").hidden = true;
     $("game").inert = false;
     runtime.modalType = "";
+    resetCombatClock();
     if (runtime.lastFocus?.isConnected && !runtime.lastFocus.closest("[hidden]"))
       runtime.lastFocus.focus();
     else $("press").focus();
@@ -7438,6 +8724,8 @@ textarea {
   function travel(id) {
     const world = Object.hasOwn(worlds, id) && worlds[id];
     if (!world || !hasRunCoins(s, world.at) || s.world === id) return;
+    if (s.combat.attempt && !confirm("Travel and end your current boss fight?")) return;
+    retreatFight(s);
     s.world = id;
     clearFieldEffects();
     renderChests();
@@ -7529,6 +8817,10 @@ textarea {
     const charge = s.abilityProgress;
     return Object.entries(profile).filter(([, info]) => info.count).map(([id, info]) => {
       const set = builds[id];
+      if (set.rewardSlots) {
+        return `<details class="gear-sets"><summary>${set.name} \xB7 ${info.count}/${set.rewardSlots.length} \xB7 ${info.count >= 2 ? "Active in combat" : "Bonus inactive"}</summary>
+          <p>Boss Board reward</p><p>2 pieces \xB7 ${set.two}</p>${set.four ? "<p>4 pieces \xB7 " + set.four + "</p>" : ""}</details>`;
+      }
       const cap = info.count >= 2;
       const current = {
         hammerhand: Math.min(charge.hammerhand, cap ? 15 : 20) + "/" + (cap ? 15 : 20) + " presses",
@@ -7545,11 +8837,11 @@ textarea {
     return `<p class="subtext" id="recipeGate" ${available ? "hidden" : ""}>Unlocks at ${fmtExact(craftAt)} coins earned this run.</p>
     <div id="recipeForm" ${available ? "" : "hidden"}><div class="forge-details">${Object.values(
       builds
-    ).map(
+    ).filter((set) => !set.rewardSlots).map(
       (set) => `<details><summary>${set.name} \xB7 ${set.style}</summary><p>${slots[set.slot]} or 2 pieces \xB7 ${set.ability}</p><p>2 pieces \xB7 ${set.two}</p><p>4 pieces \xB7 ${set.four}</p></details>`
     ).join("")}</div>
     <div class="gear-filters recipe-controls">
-    <label>Set <select id="recipeSet">${Object.entries(builds).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
+    <label>Set <select id="recipeSet">${Object.entries(builds).filter(([, set]) => !set.rewardSlots).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
     </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
     <button id="craftGear" class="action gold">Craft \xB7 ${costLabel(craftCost)}</button>
@@ -7677,6 +8969,20 @@ textarea {
   $("autoIcon").innerHTML = itemIcon(2, 1);
   $("shardIcon").innerHTML = itemIcon(3, 3);
   $("press").addEventListener("click", press);
+  $("combatGuard").addEventListener("click", () => {
+    tryGuard();
+    $("press").focus({ preventScroll: true });
+  });
+  $("combatRetreat").addEventListener("click", () => {
+    if (confirm("Retreat and end this boss fight?")) leaveFight();
+    else resetCombatClock();
+  });
+  $("combatDone").addEventListener("click", () => openModal("bosses"));
+  $("combatDismiss").addEventListener("click", () => {
+    resetCombatView();
+    renderCombatField();
+    $("press").focus({ preventScroll: true });
+  });
   $("chests").addEventListener("click", (e) => {
     const b = e.target.closest("[data-chest]");
     if (b) openChest(+b.dataset.chest);
@@ -7685,6 +8991,7 @@ textarea {
     "worlds",
     "farm",
     "companions",
+    "bosses",
     "mine",
     "progressionGuide",
     "inventory",
@@ -7741,6 +9048,26 @@ textarea {
   $("modalBody").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b || b.disabled) return;
+    if (runtime.modalType === "bosses") {
+      if (b.dataset.bossSelect) {
+        selectBoss(b.dataset.bossSelect);
+        return;
+      }
+      if (b.dataset.bossStart && prepareFight(b.dataset.bossStart)) {
+        closeModal();
+        render();
+        $("press").focus({ preventScroll: true });
+        save();
+        return;
+      }
+      if (b.dataset.bossClaim) {
+        if (claimFightReward(b.dataset.bossClaim)) {
+          render();
+          save();
+        }
+        return;
+      }
+    }
     if (b.dataset.petCommand && runtime.modalType === "companions") {
       const { changed, message } = companionButton(b);
       render();
@@ -7942,10 +9269,11 @@ textarea {
       "exportStoredSave",
       "exportPreSites",
       "exportPreCompanions",
+      "exportPreCombat",
       "exportPreExpansion",
       "exportPreFoundation"
     ].includes(b.id)) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : readPreFoundationSave();
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
@@ -8014,6 +9342,13 @@ textarea {
       else closeModal();
       return;
     }
+    if (e.code === "KeyG" && !e.repeat && !e.ctrlKey && !e.altKey && !e.metaKey && $("modal").hidden && s.combat.attempt && !document.activeElement?.matches(
+      "input, select, textarea, [contenteditable]"
+    )) {
+      e.preventDefault();
+      tryGuard();
+      return;
+    }
     if (e.code === "Space" && !e.repeat && $("modal").hidden && (!document.activeElement || document.activeElement === $("press") || !["BUTTON", "INPUT", "TEXTAREA", "SELECT"].includes(
       document.activeElement.tagName
     ))) {
@@ -8028,7 +9363,10 @@ textarea {
   function savePassiveIncome() {
     if (runtime.saveDirty) save();
   }
-  window.addEventListener("pagehide", savePassiveIncome);
+  window.addEventListener("pagehide", () => {
+    syncCombat();
+    savePassiveIncome();
+  });
   renderChests();
   render();
   save();
@@ -8036,6 +9374,7 @@ textarea {
   var sitesLast = last;
   document.addEventListener("visibilitychange", () => {
     sitesLast = performance.now();
+    resetCombatClock();
     if (document.hidden) savePassiveIncome();
   });
   setInterval(() => {
@@ -8043,6 +9382,7 @@ textarea {
     last = now;
     const elapsedVisible = document.hidden ? 0 : clamp(now - sitesLast, 0, 1e3);
     sitesLast = now;
+    syncCombat(now);
     const siteTick = advanceSites(s, elapsedVisible);
     if (siteTick.changed) runtime.saveDirty = true;
     showSiteRewards(siteTick.rewards);
