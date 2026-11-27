@@ -4,7 +4,11 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
-Boss Arenas is the next proposal.
+## 2026-11-27 · The Legendary Blacksmith
+
+- **The Legendary Blacksmith.** Visit the Grasslands Forge to heat, hammer, and quench equipment. Use Timing Assist to shape pieces one strike at a time. Mythic and Celestial evolution reveal a new look at the anvil.
+- Find blueprints through the Mine, Garden, Grove Trail expedition, and Mossguard fight. Craft Thunder Gauntlet, Phantom Charm, Nature Boots, or Dragon Ring and specialize with two- and four-piece bonuses. Gear comparisons show how a swap changes active abilities.
+- Existing equipment, locks, and loot settings migrate to schema 7. Export the original local save from **Save & settings → Export pre-Blacksmith backup**. Blueprint discoveries carry through Ascension.
 
 ## 2026-11-27 · The Living Field
 

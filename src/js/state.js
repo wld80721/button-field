@@ -1,3 +1,4 @@
+import { blueprints, freshBlacksmith } from "./blacksmith-data.js";
 import { freshCompanions } from "./companions.js";
 import { freshCombat } from "./combat.js";
 import { freshSites } from "./sites.js";
@@ -28,7 +29,7 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 6;
+const schemaVersion = 7;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
@@ -36,6 +37,7 @@ const fresh = () =>
   initializeResources({
     schemaVersion,
     sites: freshSites(),
+    blacksmith: freshBlacksmith(),
     combat: freshCombat(),
     fieldDiscoveries: [],
     companions: freshCompanions(),
@@ -153,6 +155,8 @@ function recordEarnings(before) {
 }
 function itemName(i) {
   const gear = worlds[recordWorld(i)].gear;
+  const design = Object.hasOwn(blueprints, i.set) && blueprints[i.set];
+  if (design && design.slot === i.slot) return design.signature;
   if (i.set) return builds[i.set].name + " " + slots[i.slot];
   if (gear) return rarity[i.r].name + " " + gear[i.slot];
   const base = names[i.slot][Math.min(i.r, legendary)];

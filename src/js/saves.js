@@ -1,3 +1,4 @@
+import { normalizeBlacksmith } from "./blacksmith-data.js";
 import { normalizeCombat } from "./combat.js";
 import { normalizeCompanions } from "./companions.js";
 import { normalizeDiscoveries } from "./field-discoveries.js";
@@ -206,10 +207,12 @@ function normalizeRun(o) {
   );
   normalizeCompanions(f, o.companions);
   normalizeCombat(f, o.combat);
+  normalizeBlacksmith(f, o.blacksmith);
   f.fieldDiscoveries = normalizeDiscoveries(o.fieldDiscoveries);
   return f;
 }
 const KEY = "treasure-grove-v3";
+const preBlacksmithSaveKey = KEY + "-before-blacksmith";
 const preLivingFieldSaveKey = KEY + "-before-living-field";
 const preForgeSaveKey = KEY + "-before-forge";
 const preCombatSaveKey = KEY + "-before-combat";
@@ -234,6 +237,10 @@ function readPreForgeSave() {
 
 function readPreCombatSave() {
   return readBackup(preCombatSaveKey);
+}
+
+function readPreBlacksmithSave() {
+  return readBackup(preBlacksmithSaveKey);
 }
 
 function readPreLivingFieldSave() {
@@ -316,7 +323,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preLivingFieldSaveKey, raw);
+      preserveBackup(preBlacksmithSaveKey, raw);
+      if (version < 6) preserveBackup(preLivingFieldSaveKey, raw);
       if (version < 5) preserveBackup(preCombatSaveKey, raw);
       if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
       if (version < 3) preserveBackup(preSitesSaveKey, raw);
@@ -363,6 +371,7 @@ export {
   readPreCompanionsSave,
   readPreCombatSave,
   readPreLivingFieldSave,
+  readPreBlacksmithSave,
   readPreFoundationSave,
   resumeSaving,
   save,

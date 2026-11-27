@@ -1,3 +1,4 @@
+import { blueprints } from "./blacksmith-data.js";
 import { rarity } from "./data.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
@@ -16,14 +17,27 @@ const worldMarks = {
   celestial: "M27 21h1v4h4v1h-4v4h-1v-4h-4v-1h4z",
 };
 
-function gearIcon(item) {
-  return itemIcon(item.slot, item.r, recordWorld(item));
+const signaturePaths = {
+  bolt: ["#99edff", "M15 2h11v5h-5v6h6v4h-7v5h-5v7h-7v-6h4v-7H7v-4h5V7h3z"],
+  seed: ["#b7ed76", "M15 5h8v3h4v8h-4v5h-5v6h-7v-4H7v-5H5v-6h6v3h4zm3 10h4v-4h-4z"],
+  ghost: ["#e1beff", "M10 4h12v4h5v14h-3v5h-5v-4h-5v4H8v-4H5V9h5zm1 7v5h4v-5zm8 0v5h4v-5z"],
+  flame: ["#ffb16c", "M16 2h5v8h4v6h4v8h-5v5H9v-5H4v-8h5v-6h4v7h3zm1 16v5h-3v3h7v-6h-2v-2z"],
+};
+
+function signatureMark(mark) {
+  const [color, path] = signaturePaths[mark];
+  return svg(`<path fill="${color}" d="${path}" fill-rule="evenodd"/>`);
 }
 
-function itemIcon(k, r, worldId = firstWorld) {
+function gearIcon(item) {
+  const set = Object.hasOwn(blueprints, item.set) && blueprints[item.set];
+  return itemIcon(item.slot, item.r, recordWorld(item), set);
+}
+
+function itemIcon(k, r, worldId = firstWorld, set) {
   const c = rarity[r].color,
     theme = worlds[worldId].terrain,
-    d = theme?.tiles[2] || rarity[r].wood;
+    d = set?.color || theme?.tiles[2] || rarity[r].wood;
   let p = "";
   if (k === 0)
     p = `<path fill="#172c32" d="M4 13h5V5h4v6h2V3h5v8h2V7h5v7h3v11l-6 5H10l-6-7z"/><path fill="${d}" d="M6 15h5V7h2v8h4V5h2v10h5V9h2v7h2v8l-5 4H11l-5-6z"/><path fill="${c}" d="M10 19h15v5H10zm2 6h10v3H12z"/>`;
@@ -35,6 +49,11 @@ function itemIcon(k, r, worldId = firstWorld) {
     p = `<path fill="#172d31" d="M13 1h6v6h6v4h5v10h-5v5h-6v5h-6v-5H7v-5H2V11h5V7h6z"/><path fill="${d}" d="M14 3h4v7h6v3h4v6h-5v5h-5v5h-4v-5H9v-5H4v-6h5v-3h5z"/><path fill="${c}" d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/><path fill="#fff" opacity=".75" d="M13 11h5v3h-5z"/>`;
   if (theme)
     p += `<path fill="#172c32" d="M23 20h9v12H21v-9h2z"/><path fill="${worlds[worldId].accent}" d="${worldMarks[worldId]}"/>`;
+  if (r >= 5) {
+    const halo = r === 6 ? "M16 0h2v5h-2zM0 14h5v2H0zM28 13h4v2h-4zM19 28h2v4h-2zM23 3h5v2h-5z" : "M1 12h3v8H1zM28 8h3v10h-3z";
+    p = `<path fill="${c}" d="${halo}"/>` + p;
+  }
+  if (set) p += `<g transform="translate(13 12) scale(.38)"><rect width="32" height="32" fill="#261e2a"/><path fill="${set.color}" d="${signaturePaths[set.emblem][1]}" fill-rule="evenodd"/></g>`;
   return svg(p);
 }
 function chestIcon(r) {
@@ -46,4 +65,4 @@ function openedChestIcon(r) {
   return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
 }
 
-export { chestIcon, coin, gearIcon, itemIcon, openedChestIcon, svg };
+export { signatureMark, chestIcon, coin, gearIcon, itemIcon, openedChestIcon, svg };

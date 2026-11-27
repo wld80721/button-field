@@ -53,6 +53,13 @@ function browserTest(name, run, { init, viewport = { width: 390, height: 844 }, 
 }
 
 const click = (page, selector) => page.locator(selector).click();
+async function finishWork(page, selector, strikes) {
+  await click(page, selector);
+  await click(page, "#smith-furnace");
+  if (!(await page.locator("#smithAssist").isChecked())) await page.locator("#smithAssist").check();
+  for (let i = 0; i < strikes; i++) await click(page, "#smith-anvil");
+  await click(page, "#smith-quench");
+}
 const text = (page, selector) => page.locator(selector).innerText();
 const saved = (page) => page.evaluate((key) => JSON.parse(localStorage.getItem(key)), saveKey);
 const stored = (page, key) => page.evaluate((storageKey) => localStorage.getItem(storageKey), key);
@@ -233,7 +240,7 @@ browserTest("forge uses original rates and gear index follows import, salvage an
   await click(page, "[data-salvage='2']");
   await click(page, "[data-open-forge='1']");
   assert.ok(await page.locator("#forgeBuy").isEnabled());
-  await click(page, "#forgeBuy");
+  await finishWork(page, "#forgeBuy", 2);
   const forged = await saved(page);
   assert.equal(forged.coins, 4);
   assert.equal(forged.scrap, 2);
@@ -456,7 +463,7 @@ for (const [release, legacy] of legacySaves) {
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 6);
+    assert.equal(migrated.schemaVersion, 7);
     assert.deepEqual(migrated.fieldDiscoveries, []);
     assert.equal(await stored(page, livingMigrationKey), raw);
     assert.equal(await stored(page, migrationKey), raw);
@@ -524,7 +531,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 6);
+    assert.equal((await saved(page)).schemaVersion, 7);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -669,7 +676,7 @@ browserTest("craft, compare by keyboard, lock, filter, evolve and reload", async
   await click(page, "[data-open=recipes]");
   await page.locator("#recipeSet").selectOption("hammerhand");
   await page.locator("#recipeSlot").selectOption("0");
-  await click(page, "#craftGear");
+  await finishWork(page, "#craftGear", 3);
   assert.match(await text(page, "#recipeResult"), /Hammerhand Gloves/);
   await click(page, "[data-open=inventory]");
   await page.locator("[data-compare='1']").focus();
@@ -685,8 +692,8 @@ browserTest("craft, compare by keyboard, lock, filter, evolve and reload", async
   await page.locator("#gearRarity").selectOption("2");
   assert.equal(await page.locator(".item-card").count(), 1);
   await click(page, "[data-open-forge='1']");
-  for (let i=0; i<3; i++) await click(page, "#forgeBuy");
-  for (let i=0; i<4; i++) await click(page, "#evolveBuy");
+  for (let i=0; i<3; i++) await finishWork(page, "#forgeBuy", 2);
+  for (let i=0; i<4; i++) await finishWork(page, "#evolveBuy", i < 2 ? 3 : 4);
   assert.match(await text(page, "#evolutionInfo"), /Highest evolution/);
   const evolved = (await saved(page)).items[0];
   assert.equal(evolved.r, 6);
@@ -826,11 +833,11 @@ browserTest("mobile farming and mining gates stay below the board and fund both 
   await click(page, "#inventory");
   await click(page, "[data-open=recipes]");
   assert.ok(await page.locator("#craftGear").isDisabled());
-  await click(page, "#craftGatheredGear");
+  await finishWork(page, "#craftGatheredGear", 3);
   await click(page, "[data-open=inventory]");
   const id = (await saved(page)).items[0].id;
   await click(page, `[data-open-forge="${id}"]`);
-  await click(page, "#temperGear");
+  await finishWork(page, "#temperGear", 2);
   run = await saved(page);
   assert.deepEqual([run.glowleaf, run.copperOre, run.scrap], [0, 1, 0]);
   assert.equal(run.items[0].forge, 1);
@@ -936,6 +943,7 @@ browserTest("recruit companions and claim an offline trip exactly once", async (
   assert.equal(result.glowleaf, 3);
   assert.equal(result.scrap, 5);
   assert.equal(result.companions.pets.beetle.xp, 12);
+  assert.ok(result.blacksmith.recipes.includes("wraithweave"));
   assert.equal(result.companions.trips[0], null);
   await click(page, petAction("gear", "bell"));
   assert.equal((await saved(page)).companions.pets.beetle.gear, "bell");
@@ -1129,6 +1137,7 @@ browserTest("combat unlocks from ordinary earnings and a keyboard victory keeps 
   assert.match(await text(page, "#combatTell"), /Victory/);
   assert.equal((await saved(page)).combat.clears.mossguard, "unclaimed");
   assert.equal((await saved(page)).combat.records.mossguard.wins, 1);
+  assert.ok((await saved(page)).blacksmith.recipes.includes("dragonfire"));
   await click(page, "#combatDone");
   await click(page, "[data-boss-claim=mossguard]");
   const won = await saved(page);
@@ -1328,7 +1337,7 @@ browserTest("Living Field garden, mine and Forge form a playable mobile route", 
   await page.locator(landmark("forge")).tap();
   await click(page, "[data-open=recipes]");
   assert.equal(await page.locator("#modal").getAttribute("data-location"), "forge");
-  await click(page, "#craftGatheredGear");
+  await finishWork(page, "#craftGatheredGear", 3);
   assert.equal((await saved(page)).items.length, 1);
   await escape(page);
   assert.ok(await page.locator(landmark("forge")).evaluate(el => el === document.activeElement));
@@ -1395,7 +1404,7 @@ const combatSaveBeforeLivingField = JSON.stringify({
 });
 browserTest("Living Field backs up schema 5 and exposes the byte-exact export", async (page) => {
   const run = await saved(page);
-  assert.equal(run.schemaVersion, 6);
+  assert.equal(run.schemaVersion, 7);
   assert.equal(run.items[0].forge, 1);
   assert.equal(run.combat.clears.mossguard, "unclaimed");
   assert.equal(await stored(page, livingMigrationKey), combatSaveBeforeLivingField);
@@ -1422,3 +1431,159 @@ browserTest("Living Field leaves a schema 5 save intact when the new backup cann
     };
   },
 });
+
+const blacksmithBackup = saveKey + "-before-blacksmith";
+const smithEvidence = process.env.BUTTON_FIELD_SMITH_SCREENSHOTS;
+async function smithScreenshot(page, name) {
+  if (smithEvidence) await page.screenshot({ path: smithEvidence + "/" + name + ".png", animations: "disabled" });
+}
+
+browserTest("Blacksmith unlocks from a fresh field and reload discards unfinished work", async (page) => {
+  assert.ok(await page.locator(landmark("forge")).isHidden());
+  await fieldPresses(page, 8);
+  await click(page, "[data-chest]");
+  const [gear] = (await saved(page)).items;
+  await click(page, "#inventory");
+  await click(page, `[data-equip="${gear.id}"]`);
+  await escape(page);
+  while ((await saved(page)).total < 150) await fieldPresses(page, 1);
+  await click(page, landmark("forge"));
+  assert.ok(await page.locator("#smithRoom").isVisible());
+  await smithScreenshot(page, "01-desktop-first-unlock");
+  await click(page, "#smith-rack");
+  await click(page, `[data-open-forge="${gear.id}"]`);
+  await escape(page);
+  for (let i = 0; i < 2; i++) {
+    await page.locator("[data-chest]:not([disabled])").first().click();
+    const spare = (await saved(page)).items.at(-1);
+    await click(page, "#inventory");
+    await click(page, `[data-salvage="${spare.id}"]`);
+    await escape(page);
+  }
+  await click(page, landmark("forge"));
+  await click(page, "#smith-rack");
+  await click(page, `[data-open-forge="${gear.id}"]`);
+  const before = await saved(page);
+  await click(page, "#forgeBuy");
+  await page.keyboard.press("Enter");
+  assert.equal(await page.locator("#smith-anvil").evaluate(el => el === document.activeElement), true);
+  await smithScreenshot(page, "02-desktop-timed-strike");
+  await page.clock.runFor(900);
+  await page.keyboard.press("Enter");
+  assert.match(await text(page, "#smithStatus"), /Strike 2 of 2/);
+  await click(page, '[data-smith-step="cancel"]');
+  assert.deepEqual((await saved(page)).items, before.items);
+  await click(page, "#forgeBuy");
+  await page.reload();
+  assert.deepEqual((await saved(page)).items, before.items);
+  assert.equal((await saved(page)).scrap, before.scrap);
+  await click(page, "#inventory");
+  await click(page, `[data-open-forge="${before.items[0].id}"]`);
+  await finishWork(page, "#forgeBuy", 2);
+  assert.equal((await saved(page)).items[0].forge, 1);
+  assert.equal((await saved(page)).scrap, before.scrap - 2 - gear.r);
+  await smithScreenshot(page, "03-desktop-first-temper");
+}, { viewport: { width: 1280, height: 800 }, motion: "no-preference" });
+
+browserTest("discovered blueprints craft and trigger mixed gear in the mobile field", async (page) => {
+  await importSave(page, {
+    total: 5000, coins: 10000, scrap: 100, shards: 100, copperOre: 10, glowleaf: 10,
+    companions: { artifacts: ["bell"] },
+    items: [
+      {...equipment(2, {r: 5}), set: "wildroot"},
+      {...equipment(3, {r: 5}), set: "wraithweave"},
+    ],
+    equip: {2: 3, 3: 4},
+    blacksmith: {charge: {sparkforged: 19, wildroot: 14, wraithweave: 23}},
+  });
+  await click(page, landmark("mine"));
+  for (let i = 0; i < 3; i++) await click(page, "#mine-copper");
+  assert.match(await text(page, "#siteResult"), /Sparkforged blueprint/);
+  await escape(page);
+  await page.locator(landmark("forge")).tap();
+  await page.locator("#smith-table").tap();
+  await page.locator("#recipeSet").selectOption("sparkforged");
+  await page.locator("#recipeSlot").selectOption("0");
+  await finishWork(page, "#craftGear", 3);
+  assert.match(await text(page, "#recipeResult"), /Thunder Gauntlet/);
+  assert.equal((await saved(page)).copperOre, 10);
+  await smithScreenshot(page, "04-mobile-rare-craft");
+  await click(page, "#smith-rack");
+  const item = (await saved(page)).items.at(-1);
+  await click(page, `[data-equip="${item.id}"]`);
+  await escape(page);
+  await page.clock.runFor(8000);
+  await click(page, "#press");
+  for (const mark of ["bolt", "seed", "ghost"]) assert.ok(await page.locator(`[data-signature="${mark}"]`).isVisible());
+  await smithScreenshot(page, "05-mobile-signatures");
+  const pressRun = await saved(page);
+  assert.equal(pressRun.sites.veins.copper.hp, 2);
+  assert.equal(pressRun.blacksmith.seeds, 1);
+  await page.clock.runFor(1500);
+  assert.equal((await saved(page)).presses, pressRun.presses);
+  await click(page, landmark("farm"));
+  await page.locator("#seed-0").selectOption("magical");
+  await click(page, "#plant-0");
+  assert.equal((await saved(page)).blacksmith.seeds, 0);
+  assert.equal((await saved(page)).sites.plots[0].crop, "glowleaf");
+}, { viewport: { width: 390, height: 844 }, touch: true });
+
+browserTest("Blacksmith migration exports untouched schema 6 and evolves legacy gear with the same identity", async (page) => {
+  const raw = '{ "schemaVersion": 6, "total": 10000000, "coins": 2000000, "scrap": 220, "shards": 140, "items": [{"id":1,"slot":0,"r":4,"level":1,"value":10,"forge":3,"set":"hammerhand","locked":true}], "equip":{"0":1} }';
+  assert.equal(await stored(page, blacksmithBackup), raw);
+  assert.equal((await saved(page)).schemaVersion, 7);
+  await click(page, "#settings");
+  await click(page, "#exportPreBlacksmith");
+  assert.equal(await page.locator("#saveText").inputValue(), raw);
+  await escape(page);
+  await click(page, "#inventory");
+  await click(page, '[data-open-forge="1"]');
+  await finishWork(page, "#evolveBuy", 4);
+  await smithScreenshot(page, "06-mobile-mythic");
+  await finishWork(page, "#evolveBuy", 4);
+  await smithScreenshot(page, "07-mobile-celestial");
+  await page.reload();
+  const { items, equip } = await saved(page);
+  assert.deepEqual(items[0], { id: 1, slot: 0, r: 6, level: 1, value: 14.4, forge: 3, set: "hammerhand", locked: true });
+  assert.equal(equip[0], 1);
+}, { init: () => !localStorage.getItem("treasure-grove-v3") && localStorage.setItem("treasure-grove-v3", '{ "schemaVersion": 6, "total": 10000000, "coins": 2000000, "scrap": 220, "shards": 140, "items": [{"id":1,"slot":0,"r":4,"level":1,"value":10,"forge":3,"set":"hammerhand","locked":true}], "equip":{"0":1} }'), touch: true });
+
+browserTest("Blacksmith backup failure preserves schema 6 and stops autosave", async (page) => {
+  assert.equal(await stored(page, saveKey), '{"schemaVersion":6,"coins":150,"total":150}');
+  await click(page, "#press");
+  assert.equal(await stored(page, saveKey), '{"schemaVersion":6,"coins":150,"total":150}');
+  assert.match(await text(page, "#saveStatus"), /paused/i);
+}, {
+  init: () => {
+    localStorage.setItem("treasure-grove-v3", '{"schemaVersion":6,"coins":150,"total":150}');
+    const set = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key.endsWith("-before-blacksmith")) throw new Error("quota");
+      return set.call(this, key, value);
+    };
+  },
+});
+
+browserTest("a specialized Dragonfire set primes fireballs on entry and after a successful Guard", async (page) => {
+  await importSave(page, {
+    total: 1e7, coins: 1e6,
+    items: [0, 1, 2, 3].map(slot => ({ ...equipment(slot, {r: 6}), set: "dragonfire" })),
+    equip: {0: 1, 1: 2, 2: 3, 3: 4},
+  });
+  await startBoss(page, "mossguard");
+  assert.equal((await saved(page)).combat.attempt.fireballReady, true);
+  await click(page, "#press");
+  assert.ok(await page.locator(".smith-fireball").isVisible());
+  assert.equal((await saved(page)).combat.attempt.fireballReady, false);
+  await smithScreenshot(page, "08-desktop-dragonfire");
+  await page.clock.runFor(3350);
+  await page.keyboard.press("g");
+  await page.clock.runFor(1900);
+  await page.evaluate(() => window.dispatchEvent(new Event("pagehide")));
+  assert.equal((await saved(page)).combat.attempt.fireballReady, true);
+  await page.reload();
+  assert.equal((await saved(page)).combat.attempt.loadout.dragon.damage, 20);
+  await click(page, "#press");
+  assert.ok(await page.locator(".smith-fireball").isVisible());
+  assert.equal((await saved(page)).combat.attempt.fireballReady, false);
+}, { viewport: { width: 1280, height: 800 } });

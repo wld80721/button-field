@@ -9,7 +9,7 @@ import { firstWorld, worlds } from "./world-data.js";
 
 const landmarks = {
   workshop: { name: "Workshop", at: milestones.workshop, screens: ["upgrades"], art: "workbench", find: "stone", cover: "rock" },
-  forge: { name: "Forge", at: milestones.forge, screens: ["inventory", "forge", "recipes"], art: "anvil" },
+  forge: { name: "Forge", at: milestones.forge, screens: ["blacksmith", "inventory", "forge", "recipes"], art: "anvil" },
   camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
   farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
   grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
@@ -107,9 +107,7 @@ function renderLivingField(run) {
   setValue($("board").dataset, "livingTrail", String(home && trailVisible));
   if ($("modal").dataset.location === "forge") {
     const ready = hasRunCoins(run, milestones.helper);
-    const recipes = $("modalBody").querySelector('[data-open="recipes"]');
     setValue($("modal").dataset, "recipesReady", String(ready));
-    if (ready && recipes) setText(recipes, "Set recipes");
   }
 
   const live = home && previousRun === run && previousWorld === run.world && previousTotal < run.total;
@@ -156,7 +154,7 @@ function renderLivingField(run) {
 
 function fieldLocationFor(run, id, type) {
   const landmark = Object.hasOwn(landmarks, id) && landmarks[id];
-  if (run.world !== firstWorld || !landmark || !landmarkOpen(run, id, landmark) ||
+  if ((run.world !== firstWorld && id !== "forge") || !landmark || !landmarkOpen(run, id, landmark) ||
       (type && !landmark.screens.includes(type))) return null;
   return landmark;
 }
@@ -166,8 +164,8 @@ function renderLocationScene(run, id, entering) {
   const backdrop = $("locationArt");
   setValue(modal.dataset, "location", id);
   setValue(modal.dataset, "recipesReady", String(hasRunCoins(run, milestones.helper)));
-  backdrop.hidden = !id;
-  if (!id) return;
+  backdrop.hidden = !id || id === "forge";
+  if (!id || id === "forge") return;
   if (backdrop.dataset.location !== id) {
     backdrop.dataset.location = id;
     const fixtures = landmarks[id].art;

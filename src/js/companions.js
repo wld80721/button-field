@@ -1,3 +1,4 @@
+import { unlockBlueprint } from "./blacksmith-data.js";
 import { milestones } from "./data.js";
 import { collectChest, gearBagLimit } from "./gameplay.js";
 import { creditCoins, creditResource } from "./resources.js";
@@ -529,8 +530,9 @@ function claimTrip(state, slot, now) {
   pet.xp = Math.min(maxXp, pet.xp + def.xp);
   const found = !camp.artifacts.includes(def.artifact);
   if (found) camp.artifacts.push(def.artifact);
+  const blueprint = trip.route === "grove" && unlockBlueprint(state, "wraithweave");
   pet.last = "Returned from " + def.name + ".";
-  return { ...trip, xp: def.xp, artifact: found ? def.artifact : "" };
+  return { ...trip, xp: def.xp, artifact: found ? def.artifact : "", ...(blueprint && { blueprint }) };
 }
 
 function tickPets(state, dt, rates, regionalPieces, random = Math.random) {

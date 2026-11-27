@@ -53,7 +53,7 @@ function farmMarkup() {
     ${runtime.fieldLocation === "farm" ? '<div class="location-bed" aria-hidden="true">' + fieldSprite("crop") + "</div>" : ""}
     <h3>Plot ${index + 1}</h3><p id="plotStatus-${index}"></p>
     <div class="site-controls" id="plantControls-${index}">
-      <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}</select>
+      <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}<option value="magical">Magical seed</option></select>
       <button class="action gold" data-site-action="plant" data-plot="${index}" id="plant-${index}">Plant</button>
     </div><p id="seedInfo-${index}"></p>
     <button class="action gold" data-site-action="harvest" data-plot="${index}" id="harvest-${index}">Harvest</button>
@@ -146,7 +146,9 @@ function updateFarm() {
     }
     const select = $("seed-" + index);
     for (const option of select.options) {
-      const locked = s.total < crops[option.value].at;
+      const magical = option.value === "magical";
+      const locked = magical ? s.blacksmith.seeds === 0 : s.total < crops[option.value].at;
+      if (magical) setText(option, "Magical seed · " + s.blacksmith.seeds + " in stock");
       setValue(option, "hidden", locked);
       setValue(option, "disabled", locked);
     }
@@ -168,7 +170,7 @@ function updateFarm() {
         " · " +
         def.effect,
     );
-    setText($("plant-" + index), "Plant · " + costText(def.cost));
+    setText($("plant-" + index), select.value === "magical" ? "Plant magical seed" : "Plant · " + costText(def.cost));
     setValue(
       $("plant-" + index),
       "disabled",
@@ -287,17 +289,20 @@ function siteButtonAction(button) {
     if (action === "plant" && plant(s, index, $("seed-" + index).value))
       return "Crop planted.";
     if (action === "harvest") {
-      const reward = harvest(s, index);
-      if (reward) return "Harvested · " + rewardText([reward]);
+      const reward = harvest(s, index, "manual");
+      if (reward) {
+        return "Harvested · " + rewardText([reward]) + (reward.blueprint ? " · Wildroot blueprint discovered." : "");
+      }
     }
     if (action === "research" && buyResearch(s, id))
       return research[id].name + " researched.";
   }
   if (runtime.modalType === "mine") {
     if (action === "mine") {
-      const hit = mine(s, id);
-      if (hit)
-        return hit.amount ? "Mined · " + rewardText([hit]) : "Deposit chipped.";
+      const hit = mine(s, id, "manual");
+      if (hit) {
+        return hit.amount ? "Mined · " + rewardText([hit]) + (hit.blueprint ? " · Sparkforged blueprint discovered." : "") : "Deposit chipped.";
+      }
     }
     if (action === "pick" && buyPick(s))
       return tools[s.sites.pick].name + " equipped.";

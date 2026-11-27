@@ -10,7 +10,13 @@ Start with one red button. As the field changes, paths and interactive objects l
 
 Local scenes use the shipped activity rules. The dedicated redesigns below will deepen the activities. See [Progress](PROGRESS.md) for verification and coverage.
 
-## Next expansion after The Living Field · Boss Arenas
+## Expansion 2 · The Legendary Blacksmith
+
+**Status** · Released on `main`. The Grasslands Forge opens at 150 run earnings. Players heat, hammer, and quench equipment in a dedicated workshop. Set crafting opens at 2,500, and Mythic and Celestial transformations use the existing evolution gates and costs.
+
+Four blueprints connect the workshop to mining, farming, expeditions, and the Boss Board. Their equipment supports mining strikes, clone presses, free Glowleaf planting, or Guard-triggered fireballs. Players can mix signature pieces or invest in two- and four-piece bonuses. Save schema 7 preserves existing equipment and keeps blueprint discoveries through Ascension.
+
+## Later expansion · Boss Arenas
 
 **Status** · Arena redesign proposed. The ten existing field bosses are live.
 
@@ -25,6 +31,5 @@ Start the expansion on a separate branch from the documented `main`. The first i
 
 1. **Farming and Mining.** Turn the plot and deposit screens into connected playable spaces. Grow and harvest visible crops and let players expose and extract veins. Reuse the existing crop effects, research, materials, and automation.
 2. **Companion camp and expeditions.** Build a physical camp and route map with choices to make along expeditions. Keep the 15 companions, roles, progression, and offline trip timers.
-3. **Forge.** Build an interactive workbench around material, recipe, and tempering decisions. Keep existing gear, set abilities, prices, and forge ranks compatible.
 
 Revisit the wider backlog after the current systems feel like places to play. It includes capped offline coin income, Buy 1/10/100/MAX, achievements and a richer collection book, a 50-plus-upgrade Ascension tree, Transcendence, challenge runs, ambient music, detailed statistics, and performance settings. Scope and test each phase independently.

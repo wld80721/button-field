@@ -1,3 +1,4 @@
+import { signatureMark } from "./sprites.js";
 import { bosses, combatSets } from "./boss-data.js";
 import {
   advanceFight,
@@ -168,6 +169,7 @@ function resetCombatView() {
   result = null;
   boardMessage = "";
   $("combatEffects").replaceChildren();
+  $("effects").querySelector(".smith-fireball")?.remove();
   for (const id of spriteIds) {
     const sprite = $(id);
     delete sprite.dataset.boss;
@@ -285,7 +287,16 @@ function effectLabel(label, style) {
 
 function showCombatEvents(events) {
   for (const event of events) {
-    if (event.type === "strike") {
+    if (event.type === "fireball") {
+      const layer = $("effects");
+      layer.querySelector(".smith-fireball")?.remove();
+      const fireball = document.createElement("span");
+      fireball.className = "smith-fireball";
+      fireball.innerHTML = signatureMark("flame");
+      layer.append(fireball);
+      setTimeout(() => fireball.remove(), 500);
+      sound("smithStrike");
+    } else if (event.type === "strike") {
       effectLabel("−" + event.amount, "combat-damage");
       for (const id of spriteIds) {
         const sprite = $(id);
@@ -302,7 +313,7 @@ function showCombatEvents(events) {
         event.amount ? "Block · +" + event.amount + " HP" : "Blocked!",
         "combat-block",
       );
-      setText($("combatStatus"), "Blocked. Riposte ready.");
+      setText($("combatStatus"), s.combat.attempt?.fireballReady ? "Blocked. Riposte and fireball ready." : "Blocked. Riposte ready.");
       sound("combatGuard");
     } else if (event.type === "warning") {
       setText($("combatStatus"), event.name);
@@ -318,7 +329,7 @@ function showCombatEvents(events) {
       $("combatPanel").classList.remove("combat-warning");
       setText(
         $("combatStatus"),
-        event.type === "victory" ? "Boss defeated." : "You were defeated.",
+        event.blueprint ? "Boss defeated. Dragonfire blueprint discovered." : event.type === "victory" ? "Boss defeated." : "You were defeated.",
       );
       if (event.type === "victory") {
         effectLabel("Victory!", "combat-block");
