@@ -1,3 +1,4 @@
+import { unlockBlueprint } from "./blacksmith-data.js";
 import { milestones } from "./data.js";
 import { creditResource, spendResource } from "./resources.js";
 
@@ -191,6 +192,8 @@ function plotCount(state) {
 }
 
 function canPlant(state, index, id) {
+  const magical = id === "magical";
+  if (magical) id = "glowleaf";
   return (
     Number.isInteger(index) &&
     index >= 0 &&
@@ -199,14 +202,17 @@ function canPlant(state, index, id) {
     typeof id === "string" &&
     Object.hasOwn(crops, id) &&
     state.total >= crops[id].at &&
-    hasMaterials(state, crops[id].cost)
+    (magical ? state.blacksmith?.seeds > 0 : hasMaterials(state, crops[id].cost))
   );
 }
 
 function plant(state, index, id) {
   if (!canPlant(state, index, id)) return false;
+  const magical = id === "magical";
+  if (magical) id = "glowleaf";
   const crop = crops[id];
-  useMaterials(state, crop.cost);
+  if (magical) state.blacksmith.seeds--;
+  else useMaterials(state, crop.cost);
   state.sites.plots[index] = {
     crop: id,
     remaining: crop.ms - (state.sites.research.irrigation ? 3000 : 0),
@@ -226,7 +232,7 @@ function recoverVeins(state, elapsed) {
   return changed;
 }
 
-function harvest(state, index) {
+function harvest(state, index, source) {
   const plot = state.sites.plots[index];
   if (
     !Number.isInteger(index) ||
@@ -242,10 +248,11 @@ function harvest(state, index) {
   if (plot.crop === "glowleaf") state.sites.growthCharges = 3;
   if (plot.crop === "ironroot") recoverVeins(state, 6000);
   if (plot.crop === "prismbloom") state.sites.crystalFocus = true;
-  return { material: def.material, amount: def.yield };
+  const blueprint = source === "manual" && plot.crop === "glowleaf" && unlockBlueprint(state, "wildroot");
+  return { material: def.material, amount: def.yield, ...(blueprint && { blueprint }) };
 }
 
-function mine(state, id) {
+function mine(state, id, source) {
   if (!depositAccess(state, id)) return null;
   const site = state.sites;
   const vein = site.veins[id];
@@ -259,7 +266,8 @@ function mine(state, id) {
   if (extra) site.crystalFocus = false;
   const amount = def.yield + Number(extra);
   creditResource(state, def.material, amount);
-  return { material: def.material, amount };
+  const blueprint = source === "manual" && id === "copper" && unlockBlueprint(state, "sparkforged");
+  return { material: def.material, amount, ...(blueprint && { blueprint }) };
 }
 
 function buyResearch(state, id) {
@@ -330,7 +338,7 @@ function advanceCrops(state, elapsed, all = false) {
   return true;
 }
 
-function advanceSites(state, elapsed, press = false) {
+function advanceSites(state, elapsed, press = false, cropsOnly = false) {
   const rewards = [];
   if (!Number.isFinite(elapsed) || elapsed <= 0 || state.total < farmAt)
     return { changed: false, rewards };
@@ -346,7 +354,7 @@ function advanceSites(state, elapsed, press = false) {
   }
   const targeted = site.veins[site.target];
   const recoveryBefore = targeted.remaining;
-  let changed = recoverVeins(state, elapsed) || grew;
+  let changed = (!cropsOnly && recoverVeins(state, elapsed)) || grew;
   for (let index = 0; index < availablePlots; index++) {
     const plot = site.plots[index];
     if (!plot) continue;
@@ -358,6 +366,7 @@ function advanceSites(state, elapsed, press = false) {
   }
   if (
     !press &&
+    !cropsOnly &&
     site.autoMine &&
     depositAccess(state, site.target) &&
     targeted.remaining === 0

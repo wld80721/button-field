@@ -1,3 +1,4 @@
+import { signatureAbility, signatureLoadout, unlockBlueprint } from "./blacksmith-data.js";
 import { bosses, combatSets } from "./boss-data.js";
 import { discover, lootValue } from "./build-gear.js";
 import { petLevel, roster } from "./companions.js";
@@ -15,6 +16,8 @@ const bound = (value, max) =>
 const rank = (value, max) => Math.floor(bound(value, max));
 
 function combatLoadout(state, gear) {
+  const signature = signatureLoadout(gear, "dragonfire");
+  const dragon = signature && signatureAbility("dragonfire", signature);
   const gearBonus = Math.min(
     10,
     Math.floor(2 * Math.log2(1 + gearValue(gear[0]) + gearValue(gear[1]) / 8)),
@@ -52,6 +55,7 @@ function combatLoadout(state, gear) {
     damage: 4 + gearBonus + workshop + skills,
     maxHp: state.skills.star > 0 ? 115 : 100,
     echo: state.skills.echo > 0 ? 2 : 0,
+    ...(dragon && { dragon }),
   };
 }
 
@@ -88,6 +92,7 @@ function startFight(state, id, gear) {
     pierce: 0,
     assist: assistInterval,
     loadout,
+    ...(loadout.dragon && { fireballReady: loadout.dragon.opener }),
   };
   return true;
 }
@@ -156,6 +161,7 @@ function settleAttack(state, attempt, events) {
     if (healed) events.push({ type: "bossHeal", amount: healed });
   }
   if (move.damage && attempt.guarded) {
+    if (attempt.loadout.dragon) attempt.fireballReady = true;
     const ward = attempt.loadout.sets.wardweaver >= 4;
     attempt.riposte = (ward ? 12 : 6) + attempt.loadout.echo;
     if (attempt.loadout.sets.starbound >= 2) attempt.pierce = 2;
@@ -244,6 +250,11 @@ function strikeBoss(state) {
     amount += pet.power * (pet.role === "break" && armor < 1 ? 2 : 1);
     pet.ready = false;
   }
+  if (attempt.fireballReady && loadout.dragon) {
+    amount += loadout.dragon.damage;
+    attempt.fireballReady = false;
+    events.push({ type: "fireball" });
+  }
   if (attempt.pierce > 0) attempt.pierce--;
   else amount *= armor;
   if (attempt.exposed > 0) amount *= 1.25;
@@ -261,7 +272,8 @@ function strikeBoss(state) {
     const reward = !state.combat.clears[attempt.id];
     if (reward) state.combat.clears[attempt.id] = "unclaimed";
     state.combat.attempt = null;
-    events.push({ type: "victory", id: attempt.id, reward });
+    const blueprint = attempt.id === "mossguard" && unlockBlueprint(state, "dragonfire");
+    events.push({ type: "victory", id: attempt.id, reward, ...(blueprint && { blueprint }) });
     return events;
   }
   if (warning) {
@@ -384,6 +396,7 @@ function normalizeCombat(state, raw) {
     riposte: rank(a.riposte, 14),
     pierce: rank(a.pierce, 2),
     assist: bound(a.assist, assistInterval),
+    ...(a.loadout.dragon && { fireballReady: a.fireballReady === true }),
     loadout: {
       gearBonus,
       workshop,
@@ -398,6 +411,9 @@ function normalizeCombat(state, raw) {
       pets,
       maxHp,
       echo: rank(a.loadout.echo, 2),
+      ...([8, 12, 16, 20].includes(a.loadout.dragon?.damage) && {
+        dragon: { damage: a.loadout.dragon.damage, opener: a.loadout.dragon.opener === true },
+      }),
     },
   };
 }

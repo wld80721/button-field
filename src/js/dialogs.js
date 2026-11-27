@@ -1,3 +1,4 @@
+import { blacksmithMarkup, clearWork, refreshBlacksmith } from "./blacksmith-view.js";
 import {
   renderBossBoard,
   resetCombatClock,
@@ -43,6 +44,7 @@ import {
   readPreCompanionsSave,
   readPreCombatSave,
   readPreLivingFieldSave,
+  readPreBlacksmithSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -148,7 +150,7 @@ function statusMatch(filter, value) {
   return !filter || filter === "all" || (filter === "yes") === Boolean(value);
 }
 
-function inventory() {
+function inventory(inForge) {
   const list = s.items
     .filter(
       (i) =>
@@ -176,7 +178,7 @@ function inventory() {
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>— Empty —</b>"}</div>`;
     })
     .join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
-    <button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " · " + fmtExact(craftAt) + " coins earned" : ""}</button>
+    ${inForge ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " · " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
     <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
     <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
 }
@@ -236,6 +238,8 @@ function openModal(type, id, location = runtime.fieldLocation) {
     return;
   if (type === "wheel" && !wheelReady()) return;
   syncCombat();
+  clearWork();
+  if (["blacksmith", "forge", "recipes"].includes(type)) location = "forge";
   hideSkillTip();
   hideComparison();
   sound("menu");
@@ -280,9 +284,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
       !isKnownWorld(s, runtime.gearWorldFilter)
     )
       runtime.gearWorldFilter = "all";
-    b.innerHTML = (landmark && !s.items.length
-      ? '<p class="subtext">Open a chest in the clearing to find equipment for the anvil.</p>'
-      : "") + inventory();
+    b.innerHTML = landmark ? blacksmithMarkup(inventory(true)) : inventory(false);
     $("filter").value = runtime.filter;
     $("gearWorldFilter").value = runtime.gearWorldFilter;
     updateLootRuleSummary();
@@ -293,9 +295,11 @@ function openModal(type, id, location = runtime.fieldLocation) {
       return;
     }
     t.textContent = "Equipment forge";
-    b.innerHTML = forgeMarkup(item);
+    b.innerHTML = landmark ? blacksmithMarkup(forgeMarkup(item), "forgeResult") : forgeMarkup(item);
     b.closest(".window").scrollTop = 0;
     updateForge();
+  } else if (type === "blacksmith") {
+    b.innerHTML = blacksmithMarkup();
   } else if (type === "bosses") {
     t.textContent = "Boss Board";
     renderBossBoard();
@@ -312,7 +316,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
     renderSites();
   } else if (type === "recipes") {
     t.textContent = "Set recipes";
-    b.innerHTML = recipesMarkup();
+    b.innerHTML = landmark ? blacksmithMarkup(recipesMarkup(), "recipeResult") : recipesMarkup();
     updateRecipes();
   } else if (type === "worlds") {
     t.textContent = "Worlds";
@@ -376,6 +380,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
+        ${readPreBlacksmithSave() ? '<button class="action secondary" id="exportPreBlacksmith">Export pre-Blacksmith backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
       </div>
@@ -386,11 +391,14 @@ function openModal(type, id, location = runtime.fieldLocation) {
       $("saveWarning").hidden = false;
     }
   }
-  if (landmark) t.textContent = landmark.name;
+  if (landmark) t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
+  refreshBlacksmith();
+  if (location === "forge") b.closest(".window").scrollTop = 0;
   if (type === "skills") updateBuyButtons();
   $("close").focus();
 }
 function closeModal() {
+  clearWork();
   hideSkillTip();
   hideComparison();
   runtime.ascConfirm = false;

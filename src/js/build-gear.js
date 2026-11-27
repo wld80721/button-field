@@ -1,3 +1,4 @@
+import { blueprints } from "./blacksmith-data.js";
 import { combatSets } from "./boss-data.js";
 import { gatheredRecipeCost } from "./sites.js";
 import { creditCoins, creditResource, spendResource } from "./resources.js";
@@ -44,6 +45,7 @@ const builds = {
     two: "Earn a charge every five openings.",
     four: "Bank up to two charges.",
   },
+  ...blueprints,
 };
 const evolution = {
   2: { at: 10000, cost: { coins: 3000, scrap: 16, shards: 8 }, scale: 1.5 },
@@ -126,7 +128,10 @@ function buildProfile(gear) {
   return Object.fromEntries(
     Object.keys(builds).map((id) => {
       const count = pieces[id] || 0;
-      return [id, { count, active: count >= 2 || signatures.has(id) }];
+      const active = Object.hasOwn(blueprints, id)
+        ? signatures.has(id)
+        : count >= 2 || signatures.has(id);
+      return [id, { count, active }];
     }),
   );
 }
@@ -175,6 +180,17 @@ function lootValue(world, level, slot, scale, roll = 1) {
   );
 }
 
+function recipePayment(state, set, gathered) {
+  if (!Object.hasOwn(builds, set) || builds[set].rewardSlots || state.total < craftAt)
+    return null;
+  if (Object.hasOwn(blueprints, set)) {
+    const recipe = blueprints[set];
+    return !gathered && state.total >= recipe.at && state.blacksmith.recipes.includes(set)
+      ? recipe.cost : null;
+  }
+  return gathered ? gatheredRecipeCost : craftCost;
+}
+
 function buildRecipe(
   state,
   set,
@@ -185,14 +201,12 @@ function buildRecipe(
   limit,
   gathered = false,
 ) {
-  const cost = gathered ? gatheredRecipeCost : craftCost;
+  const cost = recipePayment(state, set, gathered);
   if (
-    !Object.hasOwn(builds, set) ||
-    builds[set].rewardSlots ||
+    !cost ||
     !Number.isInteger(slot) ||
     slot < 0 ||
     slot >= slots.length ||
-    state.total < craftAt ||
     state.items.length >= limit ||
     !canPay(state, cost)
   )
@@ -323,6 +337,7 @@ export {
   discover,
   lootValue,
   buildRecipe,
+  recipePayment,
   evolutionOffer,
   evolveGear,
   resolveLoot,

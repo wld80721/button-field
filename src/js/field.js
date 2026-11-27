@@ -1,3 +1,6 @@
+import { advanceClone, fieldSignatures } from "./blacksmith-effects.js";
+import { refreshBlacksmith } from "./blacksmith-view.js";
+import { signatureMark } from "./sprites.js";
 import { strikeBoss } from "./combat.js";
 import {
   renderCombatField,
@@ -43,6 +46,7 @@ import { sound } from "./sound.js";
 import { chestIcon, openedChestIcon } from "./sprites.js";
 import {
   equippedGear,
+  earn,
   itemName,
   level,
   recordEarnings,
@@ -62,6 +66,8 @@ import {
 } from "./worlds.js";
 
 let pressTimer;
+let clonePressTimer;
+let clone;
 
 function replaceRun(run) {
   setRunState(run);
@@ -75,8 +81,11 @@ function replaceRun(run) {
 }
 
 function clearFieldEffects() {
+  clone = null;
   runtime.chestClock = 0;
   clearTimeout(pressTimer);
+  clearTimeout(clonePressTimer);
+  $("press").classList.remove("phantom-press");
   clearTimeout(toastTimer);
   $("press").classList.remove("pressed");
   $("toast").hidden = true;
@@ -132,6 +141,7 @@ function fieldSnapshot() {
     rates: stats(gear),
     pieces: worldGearCount(s.world, gear),
     profile: buildProfile(gear),
+    gear,
   };
 }
 
@@ -141,6 +151,7 @@ function press() {
   const before = stageIndex();
   const totalBefore = s.total;
   const snapshot = fieldSnapshot();
+  const fighting = Boolean(s.combat.attempt);
   const {
     coins,
     bonus: effect,
@@ -160,6 +171,19 @@ function press() {
   if (chest) revealChest(chest);
   if (opened) showOpenedChest(opened);
   showSiteRewards(advanceSites(s, 1000, true).rewards);
+  if (!fighting && !document.hidden && !runtime.modalType) {
+    if (clone && s.equip[3] !== clone.id) clone = null;
+    for (const signature of fieldSignatures(s, snapshot.gear, snapshot.rates.tap, clone)) {
+      if (signature.type === "summon") {
+        clone = signature.clone;
+        showSignature("ghost", "Phantom Charm summoned a clone");
+      } else if (signature.type === "seed") {
+        showSignature("seed", "Nature Boots · Magical seed banked");
+      } else {
+        showSignature("bolt", "Thunder Gauntlet · " + (signature.rewards.length ? rewardText(signature.rewards) : "Deposit chipped"));
+      }
+    }
+  }
   directionalFloat(
     (effect || ability ? (effect || ability) + " · " : "") +
       "+" +
@@ -175,6 +199,43 @@ function press() {
   render(opened?.disposition === "equipped" ? undefined : snapshot);
   save();
 }
+function showSignature(mark, label) {
+  const layer = $("effects");
+  layer.querySelector(`[data-signature="${mark}"]`)?.remove();
+  const el = document.createElement("span");
+  el.dataset.signature = mark;
+  el.className = "field-signature";
+  el.innerHTML = signatureMark(mark);
+  layer.append(el);
+  setTimeout(() => el.remove(), 720);
+  if (label) notice(label);
+}
+
+function dismissClone() {
+  clone = null;
+  $("effects").querySelector('[data-signature="ghost"]')?.remove();
+}
+
+function runSignatureTick(elapsed) {
+  if (!clone) return;
+  if (s.combat.attempt || s.equip[3] !== clone.id) {
+    dismissClone();
+    return;
+  }
+  if (runtime.modalType || !elapsed) return;
+  const outcome = advanceClone(s, clone, elapsed);
+  clone = outcome.clone;
+  if (outcome.coins === undefined) return;
+  earn(outcome.coins);
+  showSignature("ghost", "Phantom tap · +" + fmtRate(outcome.coins));
+  $("press").classList.add("phantom-press");
+  clearTimeout(clonePressTimer);
+  clonePressTimer = setTimeout(() => $("press").classList.remove("phantom-press"), 125);
+  showSiteRewards(outcome.rewards);
+  render();
+  save();
+}
+
 function openChest(id, source = "manual") {
   const before = s.total;
   const outcome = collectChest(
@@ -287,6 +348,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   renderCombatField();
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
+  refreshBlacksmith();
   if (runtime.modalType === "forge") updateForge();
   if (runtime.modalType === "recipes") updateRecipes();
   if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
@@ -370,5 +432,7 @@ export {
   renderChests,
   replaceRun,
   runCompanionTick,
+  runSignatureTick,
+  dismissClone,
   showSiteRewards,
 };

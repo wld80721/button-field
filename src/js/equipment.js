@@ -1,3 +1,4 @@
+import { blueprints, signatureLoadout, signatureText } from "./blacksmith-data.js";
 import { materialOffer } from "./gear.js";
 import { costText } from "./site-view.js";
 import { gatheredRecipeCost } from "./sites.js";
@@ -8,6 +9,7 @@ import {
   craftAt,
   craftCost,
   evolutionOffer,
+  recipePayment,
 } from "./build-gear.js";
 import { gearBagLimit } from "./gameplay.js";
 import { gearValue } from "./gear.js";
@@ -55,8 +57,7 @@ function forgeMarkup(item) {
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
     <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
     <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
-    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button><button class="action secondary" data-open="recipes">Set recipes</button><button class="action secondary" data-open="inventory">Back to Gear</button></div>
-    <p class="subtext" id="forgeResult" role="status"></p>`;
+    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button></div>`;
 }
 
 function updateForge() {
@@ -139,6 +140,12 @@ function buildSummary() {
         return `<details class="gear-sets"><summary>${set.name} · ${info.count}/${set.rewardSlots.length} · ${info.count >= 2 ? "Active in combat" : "Bonus inactive"}</summary>
           <p>Boss Board reward</p><p>2 pieces · ${set.two}</p>${set.four ? "<p>4 pieces · " + set.four + "</p>" : ""}</details>`;
       }
+      if (Object.hasOwn(blueprints, id)) {
+        const signature = signatureLoadout(equippedGear(), id);
+        const ability = signature ? signatureText(id, signature) : "Equip " + set.signature;
+        return `<details class="gear-sets"><summary>${set.name} · ${info.count}/4 · ${ability}</summary>
+          <p>${set.ability}</p><p>2 pieces · ${set.two}</p><p>4 pieces · ${set.four}</p></details>`;
+      }
       const cap = info.count >= 2;
       const current = {
         hammerhand:
@@ -172,7 +179,7 @@ function recipesMarkup() {
     <div id="recipeForm" ${available ? "" : "hidden"}><div class="forge-details">${Object.values(
       builds,
     )
-      .filter((set) => !set.rewardSlots)
+      .filter((set) => !set.rewardSlots && !set.signature)
       .map(
         (set) =>
           `<details><summary>${set.name} · ${set.style}</summary><p>${slots[set.slot]} or 2 pieces · ${set.ability}</p><p>2 pieces · ${set.two}</p><p>4 pieces · ${set.four}</p></details>`,
@@ -180,7 +187,7 @@ function recipesMarkup() {
       .join("")}</div>
     <div class="gear-filters recipe-controls">
     <label>Set <select id="recipeSet">${Object.entries(builds)
-      .filter(([, set]) => !set.rewardSlots)
+      .filter(([id, set]) => !set.rewardSlots && (!set.signature || s.blacksmith.recipes.includes(id)))
       .map(([id, set]) => `<option value="${id}">${set.name}</option>`)
       .join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
@@ -188,7 +195,12 @@ function recipesMarkup() {
     <button id="craftGear" class="action gold">Craft · ${costLabel(craftCost)}</button>
     <button id="craftGatheredGear" class="action gold">Craft with materials · ${costText(gatheredRecipeCost)}</button>
     <p id="gatheredBalance"></p>
-    </div><p id="recipeResult" role="status"></p><button class="action secondary" data-open="inventory">Back to Gear</button>`;
+    </div>
+    <details class="smith-blueprints"><summary>Rare blueprints</summary>${Object.entries(blueprints).map(([id, def]) =>
+      `<article style="--plate:${def.color}"><strong>${def.name} · ${def.signature}</strong>
+      <p>${s.blacksmith.recipes.includes(id) ? def.ability : def.clue}</p>
+      <p>${s.blacksmith.recipes.includes(id) ? def.two + " " + def.four : ""}</p></article>`
+    ).join("")}</details>`;
 }
 
 function updateRecipes() {
@@ -196,6 +208,13 @@ function updateRecipes() {
   setValue($("recipeForm"), "hidden", !unlocked);
   setValue($("recipeGate"), "hidden", unlocked);
   const full = s.items.length >= gearBagLimit;
+  const set = $("recipeSet").value;
+  const cost = recipePayment(s, set, false);
+  const gathered = recipePayment(s, set, true);
+  const rare = Object.hasOwn(blueprints, set);
+  setValue($("craftGatheredGear"), "hidden", rare);
+  setText($("craftGear"), cost ? "Craft · " + costText(cost) : rare
+    ? "Unlocks at " + fmtExact(blueprints[set].at) + " earned" : "Craft");
   setText(
     $("recipeBalance"),
     full
@@ -211,12 +230,12 @@ function updateRecipes() {
   setValue(
     $("craftGatheredGear"),
     "disabled",
-    !unlocked || full || !canPay(s, gatheredRecipeCost),
+    !gathered || full || !canPay(s, gathered),
   );
   setValue(
     $("craftGear"),
     "disabled",
-    !unlocked || full || !canPay(s, craftCost),
+    !cost || full || !canPay(s, cost),
   );
 }
 
@@ -271,11 +290,14 @@ function effectsFor(gear) {
   const effects = Object.entries(profile)
     .filter(([, info]) => info.active)
     .map(
-      ([id, info]) =>
-        builds[id].name +
+      ([id, info]) => {
+        const signature = Object.hasOwn(blueprints, id) && signatureLoadout(gear, id);
+        if (signature) return builds[id].signature + " · " + signatureText(id, signature);
+        return builds[id].name +
         (info.count >= 2
           ? " · " + (info.count >= 4 ? 4 : 2) + "-piece"
-          : " · Signature"),
+          : " · Signature");
+      },
     );
   const pieces = worldGearCount(s.world, gear);
   if (pieces >= 2)

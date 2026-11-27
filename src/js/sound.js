@@ -2,6 +2,9 @@ import { KEY } from "./saves.js";
 import { $ } from "./ui-dom.js";
 
 const soundTones = {
+  smithHeat: [[105, 180, 0.22, 0, "sawtooth", 0.035]],
+  smithStrike: [[930, 470, 0.12, 0, "triangle", 0.1], [1440, 930, 0.16, 0, "sine", 0.055]],
+  smithQuench: [[460, 120, 0.3, 0, "sawtooth", 0.035], [659, 784, 0.2, 0.1, "sine", 0.06]],
   combatStart: [
     [145, 200, 0.15, 0, "triangle", 0.06],
     [293, 390, 0.12, 0.12, "triangle", 0.045],

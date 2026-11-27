@@ -2,7 +2,19 @@
 
 ## Handoff · 2026-11-27
 
-The latest shipped gameplay commit is `b78f443` (The Living Field). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage and follows this expansion. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
+The Legendary Blacksmith follows The Living Field (`b78f443`). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
+
+## The Legendary Blacksmith · Release
+
+The workshop, four equipment sets, and schema 7 migration are included in Expansion 2.
+
+- The Grasslands Forge opens at the existing gate. Its furnace, anvil, and quench station handle legacy tempering, set crafting, and evolution. Heat and shape a workpiece, then pay and apply the change at quench. Canceling or reloading discards unfinished work without spending materials.
+- Existing equipment and save IDs retain their original meaning. The byte-exact pre-Blacksmith backup is exportable from Save & settings, and interrupted backup writes pause autosave. Blueprint discoveries persist through Ascension. Seeds, gear, resource balances, and ability charges use run-level resets.
+- Thunder Gauntlet chips ready deposits, Phantom Charm echoes taps, Nature Boots supply free Glowleaf seeds, and Dragon Ring fires on the next strike after a successful Guard. Dragonfire uses the current optional combat rules.
+
+- Backed up the shipped HTML and representative schema 6 saves before development. The standalone build check, 41 unit tests, and 46 offline Chromium checks passed. Compared against The Living Field with a full bag and observed zero linear bag scans and zero stable HUD mutations in both builds.
+- Played from a fresh save through unlocking the Forge and completing the first temper. Used seeded equipment for rare crafting and mixed abilities, Mythic and Celestial transformations, and a four-piece Dragonfire fight with a reload between Guard and the fireball. Reviewed desktop and mobile screenshots and exercised touch, keyboard, reduced motion, focus return, and backup failure.
+- The managed Chromium policy blocked direct `file://` loading. The build ran offline as a routed standalone document with no external assets. Physical devices, Safari, Firefox, and the live deployment were outside this review.
 
 ## Shipped
 
@@ -36,4 +48,4 @@ The latest shipped gameplay commit is `b78f443` (The Living Field). GitHub Pages
 
 ## Known issues
 
-The Living Field gives farm growth and mining damage visible changes. The later Farming and Mining phase will deepen their interactions. Forge crafting still uses dropdowns, and expeditions are countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.
+The Living Field gives farm growth and mining damage visible changes. The later Farming and Mining phase will deepen their interactions. Expeditions still use countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.

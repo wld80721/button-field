@@ -39,6 +39,7 @@ function performAscension(state) {
   run.companions = keepCompanions(state);
   run.combat = keepCombat(state);
   run.fieldDiscoveries = [...state.fieldDiscoveries];
+  run.blacksmith.recipes = [...state.blacksmith.recipes];
   run.lootRules = { ...state.lootRules };
   run.asc = {
     ...state.asc,

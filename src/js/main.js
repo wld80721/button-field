@@ -16,12 +16,14 @@ import {
   siteButtonAction,
   siteControlChange,
 } from "./site-view.js";
-import { buildRecipe, evolveGear, normalizeLootRules } from "./build-gear.js";
+import { normalizeLootRules } from "./build-gear.js";
+import { finishBlacksmith, handleBlacksmith, updateTimingAssist } from "./blacksmith-view.js";
 import {
   showComparison,
   hideComparison,
   positionComparison,
   updateLootRuleSummary,
+  updateRecipes,
 } from "./equipment.js";
 import { buyAscensionUpgrade } from "./prestige.js";
 import { ascUpgrades, clamp, upgrades } from "./data.js";
@@ -34,7 +36,7 @@ import {
 import { initFieldEffects, toast } from "./effects.js";
 import { claimDiscovery } from "./field-discoveries.js";
 import { fieldLocationFor, initLivingField, playDiscovery } from "./field-view.js";
-import { addGearItem, forgeGear, salvageGear } from "./gear.js";
+import { salvageGear } from "./gear.js";
 import {
   autoChestTick,
   fieldSnapshot,
@@ -45,14 +47,14 @@ import {
   renderChests,
   replaceRun,
   runCompanionTick,
+  runSignatureTick,
+  dismissClone,
   showSiteRewards,
 } from "./field.js";
 import {
   buyWorkshopUpgrade,
   equipItem,
   learnSkill,
-  gearBagLimit,
-  nextEntityId,
 } from "./gameplay.js";
 import { hasAscensionAccess } from "./progression.js";
 import { runtime } from "./runtime.js";
@@ -67,6 +69,7 @@ import {
   readPreCompanionsSave,
   readPreCombatSave,
   readPreLivingFieldSave,
+  readPreBlacksmithSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -85,7 +88,6 @@ import {
   getGearItem,
   itemName,
   recordEarnings,
-  level,
   s,
 } from "./state.js";
 import { $, setText } from "./ui-dom.js";
@@ -169,6 +171,8 @@ $("modal").addEventListener("click", (e) => {
 });
 $("modalBody").addEventListener("change", (e) => {
   const { id, value } = e.target;
+  if (id === "smithAssist") updateTimingAssist();
+  if (id === "recipeSet") updateRecipes();
   if (siteControlChange(e.target)) {
     renderSites();
     save();
@@ -212,12 +216,25 @@ $("modalBody").addEventListener("change", (e) => {
 $("modalBody").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
+  const smith = handleBlacksmith(b);
+  if (smith) {
+    if (smith !== true) {
+      finishBlacksmith(smith);
+      if (smith.result) {
+        notice($("recipeResult")?.textContent || $("forgeResult").textContent);
+        render();
+        save();
+      }
+    }
+    return;
+  }
   if (runtime.modalType === "bosses") {
     if (b.dataset.bossSelect) {
       selectBoss(b.dataset.bossSelect);
       return;
     }
     if (b.dataset.bossStart && prepareFight(b.dataset.bossStart)) {
+      dismissClone();
       closeModal();
       render();
       $("press").focus({ preventScroll: true });
@@ -271,56 +288,8 @@ $("modalBody").addEventListener("click", (e) => {
     $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
     return;
   }
-  if (
-    ["craftGear", "craftGatheredGear"].includes(b.id) &&
-    runtime.modalType === "recipes"
-  ) {
-    const item = buildRecipe(
-      s,
-      $("recipeSet").value,
-      +$("recipeSlot").value,
-      level(),
-      nextEntityId,
-      addGearItem,
-      gearBagLimit,
-      b.id === "craftGatheredGear",
-    );
-    if (!item) return;
-    sound("upgrade");
-    notice("Crafted " + itemName(item) + ".");
-    setText($("recipeResult"), "Crafted " + itemName(item) + ".");
-    render();
-    save();
-    return;
-  }
-  if (b.dataset.evolve && runtime.modalType === "forge") {
-    const item = getGearItem(+b.dataset.evolve);
-    if (!evolveGear(s, item)) return;
-    sound("upgrade");
-    notice("Gear evolved.");
-    save();
-    openModal("forge", item.id);
-    setText($("forgeResult"), "Gear evolved. Forge rank and lock retained.");
-    render();
-    return;
-  }
   if (b.dataset.openForge) {
     openModal("forge", +b.dataset.openForge);
-    return;
-  }
-  if (b.dataset.forge) {
-    const item = getGearItem(+b.dataset.forge);
-    if (
-      runtime.modalType === "forge" &&
-      forgeGear(s, item, b.id === "temperGear")
-    ) {
-      notice("Forged " + itemName(item) + " to rank " + item.forge + ".");
-      sound("upgrade");
-      render();
-      save();
-      setText($("forgeResult"), "Forged to rank " + item.forge + ".");
-      if (b.disabled) $("close").focus();
-    }
     return;
   }
   if (b.dataset.travel) {
@@ -392,7 +361,9 @@ $("modalBody").addEventListener("click", (e) => {
   }
   if (b.dataset.equip || b.dataset.equipReward) {
     const i = getGearItem(+(b.dataset.equip || b.dataset.equipReward));
+    const previousCharm = s.equip[3];
     if (!equipItem(s, i, Boolean(b.dataset.equip))) return;
+    if (previousCharm !== s.equip[3]) dismissClone();
     sound("equip");
     notice("Equipment updated: " + itemName(i) + ".");
     render();
@@ -454,6 +425,7 @@ $("modalBody").addEventListener("click", (e) => {
       "exportPreCompanions",
       "exportPreCombat",
       "exportPreLivingField",
+      "exportPreBlacksmith",
       "exportPreExpansion",
       "exportPreFoundation",
     ].includes(b.id)
@@ -471,7 +443,9 @@ $("modalBody").addEventListener("click", (e) => {
                 ? readPreCombatSave()
                 : b.id === "exportPreLivingField"
                   ? readPreLivingFieldSave()
-                  : readPreFoundationSave();
+                  : b.id === "exportPreBlacksmith"
+                    ? readPreBlacksmithSave()
+                    : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();
@@ -624,5 +598,6 @@ setInterval(() => {
   if (siteTick.rewards.length) save();
   autoChestTick(dt, snapshot);
   runCompanionTick(elapsedVisible);
+  runSignatureTick(elapsedVisible);
 }, 250);
 setInterval(savePassiveIncome, 5000);

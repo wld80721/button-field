@@ -80,7 +80,7 @@ test("16 targeted recipes share exact prices and reject invalid, premature and f
   const coins = run.coins;
   const scrap = run.scrap;
   const shards = run.shards;
-  for (const set of Object.keys(builds).filter((id) => !builds[id].rewardSlots))
+  for (const set of Object.keys(builds).filter((id) => !builds[id].rewardSlots && !builds[id].signature))
     for (let slot = 0; slot < 4; slot++) {
       const item = craft(run, set, slot);
       assert.equal(item.set, set);
@@ -280,7 +280,7 @@ test("equal-cost crafted builds specialize in separate activities with seeded ro
       (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 2 ** 32;
   }
   for (const id of Object.keys(builds).filter(
-    (id) => !builds[id].rewardSlots,
+    (id) => !builds[id].rewardSlots && !builds[id].signature,
   )) {
     const clickRun = scenario(id);
     let fastOpens = 0;

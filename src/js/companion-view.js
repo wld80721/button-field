@@ -331,7 +331,7 @@ function companionButton(button, now = Date.now()) {
         " XP" +
         (reward.artifact
           ? " · Discovered " + artifacts[reward.artifact].name + "."
-          : ".");
+          : ".") + (reward.blueprint ? " Wraithweave blueprint discovered." : "");
   }
   return { changed: Boolean(message), message };
 }

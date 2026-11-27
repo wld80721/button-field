@@ -293,7 +293,7 @@ test("combat defeat is free and each boss reward survives a full bag and can be 
     const run = attempt(id);
     run.combat.attempt.hp = 1;
     const reward = strikeBoss(run).at(-1);
-    assert.deepEqual(reward, { type: "victory", id, reward: true });
+    assert.deepEqual(reward, { type: "victory", id, reward: true, ...(id === "mossguard" && { blueprint: true }) });
     assert.deepEqual(strikeBoss(run), []);
     const batch = Array.from({ length: gearBagLimit }, (_, i) => ({
       id: i + 1,

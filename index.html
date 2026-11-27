@@ -3436,6 +3436,188 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
   .location-bed img, .location-vein img { transition: none; }
 }
+
+/* Blacksmith workshop */
+.modal[data-location="forge"] .window {
+  --location-floor: #30232b;
+  --location-light: #ce9571;
+  width: min(1024px, 100%);
+}
+
+.smith-room {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-rows: minmax(115px, 1fr) minmax(130px, 1.2fr);
+  align-items: end;
+  gap: 6px;
+  min-height: clamp(270px, 45dvh, 480px);
+  padding: 14px clamp(7px, 4vw, 46px) 18px;
+  overflow: hidden;
+  border: 3px solid #a87b5c;
+  box-shadow: inset 0 0 0 5px #3a2830, inset 0 -12px #30232a;
+  background:
+    radial-gradient(ellipse at 20% 65%, #f788544d 0, transparent 41%),
+    repeating-linear-gradient(0deg, #4c3033 0 2px, transparent 2px 29px),
+    repeating-linear-gradient(90deg, #47323a 0 3px, #6b4240 3px 59px);
+}
+
+.smith-wall {
+  position: absolute;
+  inset: 63% 0 0;
+  z-index: -1;
+  border-top: 6px solid #31232b;
+  background:
+    repeating-linear-gradient(0deg, #3a2b32 0 3px, transparent 3px 22px),
+    repeating-linear-gradient(102deg, #523d3d 0 4px, #644d4a 4px 36px);
+}
+
+.smith-banners {
+  grid-area: 1 / 2 / 2 / 6;
+  align-self: start;
+  min-height: 36px;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.smith-banners span {
+  border: 2px solid var(--plate);
+  background: #322731;
+  color: var(--plate);
+  padding: 2px 5px;
+  font-size: clamp(10px, 1.25vw, 13px);
+}
+
+.smith-banners span[hidden] { display: none; }
+
+.smith-station,
+.smith-bins {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-items: end;
+  gap: 5px;
+  padding: 4px;
+  min-height: 44px;
+  color: #fff1d2;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  font: inherit;
+  font-size: clamp(11px, 1.7vw, 15px);
+  text-align: center;
+}
+
+.smith-station { cursor: pointer; }
+.smith-station:disabled { cursor: default; opacity: 1; }
+.smith-station svg,
+.smith-bins svg { width: min(100%, 150px); max-height: clamp(40px, 15dvh, 122px); filter: drop-shadow(3px 6px 0 #21192588); }
+.smith-station span,
+.smith-bins span { background: #2c222a; border: 1px solid #94664e; padding: 2px 6px; }
+.smith-station:enabled:hover span,
+.smith-station:focus-visible span { color: #261e2a; background: #ffcf85; }
+.smith-station:focus-visible { outline: 2px solid #ffdb92; outline-offset: -2px; }
+.smith-furnace { grid-area: 1 / 1 / 3 / 3; align-self: center; }
+.smith-furnace svg { width: min(95%, 175px); max-height: clamp(70px, 24dvh, 205px); }
+.smith-anvil { grid-area: 2 / 3 / 3 / 5; z-index: 2; }
+.smith-quench { grid-area: 2 / 5; }
+.smith-table { grid-area: 1 / 5 / 2 / 7; }
+.smith-rack { grid-area: 1 / 3 / 2 / 5; }
+.smith-bins { grid-area: 2 / 6; }
+.smith-bins svg { max-height: 64px; }
+.smith-display { grid-area: 1 / 1; align-self: start; display: flex; gap: 4px; opacity: .88; }
+.smith-display > * { width: clamp(20px, 4vw, 48px); max-height: 46px; }
+
+.smith-room[data-stage="furnace"] .smith-furnace,
+.smith-room[data-stage="anvil"] .smith-anvil,
+.smith-room[data-stage="quench"] .smith-quench { border-color: #d89d64; background: #8c4a3726; }
+.smith-furnace svg [data-pixel="4"] { animation: smith-embers 900ms steps(3, end) infinite alternate; }
+.smith-quench svg [data-pixel="4"] { fill: #b6edff; }
+.smith-quench svg [data-pixel="3"] { fill: #6aaabb; }
+.smith-anvil svg [data-pixel="3"] { fill: #a7a4a7; }
+.smith-anvil svg [data-pixel="2"] { fill: #605a69; }
+.smith-piece {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: min(38%, 240px);
+  left: 50%;
+  bottom: clamp(72px, 18dvh, 166px);
+  transform: translateX(-50%);
+  color: #ffdfa0;
+  pointer-events: none;
+}
+.smith-piece[hidden] { display: none; }
+.smith-piece span { display: flex; }
+.smith-piece svg { width: clamp(35px, 7vw, 73px); filter: drop-shadow(0 0 7px #ff973c); }
+.smith-room[data-stage="furnace"] .smith-piece { left: 24%; }
+.smith-room[data-stage="anvil"] .smith-piece svg { filter: drop-shadow(0 0 14px #ff763b) brightness(1.2); }
+.smith-room[data-stage="quench"] .smith-piece svg { filter: drop-shadow(0 0 10px #ff913e); }
+.smith-finished .smith-piece svg { animation: smith-reveal 620ms ease-out both; filter: drop-shadow(0 0 8px #7ed4ff); }
+.smith-sparks { position: absolute; inset: 0; pointer-events: none; }
+.smith-sparks i { position: absolute; left: 49%; bottom: 30%; width: 5px; height: 5px; background: #ffcf77; opacity: 0; --x: -54px; --y: -45px; }
+.smith-sparks i:nth-child(2) { --x: -20px; --y: -85px; }
+.smith-sparks i:nth-child(3) { --x: 20px; --y: -76px; }
+.smith-sparks i:nth-child(4) { --x: 54px; --y: -38px; }
+.smith-sparks i:nth-child(5) { --x: 4px; --y: -98px; }
+.smith-impact[data-stage="anvil"] .smith-sparks i,
+.smith-impact[data-stage="quench"] .smith-sparks i { animation: smith-spark 400ms steps(7, end); }
+.smith-finished .smith-sparks i { background: #c1ebff; animation: smith-spark 550ms steps(8, end); }
+.smith-bench { position: sticky; bottom: 0; z-index: 4; background: #30232b; border: 1px solid #ba835e; padding: 8px; }
+.smith-bench p { margin: 5px 0; }
+.smith-bench .actions { margin: 0; flex-wrap: wrap; align-items: center; }
+.smith-meter { position: relative; height: 14px; border: 2px solid #c8916e; background: #261e2a; margin: 4px 5px; }
+.smith-meter i { position: absolute; height: 100%; background: #b1d578; }
+.smith-meter b { position: absolute; width: 4px; height: 130%; top: -15%; background: #fff6da; }
+.smith-wallet { margin: 6px 0 12px; color: #f5d5a9; font-size: .9rem; }
+.smith-blueprints article { border-left: 3px solid var(--plate); margin: 7px 2px; padding: 4px 9px; background: #251d25; }
+.smith-blueprints strong { color: var(--plate); }
+.smith-blueprints p { margin: 3px 0; }
+.field-signature,
+.smith-fireball { position: absolute; z-index: 4; width: clamp(36px, 8vw, 80px); filter: drop-shadow(0 0 9px currentColor); pointer-events: none; }
+.field-signature[data-signature="ghost"] { top: 42%; left: 56%; color: #c69aff; animation: smith-echo 720ms ease-out both; }
+.field-signature[data-signature="bolt"] { top: 54%; left: 76%; color: #9cf1ff; animation: smith-reveal 500ms steps(6, end); }
+.field-signature[data-signature="seed"] { top: 56%; left: 27%; color: #b7ed76; animation: smith-reveal 600ms steps(7, end); }
+.smith-fireball { --impact-top: 48%; --impact-left: 78%; top: var(--impact-top); left: var(--impact-left); color: #ffaa5f; transform: translate(-50%, -50%); animation: smith-fireball 430ms ease-out both; }
+@keyframes smith-embers { to { fill: #ff8146; opacity: .64; } }
+@keyframes smith-spark { from { opacity: 1; } to { opacity: 0; transform: translate(var(--x), var(--y)); } }
+@keyframes smith-reveal { from { opacity: .45; filter: brightness(2.2); } to { opacity: 1; } }
+@keyframes smith-echo { from { transform: translate(28%, 12%); opacity: .4; } 35% { transform: translate(-25%, -8%); opacity: 1; } to { opacity: .2; } }
+@keyframes smith-fireball { from { top: 48%; left: 53%; transform: translate(-50%, -50%) scale(.6); opacity: .6; } to { opacity: 1; } }
+@media (max-width: 570px) { .smith-fireball { --impact-top: 69%; --impact-left: 81%; } }
+@media (max-width: 520px) {
+  .smith-room { gap: 1px; min-height: 235px; grid-template-rows: 98px 120px; padding: 9px 2px 4px; }
+  .smith-station, .smith-bins { padding: 3px 0; }
+  .smith-station span, .smith-bins span { padding: 2px 3px; }
+  .smith-piece { bottom: 71px; }
+}
+.living-paused .field-signature { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .smith-room *, .field-signature, .smith-fireball { animation: none !important; }
+}
+[data-location="forge"][data-recipes-ready="false"] #smith-table { display: grid; }
+.smith-meter { container-type: inline-size; }
+.smith-meter b { left: 0; }
+.smith-result { margin: 8px 0 0; color: #ffdb98; }
+.smith-result:empty { margin: 0; }
+#press.phantom-press .cap { transform: translateY(6px); filter: drop-shadow(0 0 8px #e1beff); }
+.smith-beams {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 35%;
+  border: 8px solid #32252d;
+  border-top-color: #624537;
+  box-shadow: inset 0 4px #aa76534d, inset 0 0 40px #211a284d;
+  background: linear-gradient(90deg, transparent 28%, #342631b3 28% 29%, #af785948 29% 29.5%, transparent 29.5% 69%, #342631b3 69% 70%, #af785948 70% 70.5%, transparent 70.5%);
+  pointer-events: none;
+}
 </style>
   </head>
   <body>
@@ -3734,6 +3916,117 @@ textarea {
     <div id="skillTooltip" class="skill-tooltip" role="tooltip" hidden></div>
     <script>
 (() => {
+  // src/js/blacksmith-data.js
+  var blueprints = {
+    sparkforged: {
+      name: "Sparkforged",
+      signature: "Thunder Gauntlet",
+      slot: 0,
+      style: "Mining",
+      color: "#7ddfff",
+      emblem: "bolt",
+      clue: "Manually clear the Copper deposit in the Mine.",
+      at: 2500,
+      cost: { coins: 650, copperOre: 4, scrap: 4 },
+      ability: "Every 20 manual field presses, strike the highest-tier ready deposit.",
+      two: "Charge in 15 presses.",
+      four: "Also strike each other ready deposit once."
+    },
+    wraithweave: {
+      name: "Wraithweave",
+      signature: "Phantom Charm",
+      slot: 3,
+      style: "Echo presses",
+      color: "#c6a2f4",
+      emblem: "ghost",
+      clue: "Claim a Grove Trail expedition at the Companion camp.",
+      at: 2500,
+      cost: { coins: 650, glowleaf: 3, scrap: 6 },
+      ability: "Every 24 manual field presses, summon a clone that taps the red button.",
+      two: "Charge in 18 presses.",
+      four: "The clone makes one extra tap."
+    },
+    wildroot: {
+      name: "Wildroot",
+      signature: "Nature Boots",
+      slot: 2,
+      style: "Farming",
+      color: "#a8d879",
+      emblem: "seed",
+      clue: "Manually harvest Glowleaf from the Garden.",
+      at: 2500,
+      cost: { coins: 650, glowleaf: 4, copperOre: 2 },
+      ability: "Every 15 manual field presses, bank a seed to plant free Glowleaf.",
+      two: "Charge in 12 presses.",
+      four: "Bank one extra seed."
+    },
+    dragonfire: {
+      name: "Dragonfire",
+      signature: "Dragon Ring",
+      slot: 1,
+      style: "Combat",
+      color: "#ff9869",
+      emblem: "flame",
+      clue: "Defeat Mossguard through the Boss Board.",
+      at: 5e3,
+      cost: { coins: 1200, copperOre: 4, scrap: 8, shards: 4 },
+      ability: "After a successful Guard, your next manual strike launches a fireball.",
+      two: "Fireballs deal 4 extra base damage.",
+      four: "Start each fight with a fireball ready."
+    }
+  };
+  var fieldCharge = { sparkforged: [20, 15], wraithweave: [24, 18], wildroot: [15, 12] };
+  var freshBlacksmith = () => ({ recipes: [], charge: { sparkforged: 0, wraithweave: 0, wildroot: 0 }, seeds: 0 });
+  function unlockBlueprint(state, id) {
+    if (!state.blacksmith || !Object.hasOwn(blueprints, id) || state.blacksmith.recipes.includes(id)) return false;
+    state.blacksmith.recipes.push(id);
+    return true;
+  }
+  function normalizeBlacksmith(state, raw) {
+    const clean = freshBlacksmith();
+    const boundedInt = (value, max) => Number.isFinite(value) ? Math.min(max, Math.max(0, Math.floor(value))) : 0;
+    clean.recipes = Object.keys(blueprints).filter((id) => Array.isArray(raw?.recipes) && raw.recipes.includes(id));
+    clean.seeds = boundedInt(raw?.seeds, 4);
+    for (const [id, [max]] of Object.entries(fieldCharge)) clean.charge[id] = boundedInt(raw?.charge?.[id], max);
+    state.blacksmith = clean;
+    if (state.companions.artifacts.includes("bell")) unlockBlueprint(state, "wraithweave");
+    if (state.combat.records.mossguard) unlockBlueprint(state, "dragonfire");
+  }
+  function signatureLoadout(gear, id) {
+    const piece = gear[blueprints[id].slot];
+    if (piece?.set !== id) return null;
+    return { id: piece.id, count: gear.filter((item) => item?.set === id).length, tier: Math.max(0, piece.r - 4) };
+  }
+  function signatureAbility(id, loadout) {
+    const { tier, count } = loadout;
+    const paired = count >= 2;
+    const full = count >= 4;
+    const goal = fieldCharge[id]?.[Number(paired)];
+    switch (id) {
+      case "sparkforged":
+        return { goal, hits: 1 + tier, chain: full };
+      case "wraithweave":
+        return { goal, taps: 3 + tier + Number(full) };
+      case "wildroot":
+        return { goal, capacity: 1 + tier + Number(full) };
+      case "dragonfire":
+        return { damage: 8 + tier * 4 + Number(paired) * 4, opener: full };
+    }
+  }
+  function signatureText(id, loadout) {
+    const effect = signatureAbility(id, loadout);
+    switch (id) {
+      case "sparkforged":
+        return `${effect.hits} lightning strike(s) every ${effect.goal} presses${effect.chain ? " \xB7 chains to other deposits" : ""}`;
+      case "wraithweave":
+        return `${effect.taps} clone taps every ${effect.goal} presses`;
+      case "wildroot":
+        return `Seed every ${effect.goal} presses \xB7 stock ${effect.capacity}`;
+      case "dragonfire":
+        return `${effect.damage} fireball damage after Guard${effect.opener ? " \xB7 starts primed" : ""}`;
+    }
+  }
+
   // src/js/data.js
   var clamp = (n, a, b) => Math.min(b, Math.max(a, n));
   var rarity = [
@@ -4140,6 +4433,240 @@ textarea {
       req: 3
     }
   ];
+
+  // src/js/world-data.js
+  var firstWorld = "grasslands";
+  var worlds = {
+    grasslands: {
+      name: "Grasslands",
+      at: milestones.start,
+      accent: "#a3ec82",
+      mechanic: "Wild Growth",
+      limit: 25,
+      description: "Every 25 presses guarantees a chest as soon as there\u2019s room."
+    },
+    desert: {
+      name: "Desert",
+      at: milestones.ascension,
+      accent: "#ffd38b",
+      mechanic: "Dune Surge",
+      limit: 12,
+      description: "Every 12th press pays 4\xD7 its usual coins.",
+      gearBonus: "Each piece adds 0.5\xD7 to Dune Surge.",
+      gear: [
+        "Dunewalker Gloves",
+        "Oasis Ring",
+        "Sandstrider Boots",
+        "Scarab Charm"
+      ],
+      gearScale: 1.25,
+      terrain: {
+        tiles: [
+          "#a9673d",
+          "#b97945",
+          "#c28448",
+          "#cd904e",
+          "#d59b58",
+          "#e0aa65",
+          "#ba814e"
+        ],
+        edges: ["#6b4147", "#704748", "#805044"],
+        border: "#4a353e",
+        grain: "#6f442644",
+        mark: "#536746",
+        shine: "#a7bf65",
+        shape: [
+          [5, 3, 2, 9],
+          [2, 6, 3, 2],
+          [8, 4, 3, 2],
+          [9, 2, 2, 3]
+        ]
+      }
+    },
+    frozen: {
+      name: "Frozen Lands",
+      at: milestones.frozen,
+      accent: "#b5eeff",
+      mechanic: "Thaw",
+      limit: 10,
+      description: "Every 10 presses releases 5 seconds of automatic income. The charge waits if your automatic income is zero.",
+      gearBonus: "Each piece adds 1 second of income to Thaw.",
+      gear: [
+        "Rimeweave Gloves",
+        "Glacier Ring",
+        "Snowstep Boots",
+        "Aurora Charm"
+      ],
+      gearScale: 1.5,
+      terrain: {
+        tiles: [
+          "#407694",
+          "#5d94ac",
+          "#6fa5ba",
+          "#89bbcd",
+          "#94c5d5",
+          "#abd4e0",
+          "#588fa8"
+        ],
+        edges: ["#274a69", "#2b5271", "#355f7d"],
+        border: "#1c3655",
+        grain: "#2c688947",
+        mark: "#3f8aaa",
+        shine: "#ddfaff",
+        shape: [
+          [5, 2, 2, 10],
+          [2, 6, 8, 2],
+          [3, 4, 2, 2],
+          [7, 8, 2, 2]
+        ]
+      }
+    },
+    volcano: {
+      name: "Volcano",
+      at: milestones.volcano,
+      accent: "#ff9e70",
+      mechanic: "Forge Heat",
+      limit: 16,
+      description: "Opening a chest, including with Auto Chest, doubles your next 8 presses here.",
+      gearBonus: "Each piece adds 2 presses to the heat from a chest.",
+      gear: [
+        "Emberforge Gloves",
+        "Obsidian Ring",
+        "Cinderstep Boots",
+        "Magma Charm"
+      ],
+      gearScale: 1.8,
+      terrain: {
+        tiles: [
+          "#49363f",
+          "#523c42",
+          "#633e46",
+          "#674345",
+          "#714744",
+          "#805047",
+          "#5e3b44"
+        ],
+        edges: ["#362831", "#38282c", "#4a2932"],
+        border: "#231a27",
+        grain: "#240f274f",
+        mark: "#b9533e",
+        shine: "#ffae59",
+        shape: [
+          [2, 7, 5, 2],
+          [6, 4, 2, 4],
+          [7, 3, 5, 2],
+          [10, 2, 4, 1]
+        ]
+      }
+    },
+    celestial: {
+      name: "Celestial Realm",
+      at: milestones.celestial,
+      accent: "#dfbfff",
+      mechanic: "Starlight",
+      limit: 20,
+      description: "After 20 presses, your next chest from pressing gains one rarity tier, up to Legendary.",
+      gearBonus: "Two pieces make Starlight grant two rarity tiers.",
+      gear: [
+        "Astralweave Gloves",
+        "Orbit Ring",
+        "Cometstride Boots",
+        "Nova Charm"
+      ],
+      gearScale: 2.1,
+      terrain: {
+        tiles: [
+          "#353261",
+          "#3e396e",
+          "#473b7d",
+          "#514383",
+          "#5a488d",
+          "#624e98",
+          "#3e437a"
+        ],
+        edges: ["#23233d", "#252246", "#2d294f"],
+        border: "#16182d",
+        grain: "#a28fc248",
+        mark: "#a891cf",
+        shine: "#f8deff",
+        shape: [
+          [5, 2, 1, 9],
+          [1, 6, 9, 1],
+          [3, 4, 5, 5],
+          [10, 2, 1, 1]
+        ]
+      }
+    }
+  };
+  function recordWorld(entry) {
+    const id = entry.world;
+    return typeof id === "string" && Object.hasOwn(worlds, id) ? id : firstWorld;
+  }
+  function worldTag(id) {
+    return id === firstWorld ? {} : { world: id };
+  }
+  function discoveryKey(slot, rarityIndex, id) {
+    const design = slot + "-" + rarityIndex;
+    return id === firstWorld ? design : id + ":" + design;
+  }
+
+  // src/js/sprites.js
+  function svg(body) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`;
+  }
+  function coin() {
+    return svg(
+      '<path fill="#633822" d="M10 2h12v4h5v5h3v12h-5v5H7v-5H2V9h4V5h4z"/><path fill="#ffaf2f" d="M10 4h12v4h4v15h-5v4H10v-4H5V9h5z"/><path fill="#ffe782" d="M10 6h12v3H10zM7 10h3v10H7z"/><path fill="#bd6324" d="M14 10h6v3h-3v7h-3z"/>'
+    );
+  }
+  var worldMarks = {
+    desert: "M26 23h2v2h2v2h-2v2h-2v-2h-2v-2h2z",
+    frozen: "M26 22h2v3h3v2h-3v3h-2v-3h-3v-2h3z",
+    volcano: "M27 21h2v5h2v3h-8v-3h2v-2h2z",
+    celestial: "M27 21h1v4h4v1h-4v4h-1v-4h-4v-1h4z"
+  };
+  var signaturePaths = {
+    bolt: ["#99edff", "M15 2h11v5h-5v6h6v4h-7v5h-5v7h-7v-6h4v-7H7v-4h5V7h3z"],
+    seed: ["#b7ed76", "M15 5h8v3h4v8h-4v5h-5v6h-7v-4H7v-5H5v-6h6v3h4zm3 10h4v-4h-4z"],
+    ghost: ["#e1beff", "M10 4h12v4h5v14h-3v5h-5v-4h-5v4H8v-4H5V9h5zm1 7v5h4v-5zm8 0v5h4v-5z"],
+    flame: ["#ffb16c", "M16 2h5v8h4v6h4v8h-5v5H9v-5H4v-8h5v-6h4v7h3zm1 16v5h-3v3h7v-6h-2v-2z"]
+  };
+  function signatureMark(mark) {
+    const [color, path] = signaturePaths[mark];
+    return svg(`<path fill="${color}" d="${path}" fill-rule="evenodd"/>`);
+  }
+  function gearIcon(item) {
+    const set = Object.hasOwn(blueprints, item.set) && blueprints[item.set];
+    return itemIcon(item.slot, item.r, recordWorld(item), set);
+  }
+  function itemIcon(k, r, worldId = firstWorld, set) {
+    const c = rarity[r].color, theme = worlds[worldId].terrain, d = set?.color || theme?.tiles[2] || rarity[r].wood;
+    let p = "";
+    if (k === 0)
+      p = `<path fill="#172c32" d="M4 13h5V5h4v6h2V3h5v8h2V7h5v7h3v11l-6 5H10l-6-7z"/><path fill="${d}" d="M6 15h5V7h2v8h4V5h2v10h5V9h2v7h2v8l-5 4H11l-5-6z"/><path fill="${c}" d="M10 19h15v5H10zm2 6h10v3H12z"/>`;
+    if (k === 1)
+      p = `<path fill="#172c32" d="M10 5h12v4h5v4h3v10h-4v5H6v-5H2V13h4V9h4z"/><path fill="${theme ? d : "#cf8b38"}" d="M10 11h12v3h4v9h-5v4H11v-4H6v-9h4z"/><path fill="#ffe0a0" d="M10 14h4v3h-4v5H8v-8z"/><path fill="#172c32" d="M12 16h8v7h-8z"/><path fill="${c}" d="M11 3h10l5 6-10 8L6 9z"/><path fill="#fff" opacity=".7" d="M11 5h8v3h-8z"/>`;
+    if (k === 2)
+      p = `<path fill="#152d31" d="M6 3h15v17h8v10H3v-9h3z"/><path fill="${d}" d="M8 5h11v17h8v6H5v-6h3z"/><path fill="${c}" d="M8 6h11v5H8zm-3 17h22v4H5z"/><path fill="#fff4cb" d="M11 12h6v2h-6zm0 5h6v2h-6z"/>`;
+    if (k === 3)
+      p = `<path fill="#172d31" d="M13 1h6v6h6v4h5v10h-5v5h-6v5h-6v-5H7v-5H2V11h5V7h6z"/><path fill="${d}" d="M14 3h4v7h6v3h4v6h-5v5h-5v5h-4v-5H9v-5H4v-6h5v-3h5z"/><path fill="${c}" d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/><path fill="#fff" opacity=".75" d="M13 11h5v3h-5z"/>`;
+    if (theme)
+      p += `<path fill="#172c32" d="M23 20h9v12H21v-9h2z"/><path fill="${worlds[worldId].accent}" d="${worldMarks[worldId]}"/>`;
+    if (r >= 5) {
+      const halo = r === 6 ? "M16 0h2v5h-2zM0 14h5v2H0zM28 13h4v2h-4zM19 28h2v4h-2zM23 3h5v2h-5z" : "M1 12h3v8H1zM28 8h3v10h-3z";
+      p = `<path fill="${c}" d="${halo}"/>` + p;
+    }
+    if (set) p += `<g transform="translate(13 12) scale(.38)"><rect width="32" height="32" fill="#261e2a"/><path fill="${set.color}" d="${signaturePaths[set.emblem][1]}" fill-rule="evenodd"/></g>`;
+    return svg(p);
+  }
+  function chestIcon(r) {
+    const a = rarity[r];
+    return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M9 4h46v4h5v35h-5v5H9v-5H4V8h5z"/><path fill="${a.wood}" d="M7 24h50v18l-4 4H11l-4-4z"/><path fill="${a.light}" d="M11 6h42v4h5v14H6V10h5z"/><path fill="#fff3be" opacity=".45" d="M12 8h40v3H12z"/><path fill="#192d31" opacity=".55" d="M6 22h52v4H6zm3 12h46v2H9z"/><path fill="#17282b" d="M11 4h10v43H11zm32 0h10v43H43z"/><path fill="${a.metal}" d="M13 6h6v39h-6zm32 0h6v39h-6z"/><path fill="#fff" opacity=".6" d="M13 8h2v15h-2zm32 0h2v15h-2z"/><path fill="#17282b" d="M25 21h14v13H25z"/><path fill="${a.metal}" d="M27 23h10v9H27z"/><path fill="#182d31" d="M31 25h3v5h-3z"/></svg>`;
+  }
+  function openedChestIcon(r) {
+    const a = rarity[r];
+    return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
+  }
 
   // src/js/boss-data.js
   var combatSets = {
@@ -4673,12 +5200,17 @@ textarea {
     return state.total < farmAt ? 0 : state.sites.research.extraPlot ? 2 : 1;
   }
   function canPlant(state, index, id) {
-    return Number.isInteger(index) && index >= 0 && index < plotCount(state) && !state.sites.plots[index] && typeof id === "string" && Object.hasOwn(crops, id) && state.total >= crops[id].at && hasMaterials(state, crops[id].cost);
+    const magical = id === "magical";
+    if (magical) id = "glowleaf";
+    return Number.isInteger(index) && index >= 0 && index < plotCount(state) && !state.sites.plots[index] && typeof id === "string" && Object.hasOwn(crops, id) && state.total >= crops[id].at && (magical ? state.blacksmith?.seeds > 0 : hasMaterials(state, crops[id].cost));
   }
   function plant(state, index, id) {
     if (!canPlant(state, index, id)) return false;
+    const magical = id === "magical";
+    if (magical) id = "glowleaf";
     const crop = crops[id];
-    useMaterials(state, crop.cost);
+    if (magical) state.blacksmith.seeds--;
+    else useMaterials(state, crop.cost);
     state.sites.plots[index] = {
       crop: id,
       remaining: crop.ms - (state.sites.research.irrigation ? 3e3 : 0)
@@ -4696,7 +5228,7 @@ textarea {
     }
     return changed;
   }
-  function harvest(state, index) {
+  function harvest(state, index, source) {
     const plot = state.sites.plots[index];
     if (!Number.isInteger(index) || index < 0 || index >= plotCount(state) || !plot || plot.remaining !== 0)
       return null;
@@ -4706,9 +5238,10 @@ textarea {
     if (plot.crop === "glowleaf") state.sites.growthCharges = 3;
     if (plot.crop === "ironroot") recoverVeins(state, 6e3);
     if (plot.crop === "prismbloom") state.sites.crystalFocus = true;
-    return { material: def.material, amount: def.yield };
+    const blueprint = source === "manual" && plot.crop === "glowleaf" && unlockBlueprint(state, "wildroot");
+    return { material: def.material, amount: def.yield, ...blueprint && { blueprint } };
   }
-  function mine(state, id) {
+  function mine(state, id, source) {
     if (!depositAccess(state, id)) return null;
     const site = state.sites;
     const vein = site.veins[id];
@@ -4722,7 +5255,8 @@ textarea {
     if (extra) site.crystalFocus = false;
     const amount = def.yield + Number(extra);
     creditResource(state, def.material, amount);
-    return { material: def.material, amount };
+    const blueprint = source === "manual" && id === "copper" && unlockBlueprint(state, "sparkforged");
+    return { material: def.material, amount, ...blueprint && { blueprint } };
   }
   function buyResearch(state, id) {
     if (typeof id !== "string" || !Object.hasOwn(research, id)) return false;
@@ -4775,7 +5309,7 @@ textarea {
     }
     return true;
   }
-  function advanceSites(state, elapsed, press2 = false) {
+  function advanceSites(state, elapsed, press2 = false, cropsOnly = false) {
     const rewards = [];
     if (!Number.isFinite(elapsed) || elapsed <= 0 || state.total < farmAt)
       return { changed: false, rewards };
@@ -4789,7 +5323,7 @@ textarea {
     }
     const targeted = site.veins[site.target];
     const recoveryBefore = targeted.remaining;
-    let changed = recoverVeins(state, elapsed) || grew;
+    let changed = !cropsOnly && recoverVeins(state, elapsed) || grew;
     for (let index = 0; index < availablePlots; index++) {
       const plot = site.plots[index];
       if (!plot) continue;
@@ -4799,7 +5333,7 @@ textarea {
         changed = true;
       }
     }
-    if (!press2 && site.autoMine && depositAccess(state, site.target) && targeted.remaining === 0) {
+    if (!press2 && !cropsOnly && site.autoMine && depositAccess(state, site.target) && targeted.remaining === 0) {
       const eligible = Math.max(0, elapsed - recoveryBefore);
       if (eligible > 0) {
         site.swing += eligible;
@@ -4850,182 +5384,6 @@ textarea {
     site.swing = site.autoMine && site.veins[site.target].remaining === 0 ? bounded(raw?.swing, swingMs - 1) : 0;
   }
 
-  // src/js/world-data.js
-  var firstWorld = "grasslands";
-  var worlds = {
-    grasslands: {
-      name: "Grasslands",
-      at: milestones.start,
-      accent: "#a3ec82",
-      mechanic: "Wild Growth",
-      limit: 25,
-      description: "Every 25 presses guarantees a chest as soon as there\u2019s room."
-    },
-    desert: {
-      name: "Desert",
-      at: milestones.ascension,
-      accent: "#ffd38b",
-      mechanic: "Dune Surge",
-      limit: 12,
-      description: "Every 12th press pays 4\xD7 its usual coins.",
-      gearBonus: "Each piece adds 0.5\xD7 to Dune Surge.",
-      gear: [
-        "Dunewalker Gloves",
-        "Oasis Ring",
-        "Sandstrider Boots",
-        "Scarab Charm"
-      ],
-      gearScale: 1.25,
-      terrain: {
-        tiles: [
-          "#a9673d",
-          "#b97945",
-          "#c28448",
-          "#cd904e",
-          "#d59b58",
-          "#e0aa65",
-          "#ba814e"
-        ],
-        edges: ["#6b4147", "#704748", "#805044"],
-        border: "#4a353e",
-        grain: "#6f442644",
-        mark: "#536746",
-        shine: "#a7bf65",
-        shape: [
-          [5, 3, 2, 9],
-          [2, 6, 3, 2],
-          [8, 4, 3, 2],
-          [9, 2, 2, 3]
-        ]
-      }
-    },
-    frozen: {
-      name: "Frozen Lands",
-      at: milestones.frozen,
-      accent: "#b5eeff",
-      mechanic: "Thaw",
-      limit: 10,
-      description: "Every 10 presses releases 5 seconds of automatic income. The charge waits if your automatic income is zero.",
-      gearBonus: "Each piece adds 1 second of income to Thaw.",
-      gear: [
-        "Rimeweave Gloves",
-        "Glacier Ring",
-        "Snowstep Boots",
-        "Aurora Charm"
-      ],
-      gearScale: 1.5,
-      terrain: {
-        tiles: [
-          "#407694",
-          "#5d94ac",
-          "#6fa5ba",
-          "#89bbcd",
-          "#94c5d5",
-          "#abd4e0",
-          "#588fa8"
-        ],
-        edges: ["#274a69", "#2b5271", "#355f7d"],
-        border: "#1c3655",
-        grain: "#2c688947",
-        mark: "#3f8aaa",
-        shine: "#ddfaff",
-        shape: [
-          [5, 2, 2, 10],
-          [2, 6, 8, 2],
-          [3, 4, 2, 2],
-          [7, 8, 2, 2]
-        ]
-      }
-    },
-    volcano: {
-      name: "Volcano",
-      at: milestones.volcano,
-      accent: "#ff9e70",
-      mechanic: "Forge Heat",
-      limit: 16,
-      description: "Opening a chest, including with Auto Chest, doubles your next 8 presses here.",
-      gearBonus: "Each piece adds 2 presses to the heat from a chest.",
-      gear: [
-        "Emberforge Gloves",
-        "Obsidian Ring",
-        "Cinderstep Boots",
-        "Magma Charm"
-      ],
-      gearScale: 1.8,
-      terrain: {
-        tiles: [
-          "#49363f",
-          "#523c42",
-          "#633e46",
-          "#674345",
-          "#714744",
-          "#805047",
-          "#5e3b44"
-        ],
-        edges: ["#362831", "#38282c", "#4a2932"],
-        border: "#231a27",
-        grain: "#240f274f",
-        mark: "#b9533e",
-        shine: "#ffae59",
-        shape: [
-          [2, 7, 5, 2],
-          [6, 4, 2, 4],
-          [7, 3, 5, 2],
-          [10, 2, 4, 1]
-        ]
-      }
-    },
-    celestial: {
-      name: "Celestial Realm",
-      at: milestones.celestial,
-      accent: "#dfbfff",
-      mechanic: "Starlight",
-      limit: 20,
-      description: "After 20 presses, your next chest from pressing gains one rarity tier, up to Legendary.",
-      gearBonus: "Two pieces make Starlight grant two rarity tiers.",
-      gear: [
-        "Astralweave Gloves",
-        "Orbit Ring",
-        "Cometstride Boots",
-        "Nova Charm"
-      ],
-      gearScale: 2.1,
-      terrain: {
-        tiles: [
-          "#353261",
-          "#3e396e",
-          "#473b7d",
-          "#514383",
-          "#5a488d",
-          "#624e98",
-          "#3e437a"
-        ],
-        edges: ["#23233d", "#252246", "#2d294f"],
-        border: "#16182d",
-        grain: "#a28fc248",
-        mark: "#a891cf",
-        shine: "#f8deff",
-        shape: [
-          [5, 2, 1, 9],
-          [1, 6, 9, 1],
-          [3, 4, 5, 5],
-          [10, 2, 1, 1]
-        ]
-      }
-    }
-  };
-  function recordWorld(entry) {
-    const id = entry.world;
-    return typeof id === "string" && Object.hasOwn(worlds, id) ? id : firstWorld;
-  }
-  function worldTag(id) {
-    return id === firstWorld ? {} : { world: id };
-  }
-  function discoveryKey(slot, rarityIndex, id) {
-    const design = slot + "-" + rarityIndex;
-    return id === firstWorld ? design : id + ":" + design;
-  }
-
   // src/js/build-gear.js
   var legendary = 4;
   var craftAt = milestones.helper;
@@ -5064,7 +5422,8 @@ textarea {
       ability: "Every six manual or Auto Chest openings banks a one-tier boost to a natural chest drop, up to Legendary.",
       two: "Earn a charge every five openings.",
       four: "Bank up to two charges."
-    }
+    },
+    ...blueprints
   };
   var evolution = {
     2: { at: 1e4, cost: { coins: 3e3, scrap: 16, shards: 8 }, scale: 1.5 },
@@ -5136,7 +5495,8 @@ textarea {
     return Object.fromEntries(
       Object.keys(builds).map((id) => {
         const count = pieces[id] || 0;
-        return [id, { count, active: count >= 2 || signatures.has(id) }];
+        const active = Object.hasOwn(blueprints, id) ? signatures.has(id) : count >= 2 || signatures.has(id);
+        return [id, { count, active }];
       })
     );
   }
@@ -5169,9 +5529,18 @@ textarea {
       )
     );
   }
+  function recipePayment(state, set, gathered) {
+    if (!Object.hasOwn(builds, set) || builds[set].rewardSlots || state.total < craftAt)
+      return null;
+    if (Object.hasOwn(blueprints, set)) {
+      const recipe = blueprints[set];
+      return !gathered && state.total >= recipe.at && state.blacksmith.recipes.includes(set) ? recipe.cost : null;
+    }
+    return gathered ? gatheredRecipeCost : craftCost;
+  }
   function buildRecipe(state, set, slot, level2, nextId, put, limit, gathered = false) {
-    const cost = gathered ? gatheredRecipeCost : craftCost;
-    if (!Object.hasOwn(builds, set) || builds[set].rewardSlots || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.total < craftAt || state.items.length >= limit || !canPay(state, cost))
+    const cost = recipePayment(state, set, gathered);
+    if (!cost || !Number.isInteger(slot) || slot < 0 || slot >= slots.length || state.items.length >= limit || !canPay(state, cost))
       return null;
     const item = {
       id: nextId(state),
@@ -6215,8 +6584,9 @@ textarea {
     pet.xp = Math.min(maxXp, pet.xp + def.xp);
     const found = !camp.artifacts.includes(def.artifact);
     if (found) camp.artifacts.push(def.artifact);
+    const blueprint = trip.route === "grove" && unlockBlueprint(state, "wraithweave");
     pet.last = "Returned from " + def.name + ".";
-    return { ...trip, xp: def.xp, artifact: found ? def.artifact : "" };
+    return { ...trip, xp: def.xp, artifact: found ? def.artifact : "", ...blueprint && { blueprint } };
   }
   function tickPets(state, dt, rates, regionalPieces, random = Math.random) {
     const results = [];
@@ -6370,6 +6740,8 @@ textarea {
   var bound = (value, max) => Number.isFinite(value) ? Math.min(max, Math.max(0, value)) : 0;
   var rank = (value, max) => Math.floor(bound(value, max));
   function combatLoadout(state, gear) {
+    const signature2 = signatureLoadout(gear, "dragonfire");
+    const dragon = signature2 && signatureAbility("dragonfire", signature2);
     const gearBonus = Math.min(
       10,
       Math.floor(2 * Math.log2(1 + gearValue(gear[0]) + gearValue(gear[1]) / 8))
@@ -6401,7 +6773,8 @@ textarea {
       pets,
       damage: 4 + gearBonus + workshop + skills2,
       maxHp: state.skills.star > 0 ? 115 : 100,
-      echo: state.skills.echo > 0 ? 2 : 0
+      echo: state.skills.echo > 0 ? 2 : 0,
+      ...dragon && { dragon }
     };
   }
   function bossAccess(state, id) {
@@ -6431,7 +6804,8 @@ textarea {
       riposte: 0,
       pierce: 0,
       assist: assistInterval,
-      loadout
+      loadout,
+      ...loadout.dragon && { fireballReady: loadout.dragon.opener }
     };
     return true;
   }
@@ -6480,6 +6854,7 @@ textarea {
       if (healed) events.push({ type: "bossHeal", amount: healed });
     }
     if (move2.damage && attempt.guarded) {
+      if (attempt.loadout.dragon) attempt.fireballReady = true;
       const ward = attempt.loadout.sets.wardweaver >= 4;
       attempt.riposte = (ward ? 12 : 6) + attempt.loadout.echo;
       if (attempt.loadout.sets.starbound >= 2) attempt.pierce = 2;
@@ -6551,6 +6926,11 @@ textarea {
       amount += pet.power * (pet.role === "break" && armor < 1 ? 2 : 1);
       pet.ready = false;
     }
+    if (attempt.fireballReady && loadout.dragon) {
+      amount += loadout.dragon.damage;
+      attempt.fireballReady = false;
+      events.push({ type: "fireball" });
+    }
     if (attempt.pierce > 0) attempt.pierce--;
     else amount *= armor;
     if (attempt.exposed > 0) amount *= 1.25;
@@ -6567,7 +6947,8 @@ textarea {
       const reward2 = !state.combat.clears[attempt.id];
       if (reward2) state.combat.clears[attempt.id] = "unclaimed";
       state.combat.attempt = null;
-      events.push({ type: "victory", id: attempt.id, reward: reward2 });
+      const blueprint = attempt.id === "mossguard" && unlockBlueprint(state, "dragonfire");
+      events.push({ type: "victory", id: attempt.id, reward: reward2, ...blueprint && { blueprint } });
       return events;
     }
     if (warning) {
@@ -6671,6 +7052,7 @@ textarea {
       riposte: rank(a.riposte, 14),
       pierce: rank(a.pierce, 2),
       assist: bound(a.assist, assistInterval),
+      ...a.loadout.dragon && { fireballReady: a.fireballReady === true },
       loadout: {
         gearBonus,
         workshop,
@@ -6684,7 +7066,10 @@ textarea {
         ),
         pets,
         maxHp,
-        echo: rank(a.loadout.echo, 2)
+        echo: rank(a.loadout.echo, 2),
+        ...[8, 12, 16, 20].includes(a.loadout.dragon?.damage) && {
+          dragon: { damage: a.loadout.dragon.damage, opener: a.loadout.dragon.opener === true }
+        }
       }
     };
   }
@@ -6756,11 +7141,12 @@ textarea {
   }
 
   // src/js/state.js
-  var schemaVersion = 6;
+  var schemaVersion = 7;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
     sites: freshSites(),
+    blacksmith: freshBlacksmith(),
     combat: freshCombat(),
     fieldDiscoveries: [],
     companions: freshCompanions(),
@@ -6841,6 +7227,8 @@ textarea {
   }
   function itemName(i) {
     const gear = worlds[recordWorld(i)].gear;
+    const design = Object.hasOwn(blueprints, i.set) && blueprints[i.set];
+    if (design && design.slot === i.slot) return design.signature;
     if (i.set) return builds[i.set].name + " " + slots[i.slot];
     if (gear) return rarity[i.r].name + " " + gear[i.slot];
     const base = names[i.slot][Math.min(i.r, legendary)];
@@ -7005,10 +7393,12 @@ textarea {
     );
     normalizeCompanions(f, o.companions);
     normalizeCombat(f, o.combat);
+    normalizeBlacksmith(f, o.blacksmith);
     f.fieldDiscoveries = normalizeDiscoveries(o.fieldDiscoveries);
     return f;
   }
   var KEY = "treasure-grove-v3";
+  var preBlacksmithSaveKey = KEY + "-before-blacksmith";
   var preLivingFieldSaveKey = KEY + "-before-living-field";
   var preForgeSaveKey = KEY + "-before-forge";
   var preCombatSaveKey = KEY + "-before-combat";
@@ -7030,6 +7420,9 @@ textarea {
   }
   function readPreCombatSave() {
     return readBackup(preCombatSaveKey);
+  }
+  function readPreBlacksmithSave() {
+    return readBackup(preBlacksmithSaveKey);
   }
   function readPreLivingFieldSave() {
     return readBackup(preLivingFieldSaveKey);
@@ -7096,7 +7489,8 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preLivingFieldSaveKey, raw);
+        preserveBackup(preBlacksmithSaveKey, raw);
+        if (version < 6) preserveBackup(preLivingFieldSaveKey, raw);
         if (version < 5) preserveBackup(preCombatSaveKey, raw);
         if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
         if (version < 3) preserveBackup(preSitesSaveKey, raw);
@@ -7132,6 +7526,9 @@ textarea {
 
   // src/js/sound.js
   var soundTones = {
+    smithHeat: [[105, 180, 0.22, 0, "sawtooth", 0.035]],
+    smithStrike: [[930, 470, 0.12, 0, "triangle", 0.1], [1440, 930, 0.16, 0, "sine", 0.055]],
+    smithQuench: [[460, 120, 0.3, 0, "sawtooth", 0.035], [659, 784, 0.2, 0.1, "sine", 0.06]],
     combatStart: [
       [145, 200, 0.15, 0, "triangle", 0.06],
       [293, 390, 0.12, 0.12, "triangle", 0.045]
@@ -7354,6 +7751,7 @@ textarea {
     result = null;
     boardMessage = "";
     $("combatEffects").replaceChildren();
+    $("effects").querySelector(".smith-fireball")?.remove();
     for (const id of spriteIds) {
       const sprite = $(id);
       delete sprite.dataset.boss;
@@ -7457,7 +7855,16 @@ textarea {
   }
   function showCombatEvents(events) {
     for (const event of events) {
-      if (event.type === "strike") {
+      if (event.type === "fireball") {
+        const layer = $("effects");
+        layer.querySelector(".smith-fireball")?.remove();
+        const fireball = document.createElement("span");
+        fireball.className = "smith-fireball";
+        fireball.innerHTML = signatureMark("flame");
+        layer.append(fireball);
+        setTimeout(() => fireball.remove(), 500);
+        sound("smithStrike");
+      } else if (event.type === "strike") {
         effectLabel("\u2212" + event.amount, "combat-damage");
         for (const id of spriteIds) {
           const sprite = $(id);
@@ -7474,7 +7881,7 @@ textarea {
           event.amount ? "Block \xB7 +" + event.amount + " HP" : "Blocked!",
           "combat-block"
         );
-        setText($("combatStatus"), "Blocked. Riposte ready.");
+        setText($("combatStatus"), s.combat.attempt?.fireballReady ? "Blocked. Riposte and fireball ready." : "Blocked. Riposte ready.");
         sound("combatGuard");
       } else if (event.type === "warning") {
         setText($("combatStatus"), event.name);
@@ -7490,7 +7897,7 @@ textarea {
         $("combatPanel").classList.remove("combat-warning");
         setText(
           $("combatStatus"),
-          event.type === "victory" ? "Boss defeated." : "You were defeated."
+          event.blueprint ? "Boss defeated. Dragonfire blueprint discovered." : event.type === "victory" ? "Boss defeated." : "You were defeated."
         );
         if (event.type === "victory") {
           effectLabel("Victory!", "combat-block");
@@ -7797,7 +8204,7 @@ textarea {
     ${runtime.fieldLocation === "farm" ? '<div class="location-bed" aria-hidden="true">' + fieldSprite("crop") + "</div>" : ""}
     <h3>Plot ${index + 1}</h3><p id="plotStatus-${index}"></p>
     <div class="site-controls" id="plantControls-${index}">
-      <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}</select>
+      <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}<option value="magical">Magical seed</option></select>
       <button class="action gold" data-site-action="plant" data-plot="${index}" id="plant-${index}">Plant</button>
     </div><p id="seedInfo-${index}"></p>
     <button class="action gold" data-site-action="harvest" data-plot="${index}" id="harvest-${index}">Harvest</button>
@@ -7873,7 +8280,9 @@ textarea {
       }
       const select = $("seed-" + index);
       for (const option of select.options) {
-        const locked = s.total < crops[option.value].at;
+        const magical = option.value === "magical";
+        const locked = magical ? s.blacksmith.seeds === 0 : s.total < crops[option.value].at;
+        if (magical) setText(option, "Magical seed \xB7 " + s.blacksmith.seeds + " in stock");
         setValue(option, "hidden", locked);
         setValue(option, "disabled", locked);
       }
@@ -7886,7 +8295,7 @@ textarea {
         $("seedInfo-" + index),
         seconds(def.ms - (site.research.irrigation ? 3e3 : 0)) + " \xB7 " + def.yield + " " + materials[def.material] + " \xB7 " + def.effect
       );
-      setText($("plant-" + index), "Plant \xB7 " + costText(def.cost));
+      setText($("plant-" + index), select.value === "magical" ? "Plant magical seed" : "Plant \xB7 " + costText(def.cost));
       setValue(
         $("plant-" + index),
         "disabled",
@@ -7985,17 +8394,20 @@ textarea {
       if (action === "plant" && plant(s, index, $("seed-" + index).value))
         return "Crop planted.";
       if (action === "harvest") {
-        const reward2 = harvest(s, index);
-        if (reward2) return "Harvested \xB7 " + rewardText([reward2]);
+        const reward2 = harvest(s, index, "manual");
+        if (reward2) {
+          return "Harvested \xB7 " + rewardText([reward2]) + (reward2.blueprint ? " \xB7 Wildroot blueprint discovered." : "");
+        }
       }
       if (action === "research" && buyResearch(s, id))
         return research[id].name + " researched.";
     }
     if (runtime.modalType === "mine") {
       if (action === "mine") {
-        const hit = mine(s, id);
-        if (hit)
-          return hit.amount ? "Mined \xB7 " + rewardText([hit]) : "Deposit chipped.";
+        const hit = mine(s, id, "manual");
+        if (hit) {
+          return hit.amount ? "Mined \xB7 " + rewardText([hit]) + (hit.blueprint ? " \xB7 Sparkforged blueprint discovered." : "") : "Deposit chipped.";
+        }
       }
       if (action === "pick" && buyPick(s))
         return tools[s.sites.pick].name + " equipped.";
@@ -8033,11 +8445,11 @@ textarea {
         if (index !== ".") paths[index] += `M${x + 1} ${y + 2}h1v1h-1z`;
       }
     }
-    const pixels = paths.map(
+    const pixels2 = paths.map(
       (path, index) => path ? `<path fill="${colors[index]}" d="${path}"/>` : ""
     ).join("");
     const crest = evolved ? `<path fill="${def.color}" d="M5 0h1v1h1v1H4V1h1z"/><path fill="#fff6ad" d="M5 1h1v1H5zM0 2h1v1H0zm8 0h1v1H8z"/>` : "";
-    const result2 = `<svg viewBox="0 0 10 9" class="pet-icon" shape-rendering="crispEdges" aria-hidden="true">${pixels}${crest}</svg>`;
+    const result2 = `<svg viewBox="0 0 10 9" class="pet-icon" shape-rendering="crispEdges" aria-hidden="true">${pixels2}${crest}</svg>`;
     artCache.set(key, result2);
     return result2;
   }
@@ -8222,7 +8634,7 @@ textarea {
     if (action === "claim") {
       const reward2 = claimTrip(s, +arg, now);
       if (reward2)
-        message = "Claimed \xB7 " + costText(reward2.loot) + " + " + reward2.xp + " XP" + (reward2.artifact ? " \xB7 Discovered " + artifacts[reward2.artifact].name + "." : ".");
+        message = "Claimed \xB7 " + costText(reward2.loot) + " + " + reward2.xp + " XP" + (reward2.artifact ? " \xB7 Discovered " + artifacts[reward2.artifact].name + "." : ".") + (reward2.blueprint ? " Wraithweave blueprint discovered." : "");
     }
     return { changed: Boolean(message), message };
   }
@@ -8284,6 +8696,69 @@ textarea {
     );
   }
 
+  // src/js/blacksmith.js
+  var cycle = 1800;
+  function beginWork(state, { kind, id, set, slot, gathered = false }) {
+    if (!["craft", "temper", "evolve"].includes(kind)) return null;
+    let item;
+    let offer2;
+    if (kind === "craft") {
+      const cost = recipePayment(state, set, gathered);
+      if (!Number.isInteger(slot) || slot < 0 || slot >= slots.length || !cost || !canPay(state, cost) || state.items.length >= gearBagLimit) return null;
+    } else {
+      item = gearIndex(state).get(id);
+      if (!item) return null;
+      offer2 = kind === "evolve" ? evolutionOffer(state, item) : gathered ? materialOffer(state, item) : forgeOffer(state, item);
+      if (!offer2?.available) return null;
+    }
+    const advanced = kind === "evolve" && item.r >= 4;
+    const targets2 = kind === "temper" ? [50, 50] : advanced ? [50, 30, 70, 50] : [50, 30, 70];
+    return {
+      state,
+      kind,
+      id,
+      set,
+      slot,
+      gathered,
+      item,
+      rarity: item?.r,
+      rank: item?.forge,
+      world: state.world,
+      stage: "furnace",
+      targets: targets2,
+      band: advanced ? 10 : 15,
+      struck: 0,
+      started: 0
+    };
+  }
+  function heatWork(work2, now) {
+    if (work2.stage !== "furnace") return false;
+    work2.stage = "anvil";
+    work2.started = now;
+    return true;
+  }
+  function markerAt(work2, now) {
+    return Math.max(0, now - work2.started) % cycle / cycle * 100;
+  }
+  function strikeWork(work2, now, assist) {
+    if (work2.stage !== "anvil") return false;
+    if (!assist && Math.abs(markerAt(work2, now) - work2.targets[work2.struck]) > work2.band) return false;
+    work2.struck++;
+    work2.started = now;
+    if (work2.struck === work2.targets.length) work2.stage = "quench";
+    return true;
+  }
+  function quenchWork(state, work2, level2) {
+    if (work2.stage !== "quench" || state !== work2.state || state.world !== work2.world) return null;
+    work2.stage = "complete";
+    if (work2.kind === "craft")
+      return buildRecipe(state, work2.set, work2.slot, level2, nextEntityId, addGearItem, gearBagLimit, work2.gathered);
+    const item = gearIndex(state).get(work2.id);
+    if (!item || item !== work2.item || item.r !== work2.rarity || item.forge !== work2.rank) return null;
+    const success = work2.kind === "evolve" ? evolveGear(state, item) : forgeGear(state, item, work2.gathered);
+    return success ? item : null;
+  }
+
   // src/js/prestige.js
   function ascensionReward(state) {
     return Math.floor(Math.sqrt(state.total / progressionThresholds.ascension));
@@ -8312,6 +8787,7 @@ textarea {
     run.companions = keepCompanions(state);
     run.combat = keepCombat(state);
     run.fieldDiscoveries = [...state.fieldDiscoveries];
+    run.blacksmith.recipes = [...state.blacksmith.recipes];
     run.lootRules = { ...state.lootRules };
     run.asc = {
       ...state.asc,
@@ -8324,46 +8800,63 @@ textarea {
     return { run, stars };
   }
 
-  // src/js/sprites.js
-  function svg(body) {
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`;
+  // src/js/blacksmith-effects.js
+  var targets = ["crystal", "silver", "copper"];
+  function chargeSignature(state, id, goal) {
+    const charge = state.blacksmith.charge;
+    charge[id] = Math.min(goal, charge[id] + 1);
+    return charge[id] === goal;
   }
-  function coin() {
-    return svg(
-      '<path fill="#633822" d="M10 2h12v4h5v5h3v12h-5v5H7v-5H2V9h4V5h4z"/><path fill="#ffaf2f" d="M10 4h12v4h4v15h-5v4H10v-4H5V9h5z"/><path fill="#ffe782" d="M10 6h12v3H10zM7 10h3v10H7z"/><path fill="#bd6324" d="M14 10h6v3h-3v7h-3z"/>'
-    );
+  function fieldSignatures(state, gear, tap, clone2) {
+    const effects = [];
+    const lightning = signatureLoadout(gear, "sparkforged");
+    if (lightning) {
+      const { goal, hits, chain } = signatureAbility("sparkforged", lightning);
+      if (chargeSignature(state, "sparkforged", goal)) {
+        const ready = targets.filter((id) => depositAccess(state, id) && state.sites.veins[id].remaining === 0);
+        if (ready.length) {
+          const rewards = [];
+          for (const [index, target] of (chain ? ready : ready.slice(0, 1)).entries()) {
+            const swings = index === 0 ? hits : 1;
+            for (let i = 0; i < swings; i++) {
+              const hit = mine(state, target);
+              if (hit?.amount) {
+                rewards.push(hit);
+                break;
+              }
+            }
+          }
+          state.blacksmith.charge.sparkforged = 0;
+          effects.push({ type: "lightning", rewards });
+        }
+      }
+    }
+    const nature = signatureLoadout(gear, "wildroot");
+    if (nature) {
+      const { goal, capacity } = signatureAbility("wildroot", nature);
+      if (state.blacksmith.seeds < capacity && chargeSignature(state, "wildroot", goal)) {
+        state.blacksmith.seeds++;
+        state.blacksmith.charge.wildroot = 0;
+        effects.push({ type: "seed" });
+      }
+    }
+    const phantom = signatureLoadout(gear, "wraithweave");
+    if (phantom && !clone2) {
+      const { goal, taps } = signatureAbility("wraithweave", phantom);
+      if (chargeSignature(state, "wraithweave", goal)) {
+        state.blacksmith.charge.wraithweave = 0;
+        effects.push({ type: "summon", clone: { id: phantom.id, taps, coins: tap / 2, elapsed: 0 } });
+      }
+    }
+    return effects;
   }
-  var worldMarks = {
-    desert: "M26 23h2v2h2v2h-2v2h-2v-2h-2v-2h2z",
-    frozen: "M26 22h2v3h3v2h-3v3h-2v-3h-3v-2h3z",
-    volcano: "M27 21h2v5h2v3h-8v-3h2v-2h2z",
-    celestial: "M27 21h1v4h4v1h-4v4h-1v-4h-4v-1h4z"
-  };
-  function gearIcon(item) {
-    return itemIcon(item.slot, item.r, recordWorld(item));
-  }
-  function itemIcon(k, r, worldId = firstWorld) {
-    const c = rarity[r].color, theme = worlds[worldId].terrain, d = theme?.tiles[2] || rarity[r].wood;
-    let p = "";
-    if (k === 0)
-      p = `<path fill="#172c32" d="M4 13h5V5h4v6h2V3h5v8h2V7h5v7h3v11l-6 5H10l-6-7z"/><path fill="${d}" d="M6 15h5V7h2v8h4V5h2v10h5V9h2v7h2v8l-5 4H11l-5-6z"/><path fill="${c}" d="M10 19h15v5H10zm2 6h10v3H12z"/>`;
-    if (k === 1)
-      p = `<path fill="#172c32" d="M10 5h12v4h5v4h3v10h-4v5H6v-5H2V13h4V9h4z"/><path fill="${theme ? d : "#cf8b38"}" d="M10 11h12v3h4v9h-5v4H11v-4H6v-9h4z"/><path fill="#ffe0a0" d="M10 14h4v3h-4v5H8v-8z"/><path fill="#172c32" d="M12 16h8v7h-8z"/><path fill="${c}" d="M11 3h10l5 6-10 8L6 9z"/><path fill="#fff" opacity=".7" d="M11 5h8v3h-8z"/>`;
-    if (k === 2)
-      p = `<path fill="#152d31" d="M6 3h15v17h8v10H3v-9h3z"/><path fill="${d}" d="M8 5h11v17h8v6H5v-6h3z"/><path fill="${c}" d="M8 6h11v5H8zm-3 17h22v4H5z"/><path fill="#fff4cb" d="M11 12h6v2h-6zm0 5h6v2h-6z"/>`;
-    if (k === 3)
-      p = `<path fill="#172d31" d="M13 1h6v6h6v4h5v10h-5v5h-6v5h-6v-5H7v-5H2V11h5V7h6z"/><path fill="${d}" d="M14 3h4v7h6v3h4v6h-5v5h-5v5h-4v-5H9v-5H4v-6h5v-3h5z"/><path fill="${c}" d="M13 9h6v4h4v6h-4v4h-6v-4H9v-6h4z"/><path fill="#fff" opacity=".75" d="M13 11h5v3h-5z"/>`;
-    if (theme)
-      p += `<path fill="#172c32" d="M23 20h9v12H21v-9h2z"/><path fill="${worlds[worldId].accent}" d="${worldMarks[worldId]}"/>`;
-    return svg(p);
-  }
-  function chestIcon(r) {
-    const a = rarity[r];
-    return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M9 4h46v4h5v35h-5v5H9v-5H4V8h5z"/><path fill="${a.wood}" d="M7 24h50v18l-4 4H11l-4-4z"/><path fill="${a.light}" d="M11 6h42v4h5v14H6V10h5z"/><path fill="#fff3be" opacity=".45" d="M12 8h40v3H12z"/><path fill="#192d31" opacity=".55" d="M6 22h52v4H6zm3 12h46v2H9z"/><path fill="#17282b" d="M11 4h10v43H11zm32 0h10v43H43z"/><path fill="${a.metal}" d="M13 6h6v39h-6zm32 0h6v39h-6z"/><path fill="#fff" opacity=".6" d="M13 8h2v15h-2zm32 0h2v15h-2z"/><path fill="#17282b" d="M25 21h14v13H25z"/><path fill="${a.metal}" d="M27 23h10v9H27z"/><path fill="#182d31" d="M31 25h3v5h-3z"/></svg>`;
-  }
-  function openedChestIcon(r) {
-    const a = rarity[r];
-    return `<svg viewBox="0 0 64 54" shape-rendering="crispEdges" aria-hidden="true"><ellipse cx="32" cy="47" rx="27" ry="5" fill="#102d2e" opacity=".5"/><path fill="#17282b" d="M8 1h48v5h4v17H4V6h4z"/><path fill="${a.light}" d="M10 3h44v5h4v13H6V8h4z"/><path fill="${a.wood}" d="M9 9h46v11H9z"/><path fill="${a.metal}" d="M13 3h6v19h-6zm32 0h6v19h-6z"/><path fill="#17282b" d="M4 23h56v20h-5v5H9v-5H4z"/><path fill="#3a251b" d="M7 23h50v10H7z"/><path fill="${a.wood}" d="M7 33h50v10l-4 3H11l-4-3z"/><path fill="${a.light}" d="M7 30h50v5H7z"/><path fill="${a.metal}" d="M13 30h6v16h-6zm32 0h6v16h-6zM27 29h10v9H27z"/><path fill="#17282b" d="M31 31h3v5h-3z"/></svg>`;
+  function advanceClone(state, clone2, elapsed) {
+    if (!clone2 || state.combat.attempt || state.equip[3] !== clone2.id) return { clone: null };
+    clone2.elapsed += elapsed;
+    if (clone2.elapsed < 1e3) return { clone: clone2 };
+    clone2.elapsed -= 1e3;
+    clone2.taps--;
+    return { clone: clone2.taps ? clone2 : null, coins: clone2.coins, rewards: advanceSites(state, 1e3, true, true).rewards };
   }
 
   // src/js/effects.js
@@ -8500,7 +8993,7 @@ textarea {
   // src/js/field-view.js
   var landmarks = {
     workshop: { name: "Workshop", at: milestones.workshop, screens: ["upgrades"], art: "workbench", find: "stone", cover: "rock" },
-    forge: { name: "Forge", at: milestones.forge, screens: ["inventory", "forge", "recipes"], art: "anvil" },
+    forge: { name: "Forge", at: milestones.forge, screens: ["blacksmith", "inventory", "forge", "recipes"], art: "anvil" },
     camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
     farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
     grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
@@ -8592,9 +9085,7 @@ textarea {
     setValue($("board").dataset, "livingTrail", String(home && trailVisible));
     if ($("modal").dataset.location === "forge") {
       const ready = hasRunCoins(run, milestones.helper);
-      const recipes = $("modalBody").querySelector('[data-open="recipes"]');
       setValue($("modal").dataset, "recipesReady", String(ready));
-      if (ready && recipes) setText(recipes, "Set recipes");
     }
     const live = home && previousRun === run && previousWorld === run.world && previousTotal < run.total;
     previousRun = run;
@@ -8637,7 +9128,7 @@ textarea {
   }
   function fieldLocationFor(run, id, type) {
     const landmark = Object.hasOwn(landmarks, id) && landmarks[id];
-    if (run.world !== firstWorld || !landmark || !landmarkOpen(run, id, landmark) || type && !landmark.screens.includes(type)) return null;
+    if (run.world !== firstWorld && id !== "forge" || !landmark || !landmarkOpen(run, id, landmark) || type && !landmark.screens.includes(type)) return null;
     return landmark;
   }
   function renderLocationScene(run, id, entering) {
@@ -8645,12 +9136,12 @@ textarea {
     const backdrop = $("locationArt");
     setValue(modal.dataset, "location", id);
     setValue(modal.dataset, "recipesReady", String(hasRunCoins(run, milestones.helper)));
-    backdrop.hidden = !id;
-    if (!id) return;
+    backdrop.hidden = !id || id === "forge";
+    if (!id || id === "forge") return;
     if (backdrop.dataset.location !== id) {
       backdrop.dataset.location = id;
-      const fixtures = landmarks[id].art;
-      backdrop.innerHTML = fixtures ? fieldSprite(fixtures) + fieldSprite(id) + fieldSprite(fixtures) : fieldSprite("tree") + fieldSprite(id) + fieldSprite("flowers");
+      const fixtures2 = landmarks[id].art;
+      backdrop.innerHTML = fixtures2 ? fieldSprite(fixtures2) + fieldSprite(id) + fieldSprite(fixtures2) : fieldSprite("tree") + fieldSprite(id) + fieldSprite("flowers");
     }
     if (entering && !reducedMotion()) {
       modal.querySelector(".window").animate([
@@ -9019,6 +9510,8 @@ textarea {
 
   // src/js/field.js
   var pressTimer;
+  var clonePressTimer;
+  var clone;
   function replaceRun(run) {
     setRunState(run);
     runtime.ascConfirm = false;
@@ -9030,8 +9523,11 @@ textarea {
     renderChests();
   }
   function clearFieldEffects() {
+    clone = null;
     runtime.chestClock = 0;
     clearTimeout(pressTimer);
+    clearTimeout(clonePressTimer);
+    $("press").classList.remove("phantom-press");
     clearTimeout(toastTimer);
     $("press").classList.remove("pressed");
     $("toast").hidden = true;
@@ -9078,7 +9574,8 @@ textarea {
     return {
       rates: stats(gear),
       pieces: worldGearCount(s.world, gear),
-      profile: buildProfile(gear)
+      profile: buildProfile(gear),
+      gear
     };
   }
   function press() {
@@ -9087,6 +9584,7 @@ textarea {
     const before = stageIndex();
     const totalBefore = s.total;
     const snapshot = fieldSnapshot();
+    const fighting = Boolean(s.combat.attempt);
     const {
       coins,
       bonus: effect,
@@ -9106,6 +9604,19 @@ textarea {
     if (chest) revealChest(chest);
     if (opened) showOpenedChest(opened);
     showSiteRewards(advanceSites(s, 1e3, true).rewards);
+    if (!fighting && !document.hidden && !runtime.modalType) {
+      if (clone && s.equip[3] !== clone.id) clone = null;
+      for (const signature2 of fieldSignatures(s, snapshot.gear, snapshot.rates.tap, clone)) {
+        if (signature2.type === "summon") {
+          clone = signature2.clone;
+          showSignature("ghost", "Phantom Charm summoned a clone");
+        } else if (signature2.type === "seed") {
+          showSignature("seed", "Nature Boots \xB7 Magical seed banked");
+        } else {
+          showSignature("bolt", "Thunder Gauntlet \xB7 " + (signature2.rewards.length ? rewardText(signature2.rewards) : "Deposit chipped"));
+        }
+      }
+    }
     directionalFloat(
       (effect || ability ? (effect || ability) + " \xB7 " : "") + "+" + fmtRate(coins),
       effect
@@ -9117,6 +9628,40 @@ textarea {
     if (stageIndex() > before)
       toast("New discovery: " + stages[stageIndex()].title);
     render(opened?.disposition === "equipped" ? void 0 : snapshot);
+    save();
+  }
+  function showSignature(mark, label) {
+    const layer = $("effects");
+    layer.querySelector(`[data-signature="${mark}"]`)?.remove();
+    const el = document.createElement("span");
+    el.dataset.signature = mark;
+    el.className = "field-signature";
+    el.innerHTML = signatureMark(mark);
+    layer.append(el);
+    setTimeout(() => el.remove(), 720);
+    if (label) notice(label);
+  }
+  function dismissClone() {
+    clone = null;
+    $("effects").querySelector('[data-signature="ghost"]')?.remove();
+  }
+  function runSignatureTick(elapsed) {
+    if (!clone) return;
+    if (s.combat.attempt || s.equip[3] !== clone.id) {
+      dismissClone();
+      return;
+    }
+    if (runtime.modalType || !elapsed) return;
+    const outcome = advanceClone(s, clone, elapsed);
+    clone = outcome.clone;
+    if (outcome.coins === void 0) return;
+    earn(outcome.coins);
+    showSignature("ghost", "Phantom tap \xB7 +" + fmtRate(outcome.coins));
+    $("press").classList.add("phantom-press");
+    clearTimeout(clonePressTimer);
+    clonePressTimer = setTimeout(() => $("press").classList.remove("phantom-press"), 125);
+    showSiteRewards(outcome.rewards);
+    render();
     save();
   }
   function openChest(id, source = "manual") {
@@ -9212,6 +9757,7 @@ textarea {
     renderCombatField();
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
+    refreshBlacksmith();
     if (runtime.modalType === "forge") updateForge();
     if (runtime.modalType === "recipes") updateRecipes();
     if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
@@ -9334,7 +9880,7 @@ textarea {
   function statusMatch(filter, value) {
     return !filter || filter === "all" || filter === "yes" === Boolean(value);
   }
-  function inventory() {
+  function inventory(inForge) {
     const list = s.items.filter(
       (i) => (runtime.filter === "all" || String(i.slot) === runtime.filter) && (runtime.gearWorldFilter === "all" || recordWorld(i) === runtime.gearWorldFilter) && (!runtime.gearRarity || runtime.gearRarity === "all" || runtime.gearRarity === String(i.r)) && (!runtime.gearSet || runtime.gearSet === "all" || runtime.gearSet === (i.set || "regional")) && statusMatch(runtime.gearEquipped, s.equip[i.slot] === i.id) && statusMatch(runtime.gearLocked, i.locked)
     ).sort((a, b) => {
@@ -9347,7 +9893,7 @@ textarea {
       const i = equipped(j);
       return `<div class="slot ${i ? "filled" : ""}" style="--rarity:${i ? rarity[i.r].color : "#7b9b8a"}"><small>${k}</small>${i ? iconMarkup(i) + `<b>${itemName(i)}</b><small>${itemStat(i)}</small>` : "<b>\u2014 Empty \u2014</b>"}</div>`;
     }).join("")}</div>${equippedSetsMarkup()}${lootRuleMarkup()}
-    <button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " \xB7 " + fmtExact(craftAt) + " coins earned" : ""}</button>
+    ${inForge ? "" : `<button class="action gold" data-open="recipes">Set recipes${s.total < craftAt ? " \xB7 " + fmtExact(craftAt) + " coins earned" : ""}</button>`}
     <div id="gearComparison" class="gear-comparison" role="tooltip" hidden></div>
     <div class="inv-head"><div><h3>Gear bag (${s.items.length}/300)</h3><small id="scrapBalance">${fmt(s.scrap)} scrap</small></div><div class="gear-filters"><select id="filter" aria-label="Filter gear"><option value="all">All slots</option>${slots.map((k, j) => `<option value="${j}">${k}</option>`).join("")}</select><select id="gearWorldFilter" aria-label="Filter gear by world"><option value="all">All worlds</option>${worldOptions()}</select>${inventoryControls()}</div></div>${list.length ? '<div class="item-grid">' + list.map(itemCard).join("") + "</div>" : '<div class="empty">No gear in this category yet. Open fallen chests to find equipment.</div>'}`;
   }
@@ -9383,6 +9929,8 @@ textarea {
       return;
     if (type === "wheel" && !wheelReady()) return;
     syncCombat();
+    clearWork();
+    if (["blacksmith", "forge", "recipes"].includes(type)) location = "forge";
     hideSkillTip();
     hideComparison();
     sound("menu");
@@ -9423,7 +9971,7 @@ textarea {
       t.textContent = "Equipment & gear";
       if (runtime.gearWorldFilter !== "all" && !isKnownWorld(s, runtime.gearWorldFilter))
         runtime.gearWorldFilter = "all";
-      b.innerHTML = (landmark && !s.items.length ? '<p class="subtext">Open a chest in the clearing to find equipment for the anvil.</p>' : "") + inventory();
+      b.innerHTML = landmark ? blacksmithMarkup(inventory(true)) : inventory(false);
       $("filter").value = runtime.filter;
       $("gearWorldFilter").value = runtime.gearWorldFilter;
       updateLootRuleSummary();
@@ -9434,9 +9982,11 @@ textarea {
         return;
       }
       t.textContent = "Equipment forge";
-      b.innerHTML = forgeMarkup(item);
+      b.innerHTML = landmark ? blacksmithMarkup(forgeMarkup(item), "forgeResult") : forgeMarkup(item);
       b.closest(".window").scrollTop = 0;
       updateForge();
+    } else if (type === "blacksmith") {
+      b.innerHTML = blacksmithMarkup();
     } else if (type === "bosses") {
       t.textContent = "Boss Board";
       renderBossBoard();
@@ -9453,7 +10003,7 @@ textarea {
       renderSites();
     } else if (type === "recipes") {
       t.textContent = "Set recipes";
-      b.innerHTML = recipesMarkup();
+      b.innerHTML = landmark ? blacksmithMarkup(recipesMarkup(), "recipeResult") : recipesMarkup();
       updateRecipes();
     } else if (type === "worlds") {
       t.textContent = "Worlds";
@@ -9504,6 +10054,7 @@ textarea {
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
+        ${readPreBlacksmithSave() ? '<button class="action secondary" id="exportPreBlacksmith">Export pre-Blacksmith backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
       </div>
@@ -9514,11 +10065,14 @@ textarea {
         $("saveWarning").hidden = false;
       }
     }
-    if (landmark) t.textContent = landmark.name;
+    if (landmark) t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
+    refreshBlacksmith();
+    if (location === "forge") b.closest(".window").scrollTop = 0;
     if (type === "skills") updateBuyButtons();
     $("close").focus();
   }
   function closeModal() {
+    clearWork();
     hideSkillTip();
     hideComparison();
     runtime.ascConfirm = false;
@@ -9736,8 +10290,7 @@ textarea {
     <div class="forge-details"><p id="forgeRank"></p><p id="forgeBalance"></p><p id="forgeNext"></p><p id="evolutionInfo"></p></div>
     <div class="settings-row"><button class="action gold" id="forgeBuy" data-forge="${item.id}"></button>
     <button class="action gold" id="temperGear" data-forge="${item.id}" hidden></button>
-    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button><button class="action secondary" data-open="recipes">Set recipes</button><button class="action secondary" data-open="inventory">Back to Gear</button></div>
-    <p class="subtext" id="forgeResult" role="status"></p>`;
+    <button class="action gold" id="evolveBuy" data-evolve="${item.id}" hidden></button></div>`;
   }
   function updateForge() {
     const button = $("forgeBuy");
@@ -9795,6 +10348,12 @@ textarea {
         return `<details class="gear-sets"><summary>${set.name} \xB7 ${info.count}/${set.rewardSlots.length} \xB7 ${info.count >= 2 ? "Active in combat" : "Bonus inactive"}</summary>
           <p>Boss Board reward</p><p>2 pieces \xB7 ${set.two}</p>${set.four ? "<p>4 pieces \xB7 " + set.four + "</p>" : ""}</details>`;
       }
+      if (Object.hasOwn(blueprints, id)) {
+        const signature2 = signatureLoadout(equippedGear(), id);
+        const ability = signature2 ? signatureText(id, signature2) : "Equip " + set.signature;
+        return `<details class="gear-sets"><summary>${set.name} \xB7 ${info.count}/4 \xB7 ${ability}</summary>
+          <p>${set.ability}</p><p>2 pieces \xB7 ${set.two}</p><p>4 pieces \xB7 ${set.four}</p></details>`;
+      }
       const cap = info.count >= 2;
       const current = {
         hammerhand: Math.min(charge.hammerhand, cap ? 15 : 20) + "/" + (cap ? 15 : 20) + " presses",
@@ -9811,23 +10370,34 @@ textarea {
     return `<p class="subtext" id="recipeGate" ${available ? "hidden" : ""}>Unlocks at ${fmtExact(craftAt)} coins earned this run.</p>
     <div id="recipeForm" ${available ? "" : "hidden"}><div class="forge-details">${Object.values(
       builds
-    ).filter((set) => !set.rewardSlots).map(
+    ).filter((set) => !set.rewardSlots && !set.signature).map(
       (set) => `<details><summary>${set.name} \xB7 ${set.style}</summary><p>${slots[set.slot]} or 2 pieces \xB7 ${set.ability}</p><p>2 pieces \xB7 ${set.two}</p><p>4 pieces \xB7 ${set.four}</p></details>`
     ).join("")}</div>
     <div class="gear-filters recipe-controls">
-    <label>Set <select id="recipeSet">${Object.entries(builds).filter(([, set]) => !set.rewardSlots).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
+    <label>Set <select id="recipeSet">${Object.entries(builds).filter(([id, set]) => !set.rewardSlots && (!set.signature || s.blacksmith.recipes.includes(id))).map(([id, set]) => `<option value="${id}">${set.name}</option>`).join("")}</select></label>
     <label>Slot <select id="recipeSlot">${slots.map((slot, i) => `<option value="${i}">${slot}</option>`).join("")}</select></label>
     </div><p class="subtext">Craft a Rare piece scaled to your current field and level.</p><p id="recipeBalance"></p>
     <button id="craftGear" class="action gold">Craft \xB7 ${costLabel(craftCost)}</button>
     <button id="craftGatheredGear" class="action gold">Craft with materials \xB7 ${costText(gatheredRecipeCost)}</button>
     <p id="gatheredBalance"></p>
-    </div><p id="recipeResult" role="status"></p><button class="action secondary" data-open="inventory">Back to Gear</button>`;
+    </div>
+    <details class="smith-blueprints"><summary>Rare blueprints</summary>${Object.entries(blueprints).map(
+      ([id, def]) => `<article style="--plate:${def.color}"><strong>${def.name} \xB7 ${def.signature}</strong>
+      <p>${s.blacksmith.recipes.includes(id) ? def.ability : def.clue}</p>
+      <p>${s.blacksmith.recipes.includes(id) ? def.two + " " + def.four : ""}</p></article>`
+    ).join("")}</details>`;
   }
   function updateRecipes() {
     const unlocked = s.total >= craftAt;
     setValue($("recipeForm"), "hidden", !unlocked);
     setValue($("recipeGate"), "hidden", unlocked);
     const full = s.items.length >= gearBagLimit;
+    const set = $("recipeSet").value;
+    const cost = recipePayment(s, set, false);
+    const gathered = recipePayment(s, set, true);
+    const rare = Object.hasOwn(blueprints, set);
+    setValue($("craftGatheredGear"), "hidden", rare);
+    setText($("craftGear"), cost ? "Craft \xB7 " + costText(cost) : rare ? "Unlocks at " + fmtExact(blueprints[set].at) + " earned" : "Craft");
     setText(
       $("recipeBalance"),
       full ? "Gear bag is full." : "Available \xB7 " + costLabel({ coins: s.coins, scrap: s.scrap, shards: s.shards })
@@ -9839,12 +10409,12 @@ textarea {
     setValue(
       $("craftGatheredGear"),
       "disabled",
-      !unlocked || full || !canPay(s, gatheredRecipeCost)
+      !gathered || full || !canPay(s, gathered)
     );
     setValue(
       $("craftGear"),
       "disabled",
-      !unlocked || full || !canPay(s, craftCost)
+      !cost || full || !canPay(s, cost)
     );
   }
   var equipModes = {
@@ -9879,7 +10449,11 @@ textarea {
   function effectsFor(gear) {
     const profile = buildProfile(gear);
     const effects = Object.entries(profile).filter(([, info]) => info.active).map(
-      ([id, info]) => builds[id].name + (info.count >= 2 ? " \xB7 " + (info.count >= 4 ? 4 : 2) + "-piece" : " \xB7 Signature")
+      ([id, info]) => {
+        const signature2 = Object.hasOwn(blueprints, id) && signatureLoadout(gear, id);
+        if (signature2) return builds[id].signature + " \xB7 " + signatureText(id, signature2);
+        return builds[id].name + (info.count >= 2 ? " \xB7 " + (info.count >= 4 ? 4 : 2) + "-piece" : " \xB7 Signature");
+      }
     );
     const pieces = worldGearCount(s.world, gear);
     if (pieces >= 2)
@@ -9931,6 +10505,181 @@ textarea {
       8,
       rect.bottom + tip.offsetHeight + 8 <= innerHeight ? rect.bottom + 6 : rect.top - tip.offsetHeight - 6
     ) + "px";
+  }
+
+  // src/js/blacksmith-view.js
+  var work;
+  var frame;
+  var fixtures = {
+    furnace: ["...111...", "...121...", "..11111..", ".1222221.", ".1211121.", "121333121", "121343121", "121444121", "122222221", ".1111111."],
+    anvil: ["11111111...", "1222222211.", ".1333333321", "..12222221.", "....1211...", "...12221...", "..1111111.."],
+    quench: [".1111111.", "133444331", "122222221", ".1232321.", ".1232321.", ".1222221.", "..11111.."],
+    table: ["111111111", "122222221", "111111111", ".1211121.", ".1212121.", ".1211121."],
+    rack: ["111111111", "122222221", "121343121", "121343121", "122222221", "121111121", "111111111"],
+    bins: ["1111..1111", "1222112221", "1232112421", "1222112221", ".111..111."]
+  };
+  var pixels = ["none", "#211c29", "#b07954", "#ff8550", "#ffda8b"];
+  var fixtureDetail = {
+    furnace: '<path fill="#df9b6d" d="M2 4h1v.5H2zm4 0h1v.5H6zM2 8h5v.35H2z"/><path fill="#f9a759" d="M3 6h.5v1H3zm2.5-.5H6V7h-.5z"/><path fill="#fff1a1" d="M4.5 7H5v.6h-.5z"/><path fill="#594047" d="M3.5 1h.5v2h-.5zM1 6h.5v2H1zm6.5 0H8v2h-.5z"/>',
+    anvil: '<path fill="#d7d4cb" d="M1 1h7.5v.45H1zM2.5 2.1h7v.35h-7z"/><path fill="#41414e" d="M4.5 4.5h2v.35h-2zm-1 1h4v.35h-4z"/>',
+    quench: '<path fill="#edfaff" d="M2 1.5h2v.25H2zm2.5-.2h2v.25h-2z"/><path fill="#604454" d="M1.5 3h6v.4h-6zm0 2h6v.4h-6z"/>',
+    rack: '<path fill="#8c7967" d="M2 2h5v.35H2zM2 4.7h5v.35H2z"/><path fill="#c7d7d3" d="M3.25 2.5h.6v1.5h-.6zm1 1h1.2v.4h-1.2zM5.6 2.4h.7v1.2h-.7z"/>',
+    table: '<path fill="#d5b581" d="M.8 1h7.4v.45H.8zm1 2.4h.4v2h-.4zM6.7 3.4h.4v2h-.4z"/><path fill="#a2c3c8" d="M5.9 .35h2v.4h-2z"/>',
+    bins: '<path fill="#d4a165" d="M.6 1.2h2.8v.35H.6zm6 0h2.8v.35H6.6z"/><path fill="#f5d5a0" d="M2.1 2h.55v.55H2.1zm5 .2h.55v.55H7.1z"/>'
+  };
+  function fixture(key) {
+    const rows = fixtures[key];
+    return `<svg viewBox="0 0 ${rows[0].length} ${rows.length}" shape-rendering="crispEdges" aria-hidden="true">${rows.map(
+      (row, y) => [...row].map((p, x) => p === "." ? "" : `<rect x="${x}" y="${y}" width="1" height="1" fill="${pixels[p]}" data-pixel="${p}"/>`).join("")
+    ).join("")}${fixtureDetail[key]}</svg>`;
+  }
+  function station(id, title, attrs = "") {
+    return `<button type="button" class="smith-station smith-${id}" id="smith-${id}" ${attrs}>${fixture(id)}<span>${title}</span></button>`;
+  }
+  function displayMarkup() {
+    return fieldSprite("lantern") + [5, 6].map((grade) => {
+      const piece = s.items.find((item) => item.r === grade);
+      return piece ? gearIcon(piece) : "";
+    }).join("");
+  }
+  function updateDisplay() {
+    $("smithDisplay").innerHTML = displayMarkup();
+  }
+  function blacksmithMarkup(panel = "", resultId = "smithResult") {
+    return `<section class="smith-room" id="smithRoom" aria-label="Blacksmith workshop">
+    <div class="smith-wall" aria-hidden="true"></div>
+    <div class="smith-beams" aria-hidden="true"></div>
+    <div class="smith-banners" aria-label="Discovered blueprints">${Object.entries(blueprints).map(([id, def]) => `<span style="--plate:${def.color}" ${s.blacksmith.recipes.includes(id) ? "" : "hidden"}>${def.name}</span>`).join("")}</div>
+    <div class="smith-display" id="smithDisplay" aria-hidden="true">${displayMarkup()}</div>
+    ${station("furnace", "Heat", "data-smith-step=furnace disabled")}
+    ${station("anvil", "Strike", "data-smith-step=anvil disabled")}
+    ${station("quench", "Quench", "data-smith-step=quench disabled")}
+    ${station("table", "Recipes", "data-open=recipes" + (s.total < 2500 ? ' aria-label="Recipes, unlocks at 2,500 earned"' : ""))}
+    ${station("rack", "Equipment rack", "data-open=inventory")}
+    <div class="smith-bins">${fixture("bins")}<span>Materials</span></div>
+    <div id="smithPiece" class="smith-piece" hidden></div>
+    <div class="smith-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  </section>
+  <div id="smithBench" class="smith-bench" hidden>
+    <div id="smithMeter" class="smith-meter" aria-hidden="true" hidden><i id="smithTarget"></i><b id="smithMarker"></b></div>
+    <p id="smithStatus" role="status"></p>
+    <div class="actions"><label><input type="checkbox" id="smithAssist"> Timing assist</label><button class="action secondary" data-smith-step="cancel">Cancel work</button></div>
+  </div>
+  <p id="${resultId}" class="smith-result" role="status"></p>
+  <p class="smith-wallet" id="smithWallet"></p>
+  <div id="smithPanel">${panel || "<p>Choose equipment from the rack to temper or evolve. Discover recipes in the field and craft them at the table.</p>"}</div>`;
+  }
+  function refreshBlacksmith() {
+    if (!$("smithWallet")) return;
+    const stock = ["coins", "scrap", "shards", ...Object.keys(materials)].filter((id) => s[id] || ["coins", "scrap", "shards"].includes(id));
+    setText($("smithWallet"), stock.map((id) => `${Math.floor(s[id]).toLocaleString()} ${materials[id] ?? id}`).join(" \xB7 "));
+  }
+  function clearWork() {
+    work = null;
+    if (frame !== void 0) cancelAnimationFrame(frame);
+    frame = void 0;
+  }
+  function animateMarker(now) {
+    if (!work || work.stage !== "anvil") return;
+    $("smithMarker").style.transform = `translateX(${markerAt(work, now)}cqw)`;
+    frame = requestAnimationFrame(animateMarker);
+  }
+  function drawWork(message) {
+    const stage = work?.stage;
+    $("smithRoom").dataset.stage = stage ?? "";
+    for (const step of ["furnace", "anvil", "quench"])
+      setValue($("smith-" + step), "disabled", stage !== step);
+    for (const station2 of ["table", "rack"])
+      setValue($("smith-" + station2), "disabled", Boolean(work));
+    $("smithBench").hidden = !work;
+    $("smithPanel").hidden = Boolean(work);
+    $("smithPiece").hidden = !work;
+    if (!work) {
+      $("smithPiece").replaceChildren();
+      return;
+    }
+    const timing = stage === "anvil" && !$("smithAssist").checked;
+    $("smithMeter").hidden = !timing;
+    if (timing) {
+      $("smithTarget").style.left = work.targets[work.struck] - work.band + "%";
+      $("smithTarget").style.width = work.band * 2 + "%";
+      if (frame === void 0) frame = requestAnimationFrame(animateMarker);
+    } else if (frame !== void 0) {
+      cancelAnimationFrame(frame);
+      frame = void 0;
+    }
+    const goal = work.targets[work.struck];
+    setText($("smithStatus"), message ?? (stage === "furnace" ? "Heat the workpiece in the furnace." : stage === "quench" ? "Quench the piece to pay and finish." : `Strike ${work.struck + 1} of ${work.targets.length} \xB7 ${goal < 50 ? "left" : goal > 50 ? "right" : "center"} target`));
+  }
+  function playStation(kind) {
+    const room = $("smithRoom");
+    room.classList.remove("smith-impact", "smith-finished");
+    void room.offsetWidth;
+    room.classList.add(kind === "quench" ? "smith-finished" : "smith-impact");
+    sound({ furnace: "smithHeat", anvil: "smithStrike", quench: "smithQuench" }[kind]);
+  }
+  function handleBlacksmith(button) {
+    const step = button.dataset.smithStep;
+    if (!step && !button.dataset.forge && !button.dataset.evolve && !["craftGear", "craftGatheredGear"].includes(button.id)) return false;
+    if (!$("smithRoom")) return true;
+    const now = performance.now();
+    if (!step && !work) {
+      const kind = button.dataset.evolve ? "evolve" : button.dataset.forge ? "temper" : "craft";
+      work = beginWork(s, {
+        kind,
+        id: Number(button.dataset.evolve || button.dataset.forge),
+        set: $("recipeSet")?.value,
+        slot: Number($("recipeSlot")?.value),
+        gathered: ["craftGatheredGear", "temperGear"].includes(button.id)
+      });
+      if (work) {
+        setText(document.querySelector(".smith-result"), "");
+        $("smithPiece").innerHTML = work.item ? gearIcon(work.item) : itemIcon(work.slot, 2);
+        $("smithAssist").checked = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        drawWork();
+        $("smith-furnace").focus();
+      }
+    } else if (work && step === "cancel") {
+      clearWork();
+      drawWork();
+      $("smith-rack").focus();
+    } else if (work && step === "furnace" && heatWork(work, now)) {
+      drawWork();
+      playStation(step);
+      $("smith-anvil").focus({ preventScroll: true });
+    } else if (work && step === "anvil") {
+      const hit = strikeWork(work, now, $("smithAssist").checked);
+      drawWork(hit ? void 0 : "Missed the target. Retry this strike.");
+      if (hit) playStation(step);
+      if (work.stage === "quench") $("smith-quench").focus({ preventScroll: true });
+    } else if (work && step === "quench") {
+      const previous = work.item && { ...work.item };
+      const result2 = quenchWork(s, work, level());
+      return { result: result2, previous, kind: work.kind };
+    }
+    return true;
+  }
+  function finishBlacksmith({ result: result2, previous, kind }) {
+    clearWork();
+    drawWork();
+    if (result2 && kind === "evolve") $("smithPanel").innerHTML = forgeMarkup(result2);
+    const status = document.querySelector(".smith-result");
+    if (!result2) {
+      setText(status, "Could not finish. Check materials, item, or bag space and try again.");
+      $("smith-rack").focus();
+      return;
+    }
+    const message = kind === "craft" ? "Crafted " + itemName(result2) + "." : kind === "evolve" ? `Evolved ${itemName(result2)} to ${rarity[result2.r].name}.` : `Forged ${itemName(result2)} to rank ${result2.forge}.`;
+    setText(status, message);
+    $("smithPiece").innerHTML = (kind === "evolve" ? `<span aria-label="${rarity[previous.r].name}">${gearIcon(previous)}</span><b aria-hidden="true">\u203A</b>` : "") + `<span aria-label="${rarity[result2.r].name}">${gearIcon(result2)}</span>`;
+    $("smithPiece").hidden = false;
+    if (kind === "evolve" && result2.r >= 5) updateDisplay();
+    $("smithRoom").dataset.stage = "finished";
+    playStation("quench");
+    $("smith-rack").focus({ preventScroll: true });
+  }
+  function updateTimingAssist() {
+    if (work?.stage === "anvil") drawWork();
   }
 
   // src/js/main.js
@@ -10008,6 +10757,8 @@ textarea {
   });
   $("modalBody").addEventListener("change", (e) => {
     const { id, value } = e.target;
+    if (id === "smithAssist") updateTimingAssist();
+    if (id === "recipeSet") updateRecipes();
     if (siteControlChange(e.target)) {
       renderSites();
       save();
@@ -10048,12 +10799,25 @@ textarea {
   $("modalBody").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b || b.disabled) return;
+    const smith = handleBlacksmith(b);
+    if (smith) {
+      if (smith !== true) {
+        finishBlacksmith(smith);
+        if (smith.result) {
+          notice($("recipeResult")?.textContent || $("forgeResult").textContent);
+          render();
+          save();
+        }
+      }
+      return;
+    }
     if (runtime.modalType === "bosses") {
       if (b.dataset.bossSelect) {
         selectBoss(b.dataset.bossSelect);
         return;
       }
       if (b.dataset.bossStart && prepareFight(b.dataset.bossStart)) {
+        dismissClone();
         closeModal();
         render();
         $("press").focus({ preventScroll: true });
@@ -10105,50 +10869,8 @@ textarea {
       $("modalBody").querySelector(`[data-lock="${item.id}"]`)?.focus();
       return;
     }
-    if (["craftGear", "craftGatheredGear"].includes(b.id) && runtime.modalType === "recipes") {
-      const item = buildRecipe(
-        s,
-        $("recipeSet").value,
-        +$("recipeSlot").value,
-        level(),
-        nextEntityId,
-        addGearItem,
-        gearBagLimit,
-        b.id === "craftGatheredGear"
-      );
-      if (!item) return;
-      sound("upgrade");
-      notice("Crafted " + itemName(item) + ".");
-      setText($("recipeResult"), "Crafted " + itemName(item) + ".");
-      render();
-      save();
-      return;
-    }
-    if (b.dataset.evolve && runtime.modalType === "forge") {
-      const item = getGearItem(+b.dataset.evolve);
-      if (!evolveGear(s, item)) return;
-      sound("upgrade");
-      notice("Gear evolved.");
-      save();
-      openModal("forge", item.id);
-      setText($("forgeResult"), "Gear evolved. Forge rank and lock retained.");
-      render();
-      return;
-    }
     if (b.dataset.openForge) {
       openModal("forge", +b.dataset.openForge);
-      return;
-    }
-    if (b.dataset.forge) {
-      const item = getGearItem(+b.dataset.forge);
-      if (runtime.modalType === "forge" && forgeGear(s, item, b.id === "temperGear")) {
-        notice("Forged " + itemName(item) + " to rank " + item.forge + ".");
-        sound("upgrade");
-        render();
-        save();
-        setText($("forgeResult"), "Forged to rank " + item.forge + ".");
-        if (b.disabled) $("close").focus();
-      }
       return;
     }
     if (b.dataset.travel) {
@@ -10220,7 +10942,9 @@ textarea {
     }
     if (b.dataset.equip || b.dataset.equipReward) {
       const i = getGearItem(+(b.dataset.equip || b.dataset.equipReward));
+      const previousCharm = s.equip[3];
       if (!equipItem(s, i, Boolean(b.dataset.equip))) return;
+      if (previousCharm !== s.equip[3]) dismissClone();
       sound("equip");
       notice("Equipment updated: " + itemName(i) + ".");
       render();
@@ -10271,10 +10995,11 @@ textarea {
       "exportPreCompanions",
       "exportPreCombat",
       "exportPreLivingField",
+      "exportPreBlacksmith",
       "exportPreExpansion",
       "exportPreFoundation"
     ].includes(b.id)) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : b.id === "exportPreLivingField" ? readPreLivingFieldSave() : readPreFoundationSave();
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : b.id === "exportPreLivingField" ? readPreLivingFieldSave() : b.id === "exportPreBlacksmith" ? readPreBlacksmithSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
@@ -10322,17 +11047,17 @@ textarea {
   $("modal").addEventListener("scroll", positionComparison, true);
   document.addEventListener("keydown", (e) => {
     if (e.key === "Tab" && !$("modal").hidden) {
-      const targets = [
+      const targets2 = [
         ...$("modal").querySelectorAll(
           "button, input, select, textarea, summary, a[href], [tabindex]"
         )
       ].filter(
         (element) => !element.disabled && element.tabIndex >= 0 && element.getClientRects().length
       );
-      const first = targets[0];
-      const last2 = targets.at(-1);
+      const first = targets2[0];
+      const last2 = targets2.at(-1);
       const active = document.activeElement;
-      if (first && last2 && (!targets.includes(active) || active === (e.shiftKey ? first : last2))) {
+      if (first && last2 && (!targets2.includes(active) || active === (e.shiftKey ? first : last2))) {
         e.preventDefault();
         (e.shiftKey ? last2 : first).focus();
       }
@@ -10399,6 +11124,7 @@ textarea {
     if (siteTick.rewards.length) save();
     autoChestTick(dt, snapshot);
     runCompanionTick(elapsedVisible);
+    runSignatureTick(elapsedVisible);
   }, 250);
   setInterval(savePassiveIncome, 5e3);
 })();
