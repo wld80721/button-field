@@ -81,3 +81,11 @@ The two sites appear just below the playfield at 600 and 2,500 coins earned in t
 Glowleaf boosts the next three growth presses, Ironroot advances mineral recovery, and Prismbloom saves an extra crystal for the next crystal vein. Research adds a plot, shortens new growth, or harvests ripe crops automatically. Mining upgrades improve damage or automate one selected deposit. Neither upgrade spends materials automatically on planting.
 
 The Forge offers material payment buttons alongside the standard set recipes and rank upgrades. Existing equipment and evolution costs remain compatible. Settings can export the original save from before its first Farming and Mining migration.
+
+## Companions and expeditions
+
+**Companions** opens at 150 coins earned this run. Fifteen pets join when their roster requirements are met. Choose one field companion at first, then two at 50,000. Pets work on the visible field and earn XP when they complete an action. The field cooldown is saved through recall and reload. The red button, chest loot, gardening, and mining use their existing rules with pet actions alongside them.
+
+At level 4, a pet at home can train as a Field Hand or Scout. At level 5 and 10,000 run earnings, it can evolve for 1,500 coins, eight shards, and three Root Fiber. The three expedition routes unlock through earnings, mining tools, and pet levels. Trips begin at 2,500 run earnings and a second slot opens at 250,000. Trips continue while the game is closed. Claim finished trips to receive materials, XP, and a first-clear artifact.
+
+Ascension retains pets, XP, training, evolution, and artifacts. It clears assignments, expedition rewards, and field timers. The first local migration to schema 4 keeps the original save as a backup that players can export from **Save & settings**.

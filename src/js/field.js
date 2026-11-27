@@ -1,3 +1,9 @@
+import {
+  animatePetAction,
+  clearPetActions,
+  renderCompanions,
+} from "./companion-view.js";
+import { recruitPets, roster, tickPets } from "./companions.js";
 import { renderSites, rewardText } from "./site-view.js";
 import { advanceSites } from "./sites.js";
 import { buildProfile } from "./build-gear.js";
@@ -52,6 +58,7 @@ function replaceRun(run) {
   setRunState(run);
   runtime.ascConfirm = false;
   runtime.selectedSkill = "root";
+  runtime.petSelected = "";
   runtime.pendingWorldUnlock = null;
   clearFieldEffects();
   renderChests();
@@ -65,6 +72,7 @@ function clearFieldEffects() {
   $("toast").hidden = true;
   $("chests").replaceChildren();
   $("effects").replaceChildren();
+  clearPetActions();
 }
 
 function notice(text) {
@@ -259,6 +267,8 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   }
   wheelHUD();
   renderSites();
+  if (recruitPets(s).length) runtime.saveDirty = true;
+  renderCompanions();
   if (runtime.modalType === "worlds") updateWorlds();
   if (runtime.modalType === "progressionGuide") updateProgressionGuide();
   if (runtime.modalType === "forge") updateForge();
@@ -266,6 +276,29 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
     updateBuyButtons();
 }
+function runCompanionTick(elapsed) {
+  if (runtime.modalType || elapsed <= 0 || !s.companions.field.some(Boolean))
+    return;
+  const before = s.total;
+  const { rates, pieces } = fieldSnapshot();
+  const { changed, results } = tickPets(s, elapsed, rates, pieces);
+  if (changed) runtime.saveDirty = true;
+  if (!results.length) return;
+  if (before !== s.total) recordEarnings(before);
+  for (const result of results) {
+    if (result.opened) showOpenedChest(result.opened);
+    animatePetAction(result);
+    if (result.coins) directionalFloat("+" + fmtRate(result.coins));
+    notice(
+      roster[result.id].name +
+        " · " +
+        (result.gathered ? rewardText([result.gathered]) : result.text),
+    );
+  }
+  render();
+  save();
+}
+
 function chestInterval() {
   return 5 / (1 + 0.45 * s.up.chestSpeed);
 }
@@ -320,5 +353,6 @@ export {
   render,
   renderChests,
   replaceRun,
+  runCompanionTick,
   showSiteRewards,
 };

@@ -21,6 +21,11 @@ const coinUnlocks = [
     "Raise your chest drop chance at the Workshop.",
   ],
   [
+    progressionThresholds.companions,
+    "Companions",
+    "Recruit and assign a pet to help on the field.",
+  ],
+  [
     progressionThresholds.shards,
     "Shards, skill tree and Farming",
     "Spend shards on skills and plant your first crop.",
@@ -29,6 +34,21 @@ const coinUnlocks = [
     progressionThresholds.helper,
     "Garden helper + Set recipes + Mining",
     "Buy automatic income, craft set gear, and open the mine.",
+  ],
+  [
+    progressionThresholds.expeditions,
+    "Expeditions",
+    "Send a companion to find crafting materials and artifacts.",
+  ],
+  [
+    progressionThresholds.secondCompanionSlot,
+    "Second field companion",
+    "Assign a second pet to help on the field.",
+  ],
+  [
+    progressionThresholds.secondExpeditionSlot,
+    "Second expedition slot",
+    "Send two companions on expeditions at once.",
   ],
   [
     progressionThresholds.ascension,

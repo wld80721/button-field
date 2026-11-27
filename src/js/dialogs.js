@@ -1,3 +1,5 @@
+import { companionMarkup, renderCompanions } from "./companion-view.js";
+import { companionsAt } from "./companions.js";
 import { farmMarkup, mineMarkup, renderSites } from "./site-view.js";
 import { farmAt, mineAt } from "./sites.js";
 import { builds, craftAt, designKey } from "./build-gear.js";
@@ -32,6 +34,7 @@ import {
   readPreFoundationSave,
   readPreExpansionSave,
   readPreSitesSave,
+  readPreCompanionsSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -212,7 +215,8 @@ function showCollection(id) {
 function openModal(type, id) {
   if (
     (type === "farm" && s.total < farmAt) ||
-    (type === "mine" && s.total < mineAt)
+    (type === "mine" && s.total < mineAt) ||
+    (type === "companions" && s.total < companionsAt)
   )
     return;
   if (type === "wheel" && !wheelReady()) return;
@@ -270,6 +274,11 @@ function openModal(type, id) {
     b.innerHTML = forgeMarkup(item);
     b.closest(".window").scrollTop = 0;
     updateForge();
+  } else if (type === "companions") {
+    t.textContent = "Companions";
+    b.innerHTML = companionMarkup();
+    b.closest(".window").scrollTop = 0;
+    renderCompanions();
   } else if (type === "farm" || type === "mine") {
     t.textContent = type === "farm" ? "Farming" : "Mining";
     b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
@@ -326,6 +335,7 @@ function openModal(type, id) {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}

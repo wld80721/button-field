@@ -4,7 +4,7 @@ import { after, before, test } from "node:test";
 import { chromium } from "playwright-core";
 
 const saveKey = "treasure-grove-v3";
-const migrationKey = saveKey + "-before-farming-mining";
+const migrationKey = saveKey + "-before-companions";
 const documentUrl = "https://button-field.test/";
 const standalone = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const executablePath = process.env.CHROMIUM_PATH ||
@@ -443,19 +443,32 @@ legacySaves.push(["Foundation", { schemaVersion: 1, coins: 8500, total: 10000, i
 legacySaves.push(["Equipment Expansion", { schemaVersion: 2, total: 10000, coins: 1100,
   items: [{ ...equipment(0, {r: 2, forge: 3}), set: "hammerhand", locked: true }], equip: {0: 1},
   found: ["set:hammerhand:0:2"], lootRules: { equip: "off" }, abilityProgress: {hammerhand: 11} }]);
+legacySaves.push(["Farming and Mining", { schemaVersion: 3, total: 10000, coins: 1100, opened: 5,
+  glowleaf: 5, copperOre: 4, sites: { plots: [{ crop: "glowleaf", remaining: 4321 }], pick: 1,
+    veins: { silver: { hp: 3, remaining: 0 } } } }]);
 for (const [release, legacy] of legacySaves) {
   const raw = JSON.stringify(legacy, null, 2);
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 3);
+    assert.equal(migrated.schemaVersion, 4);
     assert.equal(await stored(page, migrationKey), raw);
     assert.equal(migrated.lootRules.equip, "off");
     assert.equal(migrated.lootRules.salvage, false);
     if (legacy.found) assert.deepEqual(migrated.found, legacy.found);
     if (legacy.abilityProgress) assert.equal(migrated.abilityProgress.hammerhand, legacy.abilityProgress.hammerhand);
-    assert.deepEqual(migrated.sites.plots, [null, null]);
-    assert.equal(migrated.sites.pick, 0);
+    if (legacy.sites) {
+      assert.deepEqual(migrated.sites.plots, [legacy.sites.plots[0], null]);
+      assert.deepEqual(migrated.sites.veins.silver, legacy.sites.veins.silver);
+      assert.equal(migrated.sites.pick, 1);
+      assert.equal(migrated.glowleaf, 5);
+      assert.equal(migrated.copperOre, 4);
+      assert.ok(migrated.companions.pets.beetle);
+    } else {
+      assert.deepEqual(migrated.sites.plots, [null, null]);
+      assert.equal(migrated.sites.pick, 0);
+    }
+    assert.equal(await stored(page, saveKey + "-before-farming-mining"), legacy.sites ? null : raw);
     assert.equal(migrated.sites.autoHarvest, false);
     assert.equal(migrated.sites.autoMine, false);
     for (const field of ["total", "coins", "presses", "scrap", "world", "items", "equip", "chests", "wheelClaims", "wheelNextAt"]) {
@@ -466,11 +479,12 @@ for (const [release, legacy] of legacySaves) {
     await page.reload();
     assert.deepEqual(await saved(page), migrated);
     await click(page, "#settings");
-    await click(page, "#exportPreSites");
+    await click(page, "#exportPreCompanions");
     assert.equal(await page.locator("#saveText").inputValue(), raw);
   }, {
     init: (() => {
       const source = `(() => {
+        Object.defineProperty(document, "hidden", { get: () => true });
         if (sessionStorage.getItem("test-seeded")) return;
         sessionStorage.setItem("test-seeded","true");
         localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(raw)});
@@ -496,7 +510,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 3);
+    assert.equal((await saved(page)).schemaVersion, 4);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -512,7 +526,7 @@ browserTest("backup storage failure suspends automatic writes", async (page) => 
     localStorage.setItem("treasure-grove-v3", '{"coins":12,"total":12}');
     const set = Storage.prototype.setItem;
     Storage.prototype.setItem = function (key, value) {
-      if (key === "treasure-grove-v3-before-farming-mining") throw new DOMException("Simulated quota", "QuotaExceededError");
+      if (key === "treasure-grove-v3-before-companions") throw new DOMException("Simulated quota", "QuotaExceededError");
       return set.call(this, key, value);
     };
   },
@@ -876,3 +890,174 @@ browserTest("research, tools, automation, travel and Ascension use the same save
   assert.equal(reset.copperOre, 0);
   assert.ok(await page.locator("#fieldSites").isHidden());
 }, { viewport: { width: 1280, height: 800 } });
+
+const petCard = (id) => `.pet-card[data-pet-arg="${id}"]`;
+const petAction = (command, arg) => `[data-pet-command="${command}"]${arg === undefined ? "" : `[data-pet-arg="${arg}"]`}`;
+
+browserTest("recruit companions and claim an offline trip exactly once", async (page) => {
+  assert.ok(await page.locator("#companions").isHidden());
+  await importSave(page, { total: 2500, coins: 100, opened: 1, scrap: 3 });
+  await click(page, "#companions");
+  assert.equal(await page.locator(".pet-card").count(), 15);
+  assert.match(await text(page, petCard("beetle")), /Button Beetle.*Home/s);
+  assert.match(await text(page, petCard("ferret")), /Locked/);
+  await click(page, petCard("ferret"));
+  assert.match(await text(page, "#petProfile"), /Visit Desert.*30 chests/);
+  assert.ok(await page.locator(".window").evaluate(el => el.scrollWidth <= el.clientWidth + 1));
+  await click(page, petCard("beetle"));
+  await click(page, petAction("send", "grove"));
+  assert.match(await text(page, "#petMessage"), /departed for Grove Trail/);
+  assert.match(await text(page, petCard("beetle")), /Away/);
+  assert.ok(await page.locator(petAction("field")).count() === 0);
+  const dispatched = await saved(page);
+  assert.equal(dispatched.companions.trips[0].duration, 90000);
+  await page.clock.setSystemTime(dispatched.companions.trips[0].finishAt + 100);
+  await page.reload();
+  await click(page, "#companions");
+  assert.match(await text(page, "#petTrips"), /Ready to claim/);
+  assert.equal((await saved(page)).glowleaf, 0);
+  await click(page, petAction("claim", "0"));
+  assert.match(await text(page, "#petMessage"), /Field Bell/);
+  let result = await saved(page);
+  assert.equal(result.glowleaf, 3);
+  assert.equal(result.scrap, 5);
+  assert.equal(result.companions.pets.beetle.xp, 12);
+  assert.equal(result.companions.trips[0], null);
+  await click(page, petAction("gear", "bell"));
+  assert.equal((await saved(page)).companions.pets.beetle.gear, "bell");
+  await page.reload();
+  await click(page, "#companions");
+  assert.equal(await page.locator(petAction("claim")).count(), 0);
+  assert.equal((await saved(page)).glowleaf, 3);
+  await click(page, petCard("sparrow"));
+  await click(page, petAction("send", "grove"));
+  await click(page, petAction("cancel", "0"));
+  assert.match(await text(page, "#petMessage"), /canceled/);
+  result = await saved(page);
+  assert.equal(result.glowleaf, 3);
+  assert.equal(result.companions.pets.sparrow.xp, 0);
+}, { viewport: { width: 320, height: 700 }, touch: true });
+
+browserTest("field companions animate, pause in menus and hidden tabs, and use normal chest and tap rewards", async (page) => {
+  await importSave(page, { total: 50000, coins: 100, presses: 7, opened: 5, chests: [chest(2, "grasslands", 1)] });
+  await click(page, "#companions");
+  await click(page, petCard("beetle"));
+  await click(page, petAction("field", "0"));
+  await click(page, petCard("mouse"));
+  await click(page, petAction("field", "1"));
+  assert.equal(await page.locator("#fieldPet-0").getAttribute("data-pet-id"), "beetle");
+  assert.equal(await page.locator("#fieldPet-1").getAttribute("data-pet-id"), "mouse");
+  assert.equal(await page.locator("#fieldPet-0 svg").evaluate(el => getComputedStyle(el).animationName), "pet-wander");
+  const assigned = await saved(page);
+  await page.clock.runFor(25000);
+  assert.deepEqual((await saved(page)).companions, assigned.companions);
+  await escape(page);
+  await page.evaluate(() => {
+    window.testHidden = true;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.clock.runFor(25000);
+  assert.deepEqual((await saved(page)).companions, assigned.companions);
+  await page.evaluate(() => {
+    window.testHidden = false;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await page.clock.runFor(5000);
+  assert.equal((await saved(page)).coins, 100);
+  await page.reload();
+  const restored = await saved(page);
+  assert.ok(restored.companions.pets.beetle.cooldown > 2000 && restored.companions.pets.beetle.cooldown < 4000);
+  await page.clock.runFor(3250);
+  assertAmount((await saved(page)).coins, 100.4);
+  assert.equal((await saved(page)).presses, 7);
+  assert.equal((await saved(page)).asc.life, 50000.4);
+  assert.equal(await page.locator("#fieldPet-0").evaluate(el => el.style.getPropertyValue("--pet-x")), "50%");
+  await page.clock.runFor(12000);
+  const collected = await saved(page);
+  assert.equal(collected.opened, 6);
+  assert.equal(collected.items.length, 1);
+  assert.equal(collected.shards, 2);
+  assert.equal(collected.chests.length, 0);
+  assert.equal(collected.presses, 7);
+  assert.equal(await page.locator(".chest.opening").count(), 1);
+  await click(page, "#companions");
+  await click(page, petCard("mouse"));
+  await click(page, petAction("rest"));
+  await escape(page);
+  assert.ok(await page.locator("#fieldPet-1").isHidden());
+}, {
+  viewport: { width: 1280, height: 800 },
+  motion: "no-preference",
+  init: () => {
+    window.testHidden = false;
+    Object.defineProperty(document, "hidden", { get: () => window.testHidden });
+  },
+});
+
+browserTest("train and evolve companions, assist field sites, and retain growth after Ascension", async (page) => {
+  const slime = { xp: 160 };
+  const mole = { xp: 0 };
+  await importSave(page, { total: 50000, coins: 6000, shards: 12, rootFiber: 3,
+    sites: { research: { extraPlot: true }, pick: 1, plots: [{ crop: "glowleaf", remaining: 1 }] },
+    companions: { pets: { slime, mole }, artifacts: ["bell"] } });
+  await click(page, "#companions");
+  await click(page, petCard("slime"));
+  await click(page, petAction("role", "field"));
+  await click(page, petAction("evolve"));
+  assert.match(await text(page, "#petProfile"), /Level 5 · Evolved/);
+  await click(page, petAction("gear", "bell"));
+  await click(page, petAction("field", "0"));
+  await click(page, petCard("mole"));
+  await click(page, petAction("field", "1"));
+  await escape(page);
+  assert.equal(await page.locator("#fieldPet-0 svg").evaluate(el => getComputedStyle(el).animationName), "none");
+  await page.clock.runFor(16500);
+  const field = await saved(page);
+  assert.equal(field.glowleaf, 3);
+  assert.equal(field.copperOre, 4);
+  assert.equal(field.rootFiber, 0);
+  assert.equal(field.coins, 4500);
+  assert.equal(field.sites.plots[0], null);
+  assert.equal(field.companions.pets.slime.xp, 162);
+  await click(page, "#skills");
+  await click(page, '[data-tree-tab="ascend"]');
+  await click(page, "[data-asc-start]");
+  assert.match(await text(page, ".asc-confirm"), /unclaimed expedition rewards/);
+  await click(page, "[data-asc-confirm]");
+  const next = await saved(page);
+  assert.deepEqual(next.companions.field, [null, null]);
+  assert.deepEqual(next.companions.trips, [null, null]);
+  assert.equal(next.companions.pets.slime.role, "field");
+  assert.equal(next.companions.pets.slime.evolved, true);
+  assert.equal(next.companions.pets.slime.gear, "bell");
+  assert.equal(next.companions.pets.slime.xp, 162);
+  await page.reload();
+  assert.deepEqual((await saved(page)).companions, next.companions);
+});
+
+browserTest("advanced expedition routes offer separate slots and apply specialization and artifact bonuses", async (page) => {
+  await importSave(page, { total: 250000, coins: 2000, sites: { pick: 1 },
+    companions: { pets: { beetle: { xp: 90, role: "scout", gear: "lens" }, sparrow: { xp: 40, gear: "satchel" } },
+      artifacts: ["lens", "satchel"] } });
+  await click(page, "#companions");
+  await click(page, petCard("beetle"));
+  assert.match(await text(page, ".pet-route:has([data-pet-arg=star])"), /Star Ruins · 252s/);
+  await click(page, petAction("send", "star"));
+  await click(page, petCard("sparrow"));
+  assert.ok(await page.locator(petAction("gear", "lens")).isDisabled());
+  assert.match(await text(page, ".pet-route:has([data-pet-arg=silver])"), /5 Copper Ore/);
+  await click(page, petAction("send", "silver"));
+  assert.equal(await page.locator(petAction("cancel")).count(), 2);
+  await page.clock.fastForward(181000);
+  assert.ok(await page.locator(petAction("cancel", "0")).isVisible());
+  await click(page, petAction("claim", "1"));
+  assert.match(await text(page, "#petMessage"), /5 Copper Ore.*20 XP/);
+  await page.clock.fastForward(73000);
+  await click(page, petAction("claim", "0"));
+  const result = await saved(page);
+  assert.equal(result.copperOre, 5);
+  assert.equal(result.silverOre, 2);
+  assert.equal(result.starCrystals, 2);
+  assert.equal(result.prismEssence, 1);
+  assert.deepEqual(result.companions.trips, [null, null]);
+});

@@ -313,6 +313,23 @@ function setMiningMode(state, enabled, target) {
   return true;
 }
 
+function advanceCrops(state, elapsed, all = false) {
+  const growing = state.sites.plots
+    .slice(0, plotCount(state))
+    .filter((plot) => plot?.remaining > 0);
+  if (!growing.length) return false;
+  if (all) {
+    for (const plot of growing)
+      plot.remaining = Math.max(0, plot.remaining - elapsed);
+  } else {
+    const closest = growing.reduce((best, plot) =>
+      plot.remaining < best.remaining ? plot : best,
+    );
+    closest.remaining = Math.max(0, closest.remaining - elapsed);
+  }
+  return true;
+}
+
 function advanceSites(state, elapsed, press = false) {
   const rewards = [];
   if (!Number.isFinite(elapsed) || elapsed <= 0 || state.total < farmAt)
@@ -433,5 +450,7 @@ export {
   setHarvestMode,
   setMiningMode,
   advanceSites,
+  advanceCrops,
+  recoverVeins,
   normalizeSites,
 };

@@ -3,6 +3,7 @@ const runtime = {
   filter: "all",
   gearWorldFilter: "all",
   selectedSkill: "root",
+  petSelected: "",
   treeTab: "skills",
   ascConfirm: false,
   chestClock: 0,

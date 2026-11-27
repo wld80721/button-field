@@ -2595,6 +2595,151 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Companions */
+.pet-summary,
+.pet-management {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+.pet-summary h3,
+.pet-management > section > h3 {
+  margin: 0 0 8px;
+}
+.pet-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  max-height: 400px;
+  overflow: auto;
+  padding: 4px;
+}
+.pet-card,
+.pet-assignment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+.pet-card {
+  padding: 5px;
+  border: 2px solid #557773;
+  border-radius: 4px;
+  background: #162f35;
+}
+.pet-card:hover,
+.pet-card[aria-pressed="true"] {
+  border-color: var(--pet-color);
+  background: #284049;
+}
+.pet-card .pet-icon {
+  width: 30px;
+  height: 28px;
+  flex: none;
+}
+.pet-card small,
+.pet-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.pet-card small,
+.pet-assignment span {
+  color: #c6ded7;
+}
+.pet-assignment {
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+.pet-assignment > span {
+  flex: 1;
+}
+.pet-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pet-profile-head .pet-icon {
+  width: 55px;
+  height: 50px;
+  flex: none;
+}
+.pet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.pet-options,
+.pet-route {
+  border-top: 1px solid #557773;
+  padding-top: 5px;
+}
+.pet-options button,
+.pet-route button {
+  white-space: normal;
+  margin: 2px;
+}
+.pet-route {
+  margin: 8px 0;
+}
+.pet-route p {
+  margin: 4px 0;
+}
+.field-pet {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  left: var(--pet-x, 34%);
+  top: var(--pet-y, 64%);
+  width: 32px;
+  transform: translate(-50%, -80%);
+  transition:
+    left 0.5s ease,
+    top 0.5s ease;
+}
+.field-pet + .field-pet {
+  left: var(--pet-x, 67%);
+  top: var(--pet-y, 65%);
+}
+.field-pet svg {
+  animation: pet-wander 3s ease-in-out infinite alternate;
+  width: 100%;
+}
+.field-pet + .field-pet svg {
+  animation-delay: -0.9s;
+}
+@keyframes pet-wander {
+  from {
+    transform: translate(-7px, 0);
+  }
+  to {
+    transform: translate(7px, -4px);
+  }
+}
+@media (max-width: 570px) {
+  .pet-summary,
+  .pet-management {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .pet-roster {
+    max-height: 204px;
+  }
+  .field-pet {
+    width: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-pet {
+    transition: none;
+  }
+  .field-pet svg {
+    animation: none;
+  }
+}
 </style>
   </head>
   <body>
@@ -2729,6 +2874,8 @@ textarea {
           <div class="progress-fill" id="progressFill"></div>
           <span class="progress-num" id="progressNum">0%</span>
         </div>
+        <div class="field-pet" id="fieldPet-0" aria-hidden="true" hidden></div>
+        <div class="field-pet" id="fieldPet-1" aria-hidden="true" hidden></div>
         <div class="effects" id="effects"></div>
         <div class="toast" id="toast" hidden aria-live="polite"></div>
         <div class="bottom-board">
@@ -2803,6 +2950,7 @@ textarea {
         </div>
         <div class="dock-right">
           <button class="nav-btn" id="progressionGuide">Guide</button>
+          <button class="nav-btn" id="companions" hidden>Companions</button>
           <button class="nav-btn worlds-btn" id="worlds">Worlds</button>
           <button class="nav-btn inventory" id="inventory" hidden>
             Gear <span class="count" id="invCount">0</span></button
@@ -2925,6 +3073,10 @@ textarea {
     forge: 150,
     shards: 600,
     helper: 2500,
+    companions: 150,
+    expeditions: 2500,
+    secondCompanionSlot: 5e4,
+    secondExpeditionSlot: 25e4,
     ascension: 1e4,
     frozen: 5e4,
     volcano: 25e4,
@@ -3536,6 +3688,20 @@ textarea {
     site.autoMine = active;
     return true;
   }
+  function advanceCrops(state, elapsed, all = false) {
+    const growing = state.sites.plots.slice(0, plotCount(state)).filter((plot) => plot?.remaining > 0);
+    if (!growing.length) return false;
+    if (all) {
+      for (const plot of growing)
+        plot.remaining = Math.max(0, plot.remaining - elapsed);
+    } else {
+      const closest = growing.reduce(
+        (best, plot) => plot.remaining < best.remaining ? plot : best
+      );
+      closest.remaining = Math.max(0, closest.remaining - elapsed);
+    }
+    return true;
+  }
   function advanceSites(state, elapsed, press2 = false) {
     const rewards = [];
     if (!Number.isFinite(elapsed) || elapsed <= 0 || state.total < farmAt)
@@ -3610,52 +3776,6 @@ textarea {
     if (depositAccess(state, raw?.target)) site.target = raw.target;
     site.swing = site.autoMine && site.veins[site.target].remaining === 0 ? bounded(raw?.swing, swingMs - 1) : 0;
   }
-
-  // src/js/numbers.js
-  var wholeNumbers = new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0
-  });
-  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-  var suffixes = ["", "K", "M", "B", "T"];
-  function fmt(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
-    if (Math.abs(n) >= 1e15) {
-      const [mantissa, exponent] = n.toExponential().split("e");
-      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
-      return truncated + "e" + exponent;
-    }
-    let unit = suffixes.length - 1;
-    while (Math.abs(n) < 1e3 ** unit) unit--;
-    const scaled = n / 1e3 ** unit;
-    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
-    return Math.trunc(scaled * precision) / precision + suffixes[unit];
-  }
-  function fmtRate(n) {
-    if (!Number.isFinite(n)) return "\u2014";
-    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
-  }
-  function fmtExact(n) {
-    return Number.isFinite(n) ? counts.format(n) : "\u2014";
-  }
-
-  // src/js/runtime.js
-  var runtime = {
-    filter: "all",
-    gearWorldFilter: "all",
-    selectedSkill: "root",
-    treeTab: "skills",
-    ascConfirm: false,
-    chestClock: 0,
-    modalType: "",
-    lastFocus: null,
-    saveDirty: false,
-    wheelResult: null,
-    wheelMoving: false,
-    wheelGeneration: 0,
-    pendingWorldUnlock: null
-  };
 
   // src/js/world-data.js
   var firstWorld = "grasslands";
@@ -4044,6 +4164,35 @@ textarea {
     return gathered;
   }
 
+  // src/js/numbers.js
+  var wholeNumbers = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0
+  });
+  var smallRates = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var counts = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+  var suffixes = ["", "K", "M", "B", "T"];
+  function fmt(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    if (Math.abs(n) < 1e3) return wholeNumbers.format(Math.trunc(n));
+    if (Math.abs(n) >= 1e15) {
+      const [mantissa, exponent] = n.toExponential().split("e");
+      const truncated = Number(mantissa.match(/^-?\d(?:\.\d{1,2})?/)[0]);
+      return truncated + "e" + exponent;
+    }
+    let unit = suffixes.length - 1;
+    while (Math.abs(n) < 1e3 ** unit) unit--;
+    const scaled = n / 1e3 ** unit;
+    const precision = Math.abs(scaled) >= 100 ? 1 : 10;
+    return Math.trunc(scaled * precision) / precision + suffixes[unit];
+  }
+  function fmtRate(n) {
+    if (!Number.isFinite(n)) return "\u2014";
+    return Math.abs(n) < 1e3 ? smallRates.format(n) : fmt(n);
+  }
+  function fmtExact(n) {
+    return Number.isFinite(n) ? counts.format(n) : "\u2014";
+  }
+
   // src/js/progression.js
   var progressionThresholds = Object.freeze({ ...milestones, firstWheel: 50 });
   var coinUnlocks = [
@@ -4063,6 +4212,11 @@ textarea {
       "Raise your chest drop chance at the Workshop."
     ],
     [
+      progressionThresholds.companions,
+      "Companions",
+      "Recruit and assign a pet to help on the field."
+    ],
+    [
       progressionThresholds.shards,
       "Shards, skill tree and Farming",
       "Spend shards on skills and plant your first crop."
@@ -4071,6 +4225,21 @@ textarea {
       progressionThresholds.helper,
       "Garden helper + Set recipes + Mining",
       "Buy automatic income, craft set gear, and open the mine."
+    ],
+    [
+      progressionThresholds.expeditions,
+      "Expeditions",
+      "Send a companion to find crafting materials and artifacts."
+    ],
+    [
+      progressionThresholds.secondCompanionSlot,
+      "Second field companion",
+      "Assign a second pet to help on the field."
+    ],
+    [
+      progressionThresholds.secondExpeditionSlot,
+      "Second expedition slot",
+      "Send two companions on expeditions at once."
     ],
     [
       progressionThresholds.ascension,
@@ -4422,11 +4591,11 @@ textarea {
     if (result.ability) progress2.hammerhand = 0;
     return result;
   }
-  function tickClockwork(state, seconds2, rates, pieces, profile, random = Math.random) {
+  function tickClockwork(state, seconds3, rates, pieces, profile, random = Math.random) {
     const { active, count } = profile.clockwork;
-    if (!active || rates.auto <= 0 || seconds2 <= 0) return null;
+    if (!active || rates.auto <= 0 || seconds3 <= 0) return null;
     const progress2 = state.abilityProgress;
-    progress2.clockwork = Math.min(6e4, progress2.clockwork + seconds2 * 1e3);
+    progress2.clockwork = Math.min(6e4, progress2.clockwork + seconds3 * 1e3);
     if (progress2.clockwork < (count >= 2 ? 45e3 : 6e4)) return null;
     const chest = spawnChest(state, { forcedRarity: 0, random });
     const oldest = oldestLocalChest(state);
@@ -4506,12 +4675,634 @@ textarea {
     return true;
   }
 
+  // src/js/companions.js
+  var {
+    companions: companionsAt,
+    expeditions: expeditionsAt,
+    secondCompanionSlot: secondFieldAt,
+    secondExpeditionSlot: secondTripAt
+  } = milestones;
+  var evolutionCost = { coins: 1500, shards: 8, rootFiber: 3 };
+  var maxXp = 810;
+  var roster = {
+    beetle: {
+      name: "Button Beetle",
+      seconds: 8,
+      need: "150 earned and one chest opened",
+      ready: (s2) => s2.opened >= 1,
+      ability: "Presses for 40% of normal tap income.",
+      action: "press",
+      power: 0.4,
+      color: "#f57965",
+      art: [
+        "..0110..",
+        ".012210.",
+        "01233210",
+        "01222210",
+        ".012210.",
+        "0.0110.0"
+      ]
+    },
+    sparrow: {
+      name: "Scrap Sparrow",
+      seconds: 20,
+      need: "150 earned and 3 scrap held",
+      ready: (s2) => s2.scrap >= 3,
+      ability: "Gathers 1 scrap.",
+      action: "scrap",
+      color: "#e8bc71",
+      art: [
+        "....011.",
+        "...01230",
+        "01112200",
+        ".012221.",
+        "..01210.",
+        "...0.0.."
+      ]
+    },
+    mouse: {
+      name: "Latch Mouse",
+      seconds: 20,
+      need: "600 earned and five chests opened",
+      ready: (s2) => s2.total >= 600 && s2.opened >= 5,
+      ability: "Opens the oldest Common or Uncommon chest.",
+      action: "chest",
+      grades: [0, 1],
+      color: "#b9b0cf",
+      art: [
+        "..01.01.",
+        "..01010.",
+        "0012320.",
+        "01222210",
+        ".012210.",
+        "00.0.0.."
+      ]
+    },
+    moth: {
+      name: "Glow Moth",
+      seconds: 10,
+      need: "3 Glowleaf held",
+      ready: (s2) => s2.glowleaf >= 3,
+      ability: "Advances all growing crops by 2s.",
+      action: "grow",
+      amount: 2e3,
+      all: true,
+      color: "#b6f489",
+      art: [
+        "01.00.10",
+        "01211210",
+        "01233210",
+        ".011110.",
+        "01211210",
+        ".00..00."
+      ]
+    },
+    slime: {
+      name: "Sprout Slime",
+      seconds: 12,
+      need: "Research the second plot",
+      ready: (s2) => s2.sites.research.extraPlot,
+      ability: "Harvests the first ripe plot.",
+      action: "harvest",
+      color: "#67dfa5",
+      art: [
+        "....10..",
+        "...010..",
+        "..0110..",
+        ".012221.",
+        "01232310",
+        "01111110"
+      ]
+    },
+    mole: {
+      name: "Copper Mole",
+      seconds: 8,
+      need: "Purchase the Copper Pick",
+      ready: (s2) => s2.sites.pick >= 1,
+      ability: "Chips Copper once.",
+      action: "mine",
+      veins: ["copper"],
+      color: "#d79c82",
+      art: [
+        "....00..",
+        "..01110.",
+        ".0123210",
+        "01222100",
+        "0122210.",
+        ".00.00.."
+      ]
+    },
+    crab: {
+      name: "Quartz Crab",
+      seconds: 11,
+      need: "Unlock the Silver deposit",
+      ready: (s2) => depositAccess(s2, "silver"),
+      ability: "Chips the Copper or Silver vein with the least toughness left. Ties favor Silver.",
+      action: "mine",
+      veins: ["silver", "copper"],
+      color: "#ec9fa8",
+      art: [
+        "00....00",
+        "010..010",
+        ".003300.",
+        "01222210",
+        "00111100",
+        "0.0..0.0"
+      ]
+    },
+    ferret: {
+      name: "Chest Ferret",
+      seconds: 24,
+      need: "Visit Desert with 30 chests opened this run",
+      ready: (s2) => s2.world === "desert" && s2.opened >= 30,
+      ability: "Opens the oldest Rare-or-better chest.",
+      action: "chest",
+      grades: [2, 3, 4],
+      color: "#f3ce8c",
+      art: [
+        ".....01.",
+        "....0120",
+        "00011230",
+        "01222210",
+        ".011100.",
+        "..0..0.."
+      ]
+    },
+    gecko: {
+      name: "Dune Gecko",
+      seconds: 12,
+      need: "Visit Desert holding a max-rank forged item",
+      ready: (s2) => s2.world === "desert" && s2.items.some((item) => item.forge >= 3),
+      ability: "Presses for 35% of tap income and advances recovering deposits by 1s.",
+      action: "press",
+      power: 0.35,
+      recover: 1e3,
+      color: "#f5b84f",
+      art: [
+        "....0.0.",
+        "...01330",
+        "01122210",
+        ".022210.",
+        "0010110.",
+        "0..0..0."
+      ]
+    },
+    hare: {
+      name: "Tundra Hare",
+      seconds: 12,
+      need: "Visit Frozen Lands after researching Irrigation",
+      ready: (s2) => s2.world === "frozen" && s2.sites.research.irrigation,
+      ability: "Advances the crop closest to ripening by 5s.",
+      action: "grow",
+      amount: 5e3,
+      color: "#b6e9ff",
+      art: [
+        "....0.0.",
+        "....1.1.",
+        "...01110",
+        "..012320",
+        ".0122210",
+        ".001100."
+      ]
+    },
+    owl: {
+      name: "Crystal Owl",
+      seconds: 16,
+      need: "Unlock the Star Crystal vein and hold 2 Star Crystals",
+      ready: (s2) => depositAccess(s2, "crystal") && s2.starCrystals >= 2,
+      ability: "Chips the Star Crystal vein once.",
+      action: "mine",
+      veins: ["crystal"],
+      color: "#dab0ff",
+      art: [
+        ".0....0.",
+        ".011110.",
+        "01233210",
+        "01211210",
+        ".012210.",
+        "..0..0.."
+      ]
+    },
+    ram: {
+      name: "Cinder Ram",
+      seconds: 14,
+      need: "Visit Volcano with the Resonant Pick",
+      ready: (s2) => s2.world === "volcano" && s2.sites.pick >= 2,
+      ability: "Advances every recovering deposit by 6s.",
+      action: "recover",
+      amount: 6e3,
+      color: "#fb8b66",
+      art: [
+        "..0000..",
+        ".011011.",
+        "01213010",
+        "01222210",
+        ".022110.",
+        "..0.0..."
+      ]
+    },
+    heron: {
+      name: "Moon Heron",
+      seconds: 14,
+      need: "250,000 earned and 1 Prism Essence held",
+      ready: (s2) => s2.total >= 25e4 && s2.prismEssence >= 1,
+      ability: "Advances the crop closest to ripening by 4s and chips Silver when available.",
+      action: "hybrid",
+      amount: 4e3,
+      veins: ["silver"],
+      color: "#d2deff",
+      art: [
+        "....0110",
+        "...01230",
+        "...010..",
+        ".01110..",
+        "012210..",
+        "..0.0..."
+      ]
+    },
+    koi: {
+      name: "Star Koi",
+      seconds: 18,
+      need: "Visit Celestial Realm with an evolved pet",
+      ready: (s2) => s2.world === "celestial" && Object.values(s2.companions.pets).some((p) => p.evolved),
+      ability: "Opens the oldest available chest of any rarity.",
+      action: "chest",
+      grades: [0, 1, 2, 3, 4],
+      color: "#ff98ba",
+      art: [
+        ".....01.",
+        "0..01110",
+        "11012230",
+        ".1122210",
+        "1100110.",
+        "0....10."
+      ]
+    },
+    drake: {
+      name: "Relic Drake",
+      seconds: 15,
+      need: "10 million earned and two artifacts discovered",
+      ready: (s2) => s2.total >= 1e7 && s2.companions.artifacts.length >= 2,
+      ability: "Presses for 75% of tap income and gathers 1 shard if a chest is waiting.",
+      action: "press",
+      power: 0.75,
+      shard: true,
+      color: "#87d1ff",
+      art: [
+        ".0..0.0.",
+        "01001130",
+        "01222210",
+        ".122210.",
+        "01112110",
+        "0.0.0..."
+      ]
+    }
+  };
+  var artifacts = {
+    bell: { name: "Field Bell", info: "10% shorter field cooldowns." },
+    lens: { name: "Scout Lens", info: "10% shorter expeditions." },
+    satchel: {
+      name: "Trail Satchel",
+      info: "One extra unit of the route\u2019s first material."
+    }
+  };
+  var routes = {
+    grove: {
+      name: "Grove Trail",
+      at: expeditionsAt,
+      level: 1,
+      seconds: 90,
+      xp: 12,
+      loot: { glowleaf: 3, scrap: 2 },
+      artifact: "bell",
+      requirement: "2,500 earned"
+    },
+    silver: {
+      name: "Silver Pass",
+      at: 1e4,
+      level: 2,
+      tool: 1,
+      seconds: 180,
+      xp: 20,
+      loot: { copperOre: 4, silverOre: 2, rootFiber: 2 },
+      artifact: "lens",
+      requirement: "10,000 earned \xB7 Copper Pick \xB7 level 2"
+    },
+    star: {
+      name: "Star Ruins",
+      at: 5e4,
+      level: 4,
+      vein: "crystal",
+      seconds: 360,
+      xp: 32,
+      loot: { starCrystals: 2, prismEssence: 1 },
+      artifact: "satchel",
+      requirement: "Star Crystal vein \xB7 level 4"
+    }
+  };
+  var newPet = () => ({
+    xp: 0,
+    evolved: false,
+    role: "",
+    gear: "",
+    cooldown: null,
+    last: ""
+  });
+  var freshCompanions = () => ({
+    pets: {},
+    field: [null, null],
+    trips: [null, null],
+    artifacts: []
+  });
+  var isKnown = (catalog, id) => typeof id === "string" && Object.hasOwn(catalog, id);
+  var petLevel = (pet) => Math.min(10, 1 + Math.floor(Math.sqrt(pet.xp / 10)));
+  var fieldSlots = (s2) => s2.total < companionsAt ? 0 : s2.total < secondFieldAt ? 1 : 2;
+  var tripSlots = (s2) => s2.total < expeditionsAt ? 0 : s2.total < secondTripAt ? 1 : 2;
+  function recruitPets(state) {
+    if (state.total < companionsAt) return [];
+    const pets = state.companions.pets;
+    const recruited = [];
+    for (const [id, def] of Object.entries(roster)) {
+      if (!pets[id] && def.ready(state)) {
+        pets[id] = newPet();
+        recruited.push(id);
+      }
+    }
+    return recruited;
+  }
+  function petDuty(state, id) {
+    const camp = state.companions;
+    const field = camp.field.indexOf(id);
+    if (field >= 0) return { type: "field", slot: field };
+    const trip = camp.trips.findIndex((trip2) => trip2?.pet === id);
+    return trip >= 0 ? { type: "trip", slot: trip } : { type: "home" };
+  }
+  function cooldown(id, pet) {
+    const reduction = (petLevel(pet) - 1) * 0.02 + (pet.role === "field" ? 0.15 : 0) + (pet.evolved ? 0.1 : 0) + (pet.gear === "bell" ? 0.1 : 0);
+    return Math.round(
+      roster[id].seconds * 1e3 * (1 - Math.min(0.45, reduction))
+    );
+  }
+  function assignField(state, id, slot) {
+    if (!isKnown(state.companions.pets, id) || !Number.isInteger(slot) || slot < 0 || slot >= fieldSlots(state) || state.companions.field[slot] || petDuty(state, id).type !== "home")
+      return false;
+    const pet = state.companions.pets[id];
+    pet.cooldown ??= cooldown(id, pet);
+    state.companions.field[slot] = id;
+    return true;
+  }
+  function restPet(state, id) {
+    const duty = petDuty(state, id);
+    if (duty.type !== "field") return false;
+    state.companions.field[duty.slot] = null;
+    return true;
+  }
+  function specializePet(state, id, role) {
+    if (!isKnown(state.companions.pets, id) || !["field", "scout"].includes(role) || petDuty(state, id).type !== "home" || petLevel(state.companions.pets[id]) < 4)
+      return false;
+    state.companions.pets[id].role = role;
+    return true;
+  }
+  function evolvePet(state, id) {
+    if (!isKnown(state.companions.pets, id) || petDuty(state, id).type !== "home")
+      return false;
+    const pet = state.companions.pets[id];
+    if (pet.evolved || petLevel(pet) < 5 || state.total < 1e4 || !useMaterials(state, evolutionCost))
+      return false;
+    pet.evolved = true;
+    return true;
+  }
+  function equipArtifact(state, id, gear) {
+    const camp = state.companions;
+    if (!isKnown(camp.pets, id) || petDuty(state, id).type === "trip")
+      return false;
+    if (gear && (!isKnown(artifacts, gear) || !camp.artifacts.includes(gear)))
+      return false;
+    const from = gear && Object.keys(camp.pets).find((key) => camp.pets[key].gear === gear);
+    if (from && petDuty(state, from).type === "trip") return false;
+    if (from) camp.pets[from].gear = "";
+    camp.pets[id].gear = gear;
+    return true;
+  }
+  function routeAccess(state, id, route) {
+    const def = routes[route];
+    return Boolean(
+      def && isKnown(routes, route) && isKnown(state.companions.pets, id) && state.total >= def.at && state.sites.pick >= (def.tool || 0) && (!def.vein || depositAccess(state, def.vein)) && petLevel(state.companions.pets[id]) >= def.level
+    );
+  }
+  function tripQuote(pet, route) {
+    const def = routes[route];
+    const duration = Math.round(
+      def.seconds * 1e3 * (1 - (pet.role === "scout" ? 0.2 : 0) - (pet.gear === "lens" ? 0.1 : 0))
+    );
+    const loot = { ...def.loot };
+    if (pet.gear === "satchel") loot[Object.keys(loot)[0]]++;
+    return { duration, loot };
+  }
+  function sendPet(state, id, route, now) {
+    const slot = state.companions.trips.findIndex(
+      (trip, index) => !trip && index < tripSlots(state)
+    );
+    if (!Number.isSafeInteger(now) || now < 0 || slot === -1 || !routeAccess(state, id, route) || petDuty(state, id).type !== "home")
+      return false;
+    const quote = tripQuote(state.companions.pets[id], route);
+    const finishAt = now + quote.duration;
+    if (!Number.isSafeInteger(finishAt)) return false;
+    state.companions.trips[slot] = { pet: id, route, ...quote, finishAt };
+    return true;
+  }
+  var tripRemaining = (trip, now) => Math.min(trip.duration, Math.max(0, trip.finishAt - now));
+  function cancelTrip(state, slot, now) {
+    const trip = state.companions.trips[slot];
+    if (!trip || !Number.isFinite(now) || tripRemaining(trip, now) <= 0)
+      return false;
+    state.companions.trips[slot] = null;
+    return true;
+  }
+  function claimTrip(state, slot, now) {
+    const camp = state.companions;
+    const trip = camp.trips[slot];
+    if (!trip || tripRemaining(trip, now) !== 0) return null;
+    camp.trips[slot] = null;
+    const def = routes[trip.route];
+    for (const [id, amount] of Object.entries(trip.loot))
+      creditResource(state, id, amount);
+    const pet = camp.pets[trip.pet];
+    pet.xp = Math.min(maxXp, pet.xp + def.xp);
+    const found = !camp.artifacts.includes(def.artifact);
+    if (found) camp.artifacts.push(def.artifact);
+    pet.last = "Returned from " + def.name + ".";
+    return { ...trip, xp: def.xp, artifact: found ? def.artifact : "" };
+  }
+  function tickPets(state, dt, rates, regionalPieces, random = Math.random) {
+    const results = [];
+    let changed = false;
+    if (!Number.isFinite(dt) || dt <= 0) return { changed, results };
+    const busy = { chest: false, harvest: false, veins: /* @__PURE__ */ new Set() };
+    const { field, pets } = state.companions;
+    for (const id of field.slice(0, fieldSlots(state))) {
+      if (!id) continue;
+      const pet = pets[id];
+      const before = pet.cooldown ?? cooldown(id, pet);
+      pet.cooldown = Math.max(0, before - dt);
+      changed ||= before !== pet.cooldown;
+      if (pet.cooldown > 0) continue;
+      const result = actPet(
+        state,
+        roster[id],
+        rates,
+        regionalPieces,
+        busy,
+        random
+      );
+      if (!result) continue;
+      pet.xp = Math.min(maxXp, pet.xp + 2);
+      pet.cooldown = cooldown(id, pet);
+      pet.last = result.text;
+      results.push({ id, ...result });
+      changed = true;
+    }
+    return { changed, results };
+  }
+  function actPet(state, def, rates, pieces, busy, random) {
+    const local = () => state.chests.find((chest) => recordWorld(chest) === state.world);
+    if (def.action === "press") {
+      const coins = rates.tap * def.power;
+      if (!(coins > 0)) return null;
+      creditCoins(state, coins);
+      if (def.recover) recoverVeins(state, def.recover);
+      const shard = def.shard && state.total >= 600 && local();
+      if (shard) creditResource(state, "shards", 1);
+      return {
+        target: "button",
+        coins,
+        text: shard ? "Pressed the button and found 1 shard." : "Pressed the red button."
+      };
+    }
+    if (def.action === "scrap") {
+      creditResource(state, "scrap", 1);
+      return { target: "roam", text: "Gathered 1 scrap." };
+    }
+    if (def.action === "chest") {
+      if (busy.chest || state.items.length >= gearBagLimit) return null;
+      const chest = state.chests.find(
+        (chest2) => recordWorld(chest2) === state.world && def.grades.includes(chest2.r)
+      );
+      if (!chest) return null;
+      const opened = collectChest(state, chest.id, pieces, random, "pet");
+      if (!opened || opened.full) return null;
+      busy.chest = true;
+      return { target: "chest", opened, text: "Opened a treasure chest." };
+    }
+    if (def.action === "harvest") {
+      if (busy.harvest) return null;
+      const index = state.sites.plots.findIndex((plot) => plot?.remaining === 0);
+      const gathered = index >= 0 && harvest(state, index);
+      if (!gathered) return null;
+      busy.harvest = true;
+      return { target: "farm", gathered, text: "Harvested a ripe crop." };
+    }
+    if (def.action === "recover") {
+      if (!recoverVeins(state, def.amount)) return null;
+      return { target: "mine", text: "Advanced recovering deposits." };
+    }
+    const grew = def.amount && advanceCrops(state, def.amount, def.all);
+    const vein = def.veins?.filter(
+      (id) => !busy.veins.has(id) && depositAccess(state, id) && state.sites.veins[id].remaining === 0
+    ).sort(
+      (a, b) => state.sites.veins[a].hp / deposits[a].hp - state.sites.veins[b].hp / deposits[b].hp
+    )[0];
+    const mined = vein && mine(state, vein);
+    if (mined) busy.veins.add(vein);
+    if (!grew && !mined) return null;
+    return {
+      target: grew ? "farm" : "mine",
+      gathered: mined?.amount ? mined : null,
+      text: grew && mined ? "Tended crops and chipped Silver." : grew ? "Advanced crop growth." : "Chipped a deposit."
+    };
+  }
+  function normalizeCompanions(state, raw) {
+    const camp = state.companions;
+    const bounded = (n, max) => Number.isFinite(n) ? Math.max(0, Math.min(n, max)) : 0;
+    if (Array.isArray(raw?.artifacts))
+      camp.artifacts = [
+        ...new Set(raw.artifacts.filter((id) => isKnown(artifacts, id)))
+      ];
+    const held = /* @__PURE__ */ new Set();
+    for (const id of Object.keys(roster)) {
+      const p = raw?.pets?.[id];
+      if (!p || typeof p !== "object" || Array.isArray(p)) continue;
+      const pet = newPet();
+      pet.xp = Math.floor(bounded(p.xp, maxXp));
+      pet.evolved = petLevel(pet) >= 5 && p.evolved === true;
+      pet.role = petLevel(pet) >= 4 && ["field", "scout"].includes(p.role) ? p.role : "";
+      if (camp.artifacts.includes(p.gear) && !held.has(p.gear)) {
+        pet.gear = p.gear;
+        held.add(p.gear);
+      }
+      pet.cooldown = Number.isFinite(p.cooldown) ? bounded(p.cooldown, roster[id].seconds * 1e3) : null;
+      pet.last = typeof p.last === "string" ? p.last.slice(0, 100) : "";
+      camp.pets[id] = pet;
+    }
+    const assigned = /* @__PURE__ */ new Set();
+    for (let i = 0; i < tripSlots(state); i++) {
+      const trip = raw?.trips?.[i];
+      if (!trip || !isKnown(camp.pets, trip.pet) || assigned.has(trip.pet) || !routeAccess(state, trip.pet, trip.route) || !Number.isSafeInteger(trip.finishAt) || trip.finishAt < 0)
+        continue;
+      const quote = tripQuote(camp.pets[trip.pet], trip.route);
+      camp.trips[i] = {
+        pet: trip.pet,
+        route: trip.route,
+        ...quote,
+        finishAt: trip.finishAt
+      };
+      assigned.add(trip.pet);
+    }
+    for (let i = 0; i < fieldSlots(state); i++) {
+      const id = raw?.field?.[i];
+      if (!isKnown(camp.pets, id) || assigned.has(id)) continue;
+      camp.field[i] = id;
+      assigned.add(id);
+    }
+  }
+  function keepCompanions(state) {
+    return {
+      ...freshCompanions(),
+      artifacts: [...state.companions.artifacts],
+      pets: Object.fromEntries(
+        Object.entries(state.companions.pets).map(([id, pet]) => [
+          id,
+          { ...pet, cooldown: null, last: "" }
+        ])
+      )
+    };
+  }
+
+  // src/js/runtime.js
+  var runtime = {
+    filter: "all",
+    gearWorldFilter: "all",
+    selectedSkill: "root",
+    petSelected: "",
+    treeTab: "skills",
+    ascConfirm: false,
+    chestClock: 0,
+    modalType: "",
+    lastFocus: null,
+    saveDirty: false,
+    wheelResult: null,
+    wheelMoving: false,
+    wheelGeneration: 0,
+    pendingWorldUnlock: null
+  };
+
   // src/js/state.js
-  var schemaVersion = 3;
+  var schemaVersion = 4;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
     sites: freshSites(),
+    companions: freshCompanions(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),
     world: firstWorld,
@@ -4830,6 +5621,279 @@ textarea {
     return false;
   }
 
+  // src/js/companion-view.js
+  var seconds2 = (ms) => Math.ceil(ms / 1e3) + "s";
+  var roles = { "": "Untrained", field: "Field Hand", scout: "Scout" };
+  var artCache = /* @__PURE__ */ new Map();
+  var paintedMarkup = /* @__PURE__ */ new WeakMap();
+  function petIcon(id, evolved = false) {
+    const key = id + Boolean(evolved);
+    if (artCache.has(key)) return artCache.get(key);
+    const def = roster[id];
+    const colors = [
+      "#182332",
+      def.color,
+      evolved ? "#88f4ee" : "#fff5c9",
+      "#fffaff"
+    ];
+    const paths = colors.map(() => "");
+    for (const [y, row] of def.art.entries()) {
+      for (let x = 0; x < row.length; x++) {
+        const index = row[x];
+        if (index !== ".") paths[index] += `M${x + 1} ${y + 2}h1v1h-1z`;
+      }
+    }
+    const pixels = paths.map(
+      (path, index) => path ? `<path fill="${colors[index]}" d="${path}"/>` : ""
+    ).join("");
+    const crest = evolved ? `<path fill="${def.color}" d="M5 0h1v1h1v1H4V1h1z"/><path fill="#fff6ad" d="M5 1h1v1H5zM0 2h1v1H0zm8 0h1v1H8z"/>` : "";
+    const result = `<svg viewBox="0 0 10 9" class="pet-icon" shape-rendering="crispEdges" aria-hidden="true">${pixels}${crest}</svg>`;
+    artCache.set(key, result);
+    return result;
+  }
+  function companionMarkup() {
+    return `<p class="subtext">Recruits join when their requirements are met. Field companions work while the field is open. Expeditions continue while you\u2019re away.</p>
+    <div class="pet-summary">
+      <section aria-label="Field assignments"><h3>On the field</h3><div id="petSlots"></div></section>
+      <section aria-label="Expedition assignments"><h3>Expeditions</h3><div id="petTrips"></div></section>
+    </div>
+    <div class="pet-management">
+      <section aria-label="Pet roster"><h3>Roster</h3><div class="pet-roster" id="petRoster"></div></section>
+      <section id="petProfile" class="up-card pet-profile" aria-label="Selected companion"></section>
+    </div>
+    <details class="gear-sets" id="petArtifacts"><summary>Artifacts</summary><div id="petArtifactList"></div></details>
+    <p role="status" id="petMessage" class="subtext"></p>`;
+  }
+  function paint(node, html) {
+    if (paintedMarkup.get(node) === html) return;
+    const focused = document.activeElement;
+    const attributes = focused?.dataset;
+    const identity = focused && node.contains(focused) && attributes?.petCommand ? [attributes.petCommand, attributes.petArg] : null;
+    paintedMarkup.set(node, html);
+    node.innerHTML = html;
+    if (identity) {
+      const replacement = [...node.querySelectorAll("[data-pet-command]")].find(
+        (el) => (el.dataset.petCommand === identity[0] || identity[0] === "cancel" && el.dataset.petCommand === "claim") && el.dataset.petArg === identity[1] && !el.disabled
+      );
+      replacement?.focus({ preventScroll: true });
+    }
+  }
+  function command(action, label, arg = "", disabled = false, primary = false) {
+    return `<button class="action ${primary ? "gold" : "secondary"}" data-pet-command="${action}" data-pet-arg="${arg}" ${disabled ? "disabled" : ""}>${label}</button>`;
+  }
+  function safePetSelection() {
+    const pets = s.companions.pets;
+    if (!Object.hasOwn(roster, runtime.petSelected)) {
+      runtime.petSelected = Object.keys(pets)[0] || "beetle";
+    }
+    return runtime.petSelected;
+  }
+  function renderCompanions(now = Date.now()) {
+    setValue($("companions"), "hidden", s.total < companionsAt);
+    updatePetField();
+    if (runtime.modalType !== "companions") return;
+    const camp = s.companions;
+    const selected = safePetSelection();
+    paint(
+      $("petSlots"),
+      camp.field.map((id, i) => {
+        const available = i < fieldSlots(s);
+        return `<div class="pet-assignment"><b>Slot ${i + 1}</b><span>${id ? roster[id].name : available ? "Empty" : fmtExact(secondFieldAt) + " coins earned"}</span>
+      ${id ? command("select", "View", id) : ""}</div>`;
+      }).join("")
+    );
+    updatePetTrips(now);
+    paint(
+      $("petRoster"),
+      Object.entries(roster).map(([id, def]) => {
+        const pet2 = camp.pets[id];
+        const duty = pet2 ? petDuty(s, id) : null;
+        const label = !duty ? "Locked" : duty.type === "field" ? "Field" : duty.type === "trip" ? "Away" : "Home";
+        return `<button class="pet-card" data-pet-command="select" data-pet-arg="${id}" aria-pressed="${selected === id}" style="--pet-color:${def.color}">
+      ${petIcon(id, pet2?.evolved)}<span><strong>${def.name}</strong><small>${pet2 ? "Lv. " + petLevel(pet2) + " \xB7 " : ""}${label}</small></span></button>`;
+      }).join("")
+    );
+    paint($("petProfile"), profileMarkup(selected));
+    const pet = camp.pets[selected];
+    if (pet) {
+      const level2 = petLevel(pet);
+      const status = $("petProgress");
+      const ready = $("petCooldown");
+      if (status)
+        setText(
+          status,
+          level2 === 10 ? "Maximum level" : pet.xp + " / " + 10 * level2 ** 2 + " XP"
+        );
+      if (ready)
+        setText(
+          ready,
+          "Action \xB7 " + (pet.cooldown === 0 ? "Ready, waiting for a target" : seconds2(pet.cooldown ?? cooldown(selected, pet)) + " remaining")
+        );
+      if ($("petLast")) setText($("petLast"), pet.last || "No activity yet.");
+    }
+    paint(
+      $("petArtifactList"),
+      Object.entries(artifacts).map(([id, def]) => {
+        const owner = camp.artifacts.includes(id) && Object.keys(camp.pets).find((key) => camp.pets[key].gear === id);
+        return `<p><strong>${def.name}</strong> \xB7 ${camp.artifacts.includes(id) ? owner ? "Held by " + roster[owner].name : "Available" : "Undiscovered"}<br>${def.info}</p>`;
+      }).join("")
+    );
+  }
+  function updatePetTrips(now = Date.now()) {
+    const camp = s.companions;
+    const slots2 = tripSlots(s);
+    paint(
+      $("petTrips"),
+      slots2 ? camp.trips.slice(0, slots2).map((trip, i) => {
+        if (!trip)
+          return `<div class="pet-assignment"><b>Trip ${i + 1}</b><span>Available</span></div>`;
+        const remaining = tripRemaining(trip, now);
+        return `<div class="pet-assignment"><b>${routes[trip.route].name}</b><span>${roster[trip.pet].name} \xB7 <span id="tripTime-${i}"></span></span>
+      ${remaining ? command("cancel", "Cancel", i) : command("claim", "Claim", i, false, true)}</div>`;
+      }).join("") + (slots2 === 1 ? `<p class="subtext">Second trip slot unlocks at ${fmtExact(secondTripAt)} earned.</p>` : "") : `<p class="subtext">Grove Trail unlocks at ${fmtExact(expeditionsAt)} earned.</p>`
+    );
+    camp.trips.forEach((trip, i) => {
+      const label = $("tripTime-" + i);
+      if (trip && label) {
+        const remaining = tripRemaining(trip, now);
+        setText(label, remaining ? seconds2(remaining) : "Ready to claim");
+      }
+    });
+  }
+  function profileMarkup(id) {
+    const def = roster[id];
+    const camp = s.companions;
+    const pet = camp.pets[id];
+    const intro = `<header class="pet-profile-head">${petIcon(id, pet?.evolved)}<div><h3>${def.name}</h3>
+    <p>${pet ? "Level " + petLevel(pet) + (pet.evolved ? " \xB7 Evolved" : "") : def.need}</p></div></header>
+    <p>${def.ability} Base cooldown ${def.seconds}s.</p>`;
+    if (!pet) return intro;
+    const duty = petDuty(s, id);
+    const home = duty.type === "home";
+    const status = duty.type === "field" ? "Field slot " + (duty.slot + 1) : duty.type === "trip" ? "On expedition" : "At home";
+    const fieldButtons = home ? camp.field.map(
+      (active, i) => i < fieldSlots(s) ? command(
+        "field",
+        "Assign slot " + (i + 1),
+        i,
+        Boolean(active),
+        true
+      ) : ""
+    ).join("") : duty.type === "field" ? command("rest", "Recall to camp") : "";
+    const spec = `<p><strong>Training</strong> \xB7 ${roles[pet.role]}<br>Field Hand cuts cooldowns by 15%. Scout cuts trip time by 20%.</p>
+    ${home && petLevel(pet) >= 4 ? command("role", "Field Hand", "field", pet.role === "field") + command("role", "Scout", "scout", pet.role === "scout") : "<p class='subtext'>Train or retrain at home from level 4.</p>"}`;
+    const evolve = pet.evolved ? "" : `<p><strong>Evolution</strong> \xB7 Level 5 and 10,000 earned. Cuts cooldowns by 10%.</p>
+    ${command("evolve", "Evolve \xB7 " + costText(evolutionCost), "", !home || petLevel(pet) < 5 || s.total < 1e4 || !hasMaterials(s, evolutionCost))}`;
+    const gear = `<p><strong>Artifact</strong> \xB7 ${pet.gear ? artifacts[pet.gear].name : "None"}</p>
+    ${duty.type === "trip" ? '<p class="subtext">Equipment stays with a pet on a trip.</p>' : camp.artifacts.map((gear2) => {
+      const owner = Object.keys(camp.pets).find(
+        (key) => camp.pets[key].gear === gear2
+      );
+      return command(
+        "gear",
+        artifacts[gear2].name,
+        gear2,
+        pet.gear === gear2 || Boolean(owner && petDuty(s, owner).type === "trip")
+      );
+    }).join("") + (pet.gear ? command("gear", "Unequip artifact") : "")}`;
+    const expeditions = tripSlots(s) && home ? `<h4>Expedition routes</h4>${Object.entries(routes).map(([key, route]) => {
+      const quote = tripQuote(pet, key);
+      const full = camp.trips.slice(0, tripSlots(s)).every(Boolean);
+      return `<article class="pet-route"><strong>${route.name} \xB7 ${seconds2(quote.duration)}</strong><p>${route.requirement}</p>
+      <p>${costText(quote.loot)} + ${route.xp} XP${!camp.artifacts.includes(route.artifact) ? " \xB7 First clear: " + artifacts[route.artifact].name : ""}</p>
+      ${command("send", "Dispatch to " + route.name, key, full || !routeAccess(s, id, key), true)}</article>`;
+    }).join("")}` : "";
+    return intro + `<div class="pet-actions"><strong>${status}</strong>${fieldButtons}</div><p id="petProgress"></p><p id="petCooldown"></p><p id="petLast"></p>
+    <section class="pet-options">${spec}${evolve}${gear}</section>${expeditions}`;
+  }
+  function companionButton(button, now = Date.now()) {
+    const action = button.dataset.petCommand;
+    const arg = button.dataset.petArg;
+    const id = safePetSelection();
+    let message = "";
+    if (action === "select" && Object.hasOwn(roster, arg)) {
+      runtime.petSelected = arg;
+      return { changed: false, message: "" };
+    }
+    if (action === "field" && assignField(s, id, +arg))
+      message = roster[id].name + " joined the field.";
+    if (action === "rest" && restPet(s, id))
+      message = roster[id].name + " returned to camp.";
+    if (action === "gear" && equipArtifact(s, id, arg))
+      message = arg ? artifacts[arg].name + " equipped." : "Artifact unequipped.";
+    if (action === "role" && specializePet(s, id, arg))
+      message = roster[id].name + " trained as " + roles[arg] + ".";
+    if (action === "evolve" && evolvePet(s, id))
+      message = roster[id].name + " evolved.";
+    if (action === "send" && sendPet(s, id, arg, now))
+      message = roster[id].name + " departed for " + routes[arg].name + ".";
+    if (action === "cancel" && cancelTrip(s, +arg, now))
+      message = "Expedition canceled. The companion returned without rewards.";
+    if (action === "claim") {
+      const reward = claimTrip(s, +arg, now);
+      if (reward)
+        message = "Claimed \xB7 " + costText(reward.loot) + " + " + reward.xp + " XP" + (reward.artifact ? " \xB7 Discovered " + artifacts[reward.artifact].name + "." : ".");
+    }
+    return { changed: Boolean(message), message };
+  }
+  function updatePetField() {
+    const camp = s.companions;
+    for (let i = 0; i < 2; i++) {
+      const node = $("fieldPet-" + i);
+      const id = camp.field[i];
+      setValue(node, "hidden", !id);
+      if (!id) {
+        if (node.dataset.pet) {
+          delete node.dataset.pet;
+          delete node.dataset.petId;
+          clearTimeout(actionTimers.get(node));
+        }
+        continue;
+      }
+      const evolved = camp.pets[id].evolved;
+      const key = id + evolved;
+      if (node.dataset.pet === key) continue;
+      node.dataset.pet = key;
+      node.dataset.petId = id;
+      node.innerHTML = petIcon(id, evolved);
+      node.style.removeProperty("--pet-x");
+      node.style.removeProperty("--pet-y");
+    }
+  }
+  var actionTimers = /* @__PURE__ */ new WeakMap();
+  function clearPetActions() {
+    for (let index = 0; index < 2; index++) {
+      const node = $("fieldPet-" + index);
+      clearTimeout(actionTimers.get(node));
+      node.style.removeProperty("--pet-x");
+      node.style.removeProperty("--pet-y");
+    }
+  }
+  function animatePetAction(result) {
+    const index = s.companions.field.indexOf(result.id);
+    const node = $("fieldPet-" + index);
+    if (!node) return;
+    const locations = {
+      button: [50, 48],
+      farm: [30, 81],
+      mine: [70, 81],
+      roam: [index ? 72 : 28, 44]
+    };
+    const [x, y] = result.opened ? [result.opened.chest.x, result.opened.chest.y] : locations[result.target];
+    node.style.setProperty("--pet-x", x + "%");
+    node.style.setProperty("--pet-y", y + "%");
+    clearTimeout(actionTimers.get(node));
+    const key = node.dataset.pet;
+    actionTimers.set(
+      node,
+      setTimeout(() => {
+        if (node.dataset.pet !== key) return;
+        node.style.removeProperty("--pet-x");
+        node.style.removeProperty("--pet-y");
+      }, 1050)
+    );
+  }
+
   // src/js/prestige.js
   function ascensionReward(state) {
     return Math.floor(Math.sqrt(state.total / progressionThresholds.ascension));
@@ -4855,6 +5919,7 @@ textarea {
     const stars = ascensionReward(state);
     if (stars < 1) return null;
     const run = fresh();
+    run.companions = keepCompanions(state);
     run.lootRules = { ...state.lootRules };
     run.asc = {
       ...state.asc,
@@ -5219,10 +6284,12 @@ textarea {
       ...f.items.map((i) => i.id + 1),
       ...f.chests.map((c) => c.id + 1)
     );
+    normalizeCompanions(f, o.companions);
     return f;
   }
   var KEY = "treasure-grove-v3";
   var preForgeSaveKey = KEY + "-before-forge";
+  var preCompanionsSaveKey = KEY + "-before-companions";
   var preSitesSaveKey = KEY + "-before-farming-mining";
   var preExpansionSaveKey = KEY + "-before-equipment-expansion";
   var preFoundationSaveKey = KEY + "-before-foundation";
@@ -5237,6 +6304,9 @@ textarea {
   }
   function readPreForgeSave() {
     return readBackup(preForgeSaveKey);
+  }
+  function readPreCompanionsSave() {
+    return readBackup(preCompanionsSaveKey);
   }
   function readPreSitesSave() {
     return readBackup(preSitesSaveKey);
@@ -5297,7 +6367,8 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preSitesSaveKey, raw);
+        preserveBackup(preCompanionsSaveKey, raw);
+        if (version < 3) preserveBackup(preSitesSaveKey, raw);
         if (version < 2) preserveBackup(preExpansionSaveKey, raw);
         if (version < 1) preserveBackup(preFoundationSaveKey, raw);
         if (!Object.hasOwn(payload, "scrap"))
@@ -5468,7 +6539,7 @@ textarea {
   }
   function ascMarkup() {
     const reward = ascReward(), next = ascCoinGoal(reward + 1), a = s.asc;
-    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses, wheel progress, farming and mining. Keeps Ascension Stars, permanent upgrades, and lifetime records.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your current run will be erased.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
+    return `${ascTabs()}<div class="asc-scroll"><div class="asc-shell"><div class="asc-banner"><div><h3>\u2726 ASCENSION</h3><p>Begin a new grove and turn this run's lifetime earnings into permanent Ascension Stars.</p><p><b>${fmt(s.total)} / ${fmt(next)} coins earned this run</b> \xB7 ${a.runs} ascensions</p><div class="asc-meter"><i style="width:${Math.min(100, s.total / next * 100)}%"></i></div><p>Next star at ${fmt(next)} coins \xB7 First ascension requires ${fmtExact(progressionThresholds.ascension)} coins.</p><div class="asc-rebirth"><button class="tree-buy" data-asc-start ${reward < 1 ? "disabled" : ""}>Ascend \xB7 +${fmt(reward)} \u2605</button><span>Lifetime multiplier: \xD7${(1 + a.earned * 0.15).toFixed(2)}</span></div><p class="asc-warning">Resets coins, gear, scrap, shards, normal skills, upgrades, chests, collection, world unlocks, field bonuses, wheel progress, farming and mining. Keeps Ascension Stars, permanent upgrades, and lifetime records. Companions keep their levels, training, evolutions, and artifacts. Field assignments and expeditions reset, including unclaimed rewards.</p>${runtime.ascConfirm ? `<div class="asc-confirm"><span>Start over and claim the stars shown above? Your field assignments and unclaimed expedition rewards will be cleared.</span><button class="tree-buy" data-asc-confirm>Confirm ascension</button><button class="tree-buy" data-asc-cancel>Cancel</button></div>` : ""}</div><div class="asc-crystal">\u2726 ${fmt(a.stars)}<small>AVAILABLE STARS</small><small>${fmt(a.earned)} EARNED ALL TIME</small></div></div><h3 class="asc-heading">Permanent constellation upgrades</h3><div class="asc-grid">${ascUpgrades.map((u) => {
       const lv = a.up[u.id], cost = ascCost(u), locked = a.runs < u.req;
       return `<article class="asc-card ${locked ? "locked" : ""}">${itemIcon(...u.icon)}<h4>${u.name}</h4><p>${u.desc}</p><span class="asc-level">Level ${lv} / ${u.max}</span><span class="requirement">${locked ? "Requires " + u.req + " ascensions" : "Persists through every reset"}</span><button class="tree-buy" data-asc-buy="${u.id}" ${locked || lv >= u.max || a.stars < cost ? "disabled" : ""}>${locked ? "Locked" : lv >= u.max ? "Max level" : "Upgrade \xB7 " + fmtExact(cost) + " \u2605"}</button></article>`;
     }).join(
@@ -5721,6 +6792,7 @@ textarea {
     setRunState(run);
     runtime.ascConfirm = false;
     runtime.selectedSkill = "root";
+    runtime.petSelected = "";
     runtime.pendingWorldUnlock = null;
     clearFieldEffects();
     renderChests();
@@ -5733,6 +6805,7 @@ textarea {
     $("toast").hidden = true;
     $("chests").replaceChildren();
     $("effects").replaceChildren();
+    clearPetActions();
   }
   function notice(text) {
     s.notice = text;
@@ -5897,12 +6970,34 @@ textarea {
     }
     wheelHUD();
     renderSites();
+    if (recruitPets(s).length) runtime.saveDirty = true;
+    renderCompanions();
     if (runtime.modalType === "worlds") updateWorlds();
     if (runtime.modalType === "progressionGuide") updateProgressionGuide();
     if (runtime.modalType === "forge") updateForge();
     if (runtime.modalType === "recipes") updateRecipes();
     if (runtime.modalType === "upgrades" || runtime.modalType === "skills")
       updateBuyButtons();
+  }
+  function runCompanionTick(elapsed) {
+    if (runtime.modalType || elapsed <= 0 || !s.companions.field.some(Boolean))
+      return;
+    const before = s.total;
+    const { rates, pieces } = fieldSnapshot();
+    const { changed, results } = tickPets(s, elapsed, rates, pieces);
+    if (changed) runtime.saveDirty = true;
+    if (!results.length) return;
+    if (before !== s.total) recordEarnings(before);
+    for (const result of results) {
+      if (result.opened) showOpenedChest(result.opened);
+      animatePetAction(result);
+      if (result.coins) directionalFloat("+" + fmtRate(result.coins));
+      notice(
+        roster[result.id].name + " \xB7 " + (result.gathered ? rewardText([result.gathered]) : result.text)
+      );
+    }
+    render();
+    save();
   }
   function chestInterval() {
     return 5 / (1 + 0.45 * s.up.chestSpeed);
@@ -6043,7 +7138,7 @@ textarea {
     ).join("");
   }
   function openModal(type, id) {
-    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt)
+    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt)
       return;
     if (type === "wheel" && !wheelReady()) return;
     hideSkillTip();
@@ -6096,6 +7191,11 @@ textarea {
       b.innerHTML = forgeMarkup(item);
       b.closest(".window").scrollTop = 0;
       updateForge();
+    } else if (type === "companions") {
+      t.textContent = "Companions";
+      b.innerHTML = companionMarkup();
+      b.closest(".window").scrollTop = 0;
+      renderCompanions();
     } else if (type === "farm" || type === "mine") {
       t.textContent = type === "farm" ? "Farming" : "Mining";
       b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
@@ -6146,6 +7246,7 @@ textarea {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
@@ -6583,6 +7684,7 @@ textarea {
   for (const id of [
     "worlds",
     "farm",
+    "companions",
     "mine",
     "progressionGuide",
     "inventory",
@@ -6639,6 +7741,19 @@ textarea {
   $("modalBody").addEventListener("click", (e) => {
     const b = e.target.closest("button");
     if (!b || b.disabled) return;
+    if (b.dataset.petCommand && runtime.modalType === "companions") {
+      const { changed, message } = companionButton(b);
+      render();
+      setText($("petMessage"), message);
+      if (!b.isConnected && document.activeElement === document.body) {
+        $("petRoster").querySelector('[aria-pressed="true"]')?.focus({ preventScroll: true });
+      }
+      if (changed) {
+        sound("menu");
+        save();
+      }
+      return;
+    }
     if (b.dataset.siteAction) {
       const outcome = siteButtonAction(b);
       if (outcome) {
@@ -6826,10 +7941,11 @@ textarea {
     if ([
       "exportStoredSave",
       "exportPreSites",
+      "exportPreCompanions",
       "exportPreExpansion",
       "exportPreFoundation"
     ].includes(b.id)) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : readPreFoundationSave();
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
@@ -6934,9 +8050,14 @@ textarea {
     if (snapshot.rates.auto > 0) {
       earn(snapshot.rates.auto * dt);
       render(snapshot);
-    } else if (siteTick.changed) renderSites();
+    } else if (siteTick.rewards.length) render();
+    else {
+      if (siteTick.changed) renderSites();
+      if (runtime.modalType === "companions") updatePetTrips();
+    }
     if (siteTick.rewards.length) save();
     autoChestTick(dt, snapshot);
+    runCompanionTick(elapsedVisible);
   }, 250);
   setInterval(savePassiveIncome, 5e3);
 })();

@@ -1,3 +1,4 @@
+import { companionButton, updatePetTrips } from "./companion-view.js";
 import { advanceSites } from "./sites.js";
 import {
   renderSites,
@@ -30,6 +31,7 @@ import {
   render,
   renderChests,
   replaceRun,
+  runCompanionTick,
   showSiteRewards,
 } from "./field.js";
 import {
@@ -49,6 +51,7 @@ import {
   readPreFoundationSave,
   readPreExpansionSave,
   readPreSitesSave,
+  readPreCompanionsSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -91,6 +94,7 @@ $("chests").addEventListener("click", (e) => {
 for (const id of [
   "worlds",
   "farm",
+  "companions",
   "mine",
   "progressionGuide",
   "inventory",
@@ -150,6 +154,21 @@ $("modalBody").addEventListener("change", (e) => {
 $("modalBody").addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b || b.disabled) return;
+  if (b.dataset.petCommand && runtime.modalType === "companions") {
+    const { changed, message } = companionButton(b);
+    render();
+    setText($("petMessage"), message);
+    if (!b.isConnected && document.activeElement === document.body) {
+      $("petRoster")
+        .querySelector('[aria-pressed="true"]')
+        ?.focus({ preventScroll: true });
+    }
+    if (changed) {
+      sound("menu");
+      save();
+    }
+    return;
+  }
   if (b.dataset.siteAction) {
     const outcome = siteButtonAction(b);
     if (outcome) {
@@ -354,6 +373,7 @@ $("modalBody").addEventListener("click", (e) => {
     [
       "exportStoredSave",
       "exportPreSites",
+      "exportPreCompanions",
       "exportPreExpansion",
       "exportPreFoundation",
     ].includes(b.id)
@@ -365,7 +385,9 @@ $("modalBody").addEventListener("click", (e) => {
           ? readPreSitesSave()
           : b.id === "exportPreExpansion"
             ? readPreExpansionSave()
-            : readPreFoundationSave();
+            : b.id === "exportPreCompanions"
+              ? readPreCompanionsSave()
+              : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();
@@ -489,8 +511,13 @@ setInterval(() => {
   if (snapshot.rates.auto > 0) {
     earn(snapshot.rates.auto * dt);
     render(snapshot);
-  } else if (siteTick.changed) renderSites();
+  } else if (siteTick.rewards.length) render();
+  else {
+    if (siteTick.changed) renderSites();
+    if (runtime.modalType === "companions") updatePetTrips();
+  }
   if (siteTick.rewards.length) save();
   autoChestTick(dt, snapshot);
+  runCompanionTick(elapsedVisible);
 }, 250);
 setInterval(savePassiveIncome, 5000);

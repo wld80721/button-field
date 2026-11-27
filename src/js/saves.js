@@ -1,3 +1,4 @@
+import { normalizeCompanions } from "./companions.js";
 import { normalizeSites } from "./sites.js";
 import {
   builds,
@@ -201,10 +202,12 @@ function normalizeRun(o) {
     ...f.items.map((i) => i.id + 1),
     ...f.chests.map((c) => c.id + 1),
   );
+  normalizeCompanions(f, o.companions);
   return f;
 }
 const KEY = "treasure-grove-v3";
 const preForgeSaveKey = KEY + "-before-forge";
+const preCompanionsSaveKey = KEY + "-before-companions";
 const preSitesSaveKey = KEY + "-before-farming-mining";
 const preExpansionSaveKey = KEY + "-before-equipment-expansion";
 const preFoundationSaveKey = KEY + "-before-foundation";
@@ -221,6 +224,10 @@ function readBackup(key) {
 
 function readPreForgeSave() {
   return readBackup(preForgeSaveKey);
+}
+
+function readPreCompanionsSave() {
+  return readBackup(preCompanionsSaveKey);
 }
 
 function readPreSitesSave() {
@@ -295,7 +302,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preSitesSaveKey, raw);
+      preserveBackup(preCompanionsSaveKey, raw);
+      if (version < 3) preserveBackup(preSitesSaveKey, raw);
       if (version < 2) preserveBackup(preExpansionSaveKey, raw);
       if (version < 1) preserveBackup(preFoundationSaveKey, raw);
       if (!Object.hasOwn(payload, "scrap"))
@@ -336,6 +344,7 @@ export {
   readPreForgeSave,
   readPreExpansionSave,
   readPreSitesSave,
+  readPreCompanionsSave,
   readPreFoundationSave,
   resumeSaving,
   save,

@@ -2585,3 +2585,148 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* Companions */
+.pet-summary,
+.pet-management {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: start;
+}
+.pet-summary h3,
+.pet-management > section > h3 {
+  margin: 0 0 8px;
+}
+.pet-roster {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  max-height: 400px;
+  overflow: auto;
+  padding: 4px;
+}
+.pet-card,
+.pet-assignment {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+.pet-card {
+  padding: 5px;
+  border: 2px solid #557773;
+  border-radius: 4px;
+  background: #162f35;
+}
+.pet-card:hover,
+.pet-card[aria-pressed="true"] {
+  border-color: var(--pet-color);
+  background: #284049;
+}
+.pet-card .pet-icon {
+  width: 30px;
+  height: 28px;
+  flex: none;
+}
+.pet-card small,
+.pet-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.pet-card small,
+.pet-assignment span {
+  color: #c6ded7;
+}
+.pet-assignment {
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+.pet-assignment > span {
+  flex: 1;
+}
+.pet-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pet-profile-head .pet-icon {
+  width: 55px;
+  height: 50px;
+  flex: none;
+}
+.pet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.pet-options,
+.pet-route {
+  border-top: 1px solid #557773;
+  padding-top: 5px;
+}
+.pet-options button,
+.pet-route button {
+  white-space: normal;
+  margin: 2px;
+}
+.pet-route {
+  margin: 8px 0;
+}
+.pet-route p {
+  margin: 4px 0;
+}
+.field-pet {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  left: var(--pet-x, 34%);
+  top: var(--pet-y, 64%);
+  width: 32px;
+  transform: translate(-50%, -80%);
+  transition:
+    left 0.5s ease,
+    top 0.5s ease;
+}
+.field-pet + .field-pet {
+  left: var(--pet-x, 67%);
+  top: var(--pet-y, 65%);
+}
+.field-pet svg {
+  animation: pet-wander 3s ease-in-out infinite alternate;
+  width: 100%;
+}
+.field-pet + .field-pet svg {
+  animation-delay: -0.9s;
+}
+@keyframes pet-wander {
+  from {
+    transform: translate(-7px, 0);
+  }
+  to {
+    transform: translate(7px, -4px);
+  }
+}
+@media (max-width: 570px) {
+  .pet-summary,
+  .pet-management {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .pet-roster {
+    max-height: 204px;
+  }
+  .field-pet {
+    width: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .field-pet {
+    transition: none;
+  }
+  .field-pet svg {
+    animation: none;
+  }
+}
