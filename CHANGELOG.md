@@ -4,7 +4,7 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
-See the [development plan](DEVELOPMENT_PLAN.md) for proposed work.
+Boss Arenas are the next proposal. See the [development plan](DEVELOPMENT_PLAN.md#next-expansion--boss-arenas) for scope and the [handoff](PROGRESS.md) for verification. The current gameplay release is `d476c42`.
 
 ## 2026-11-27
 

@@ -18,3 +18,12 @@ To compare scan counts and HUD mutations with the Equipment Forge release, extra
 git show 327d85025fa11596dea6c5f578b88c9771ea5daf:index.html > /tmp/button-field-before-foundation.html
 BUTTON_FIELD_BASELINE=/tmp/button-field-before-foundation.html npm run test:browser
 ```
+
+## Combat release baseline
+
+The companion release is the baseline used for the current [progress report](../PROGRESS.md). To reproduce that comparison, use its build in the same harness.
+
+```sh
+git show a99c11e:index.html > /tmp/button-field-before-combat.html
+BUTTON_FIELD_BASELINE=/tmp/button-field-before-combat.html npm run test:browser
+```

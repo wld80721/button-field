@@ -13,7 +13,7 @@ Start with one red button. As the field changes, paths and interactive objects l
 - **Connections.** Open first-clear loot in the arena and display trophies back in the field. Prototype Mossguard opening a trail to an extra garden bed whose crop can feed a Forge tool for breaking armor in later fights. Keep existing routes into farming and the other systems available. Preserve the ten bosses, earned trophies and items, gear effects, normal press rewards, and optional combat.
 - **Release check.** Back up the current build and representative saves. Play from a fresh save through discovery, the first fight, a midgame arena, the late-game Orrery, and use of a reward outside combat. Inspect desktop and mobile screenshots during attacks, victories, and visible field changes. Verify touch, keyboard, reduced motion, reload and migration, economy, and performance. Report any coverage gaps.
 
-Start the expansion on a separate branch. Update [PROGRESS.md](PROGRESS.md) and the [changelog](CHANGELOG.md) with actual outcomes and obtain explicit user approval before merging into `main` or pushing the expansion directly to it.
+Start the expansion on a separate branch from the documented `main`. The first implementation slice is the entrance and a complete Mossguard fight, including movement, Guard, the reward, and the return to the field. Playtest that loop before extending it to the remaining arenas. Update [PROGRESS.md](PROGRESS.md) and the [changelog](CHANGELOG.md) with actual outcomes and obtain explicit user approval before merging into `main` or pushing the expansion directly to it.
 
 ## Later phases
 

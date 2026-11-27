@@ -2,7 +2,7 @@
 
 ## Handoff · 2026-11-27
 
-The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas are the proposed next expansion. Start with the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
+The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the standalone root `index.html` from `main`. The current checkout contains that gameplay and the handoff documentation. Boss Arenas are at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
 ## Shipped
 
@@ -19,7 +19,8 @@ The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the stan
 
 ## Verification
 
-- **Current standalone:** `npm run check:build` and `npm test` passed. The gameplay suite has **35 unit tests**. All **36 offline Chromium checks** passed, covering migration, saves, desktop and mobile controls, reduced motion, reward claims, and effects under rapid input. The published HTML matched the local build.
+- **Current standalone:** `npm run check:build` and all **35 unit tests** passed on the handoff checkout. The published HTML matched the local build byte for byte.
+- **Browser regression:** All **36 offline Chromium checks** passed on this gameplay build. They cover migration, saves, desktop and emulated mobile controls, reduced motion, reward claims, and effects under rapid input. See [how to rerun the suite](tests/README.md#combat-release-baseline).
 - **Balance:** With seeded gear at unlock and 2.5 presses/sec, Mossguard took **10.1 seconds** and the final three fights took **26.5–31.7 seconds**. The baseline comparison with the companion release measured zero linear inventory scans and zero stable HUD mutations in both builds.
 - **Playtest:** In seeded walkthroughs, planted and harvested Glowleaf on mobile, mined copper and crafted with it on desktop, claimed a Grove Trail expedition, and defeated the late-game Astral Orrery. Inspected screenshots of the growing crop, copper vein, recipe screen, active expedition, and Orrery fight and victory.
 - **Coverage gaps:** Managed Chromium blocked direct `file://` loading with `ERR_BLOCKED_BY_ADMINISTRATOR`. Offline play was verified by routing the standalone document in an offline browser context. Browser checks used Chromium with emulated mobile. Physical devices, Safari, and Firefox remain untested in this pass.
