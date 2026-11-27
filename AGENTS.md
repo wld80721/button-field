@@ -11,6 +11,7 @@ These requirements apply to every major expansion and to redesigns of existing s
 
 ## Design the expansion first
 
+- Read [PROGRESS.md](PROGRESS.md) and [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md) before starting a phase. Update them with implementation status, test results, and remaining work.
 - Inspect the current game and the systems the expansion will connect to. Identify which recent features fall short of these standards and schedule their redesign one phase at a time.
 - Before implementing each expansion, describe its visual layout, gameplay loop, progression, player interactions, and connections to existing systems. Explain what the player does moment to moment and how that changes from early to late progression.
 - Treat each major expansion as a substantial game update. A small tab, text panel, statistics display, or upgrade list alone is insufficient for a major gameplay system.
