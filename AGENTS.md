@@ -1,6 +1,6 @@
 # Button Field development standards
 
-These standards apply to every major gameplay phase and to redesigns of existing systems.
+These requirements apply to every major expansion and to redesigns of existing systems. Button Field grows from a simple incremental button game into a large, interconnected world with distinct gameplay experiences.
 
 ## One red button, many interconnected games
 
@@ -12,18 +12,29 @@ These standards apply to every major gameplay phase and to redesigns of existing
 ## Design the expansion first
 
 - Inspect the current game and the systems the expansion will connect to. Identify which recent features fall short of these standards and schedule their redesign one phase at a time.
-- Before implementing a major expansion, show the user what the experience will look like, what the player will do moment to moment, which decisions and discoveries will matter, and what changes from early to late progression.
-- Define a complete playable loop and a clear visual direction for the phase. A new menu entry, statistics panel, or upgrade list alone does not constitute an expansion.
+- Before implementing each expansion, describe its visual layout, gameplay loop, progression, player interactions, and connections to existing systems. Explain what the player does moment to moment and how that changes from early to late progression.
+- Treat each major expansion as a substantial game update. A small tab, text panel, statistics display, or upgrade list alone is insufficient for a major gameplay system.
 
 ## Build a playable world
 
-- Give each major system a large, dedicated, visually distinct play space. Use original pixel-art environments, interactive objects, sprites, icons, animations, and effects. Let interacting with the scene drive play. Use text and controls for instructions, accessibility, and precise feedback.
-- Show progress in the world through visible changes, new spaces, and new interactions. Keep palettes, pixel scale, typography, and motion consistent with Button Field while giving each system its own identity.
-- Introduce new ways to play through choices, discoveries, challenges, and rewards. Connect the new loop to existing systems and unlock new experiences as players progress.
+- Give each major system a dedicated interactive environment that occupies most of the playable area. Use original pixel-art graphics, objects, sprites, icons, animations, particles, and sound effects. Let interacting with the scene drive play. Use text and controls for instructions, accessibility, and precise feedback.
+- Make progression visibly transform the world through changes to the scene, new spaces, and new interactions. Keep palettes, pixel scale, typography, and motion consistent across Button Field while giving each system its own identity.
+- Give every major system new player actions, decisions, challenges, and rewards. Prioritize depth before expanding the feature count. Introduce new mechanics gradually so new players have time to learn each one.
 - Preserve the central red button, field identity, chest animations, sound, existing mechanics, and save compatibility. Back up the current build and representative saves before major changes. Obtain the user's permission for changes outside the announced redesign scope.
+
+## Keep the game maintainable and portable
+
+- Inspect existing systems first and reuse their rules, data, and interfaces. Keep changes focused and avoid duplicated systems and unnecessary codebase rewrites.
+- Keep the game optimized, compatible with GitHub Pages, and playable offline as a standalone build. Verify that animations, particles, and new gameplay remain responsive as the field and saves grow.
 
 ## Playtest before release
 
-- Ship complete experiences with final art and interaction. Technical correctness is one part of the release check alongside depth, readability, pacing, and enjoyment.
-- Play the actual browser build from the first unlock through a developed state and a late-game state. Inspect screenshots at desktop and mobile sizes, including active gameplay, rewards, and visible progression changes. Check touch, keyboard, and reduced motion.
+- Require polished, meaningful gameplay as well as working code. Ship complete mechanics, final art, and a purpose-built interface. Assess depth, readability, pacing, and enjoyment during playtesting.
+- After implementation, play the actual browser build from the first unlock through a developed state and a late-game state. Inspect screenshots of the new environments at desktop and mobile sizes, including active gameplay, rewards, and visible progression changes. Check touch, keyboard, and reduced motion.
 - Verify old save migration, save and reload, economy, performance, and JavaScript errors. Record concrete observations and resolve issues before marking the phase complete. Complete and test one expansion before beginning the next.
+- Report what was tested and identify any tests that could not be performed, including the reason.
+
+## Changelog and approval
+
+- Maintain [CHANGELOG.md](CHANGELOG.md). Record player-facing changes and save or compatibility notes as part of each update. Keep pending changes under Unreleased until they ship.
+- Prepare major updates on a separate branch for review. Obtain the user's explicit approval before merging a major update into `main` or pushing it directly to `main`.
