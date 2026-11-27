@@ -38,6 +38,7 @@ function performAscension(state) {
   const run = fresh();
   run.companions = keepCompanions(state);
   run.combat = keepCombat(state);
+  run.fieldDiscoveries = [...state.fieldDiscoveries];
   run.lootRules = { ...state.lootRules };
   run.asc = {
     ...state.asc,

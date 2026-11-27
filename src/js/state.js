@@ -28,7 +28,7 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 5;
+const schemaVersion = 6;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
@@ -37,6 +37,7 @@ const fresh = () =>
     schemaVersion,
     sites: freshSites(),
     combat: freshCombat(),
+    fieldDiscoveries: [],
     companions: freshCompanions(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),

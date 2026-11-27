@@ -48,6 +48,7 @@
       </header>
       <section class="board-frame" id="board" aria-label="Treasure field">
         <canvas id="terrain" aria-hidden="true"></canvas>
+        <div id="livingAmbient" class="living-ambient-layer" aria-hidden="true" hidden></div>
         <div class="vignette"></div>
         <div class="board-top">
           <div class="quest">
@@ -170,6 +171,18 @@
           </div>
         </div>
       </section>
+      <section class="living-field" id="livingField" aria-label="Grasslands trails" hidden>
+        <div id="livingLandmarks" class="living-landmarks"></div>
+        <span class="visually-hidden" id="fieldDiscoveryStatus" role="status"></span>
+        <div id="livingTrail" class="living-trail">
+          <span class="living-pavers" aria-hidden="true"></span>
+          <div class="living-sign">
+            <strong id="livingNext"></strong>
+            <small id="livingRequirement"></small>
+          </div>
+        </div>
+      </section>
+      <button id="worldHome" class="living-world-home" hidden></button>
       <section
         id="combatPanel"
         class="combat-panel"
@@ -285,6 +298,7 @@
           <h2 id="modalTitle"></h2>
           <button id="close" aria-label="Close dialog">✕</button>
         </header>
+        <div class="location-art" id="locationArt" aria-hidden="true" hidden></div>
         <div class="window-body" id="modalBody"></div>
       </section>
     </div>

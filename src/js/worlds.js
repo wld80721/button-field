@@ -1,10 +1,12 @@
 import { retreatFight } from "./combat.js";
+import { fieldSprite } from "./field-art.js";
 import { closeModal } from "./dialogs.js";
 import { terrain } from "./effects.js";
 import { regionalSets, worldChargeGoal } from "./gear.js";
 import { clearFieldEffects, notice, render, renderChests } from "./field.js";
 import { fmtExact } from "./numbers.js";
 import { hasRunCoins, nextWorld } from "./progression.js";
+import { runtime } from "./runtime.js";
 import { save } from "./saves.js";
 import { equippedGear, s } from "./state.js";
 import { $, setText, setValue } from "./ui-dom.js";
@@ -72,6 +74,7 @@ function worldsMarkup() {
 
 function worldCard(id, world) {
   return `<article class="up-card world-card" style="--world-accent:${world.accent}">
+    ${runtime.fieldLocation === "gate" ? '<div class="world-waystone" aria-hidden="true">' + fieldSprite("gate") + "</div>" : ""}
     <h3>${world.name}</h3>
     <p><strong>${world.mechanic}</strong> · ${world.description}</p>
     <p>${world.gearBonus || "Find the original Treasure Grove equipment here."}</p>
@@ -131,7 +134,7 @@ function travel(id) {
   notice("Arrived in " + world.name + ".");
   render();
   save();
-  closeModal();
+  if (!$("modal").hidden) closeModal();
   $("press").focus();
 }
 

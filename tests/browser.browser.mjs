@@ -5,6 +5,7 @@ import { chromium } from "playwright-core";
 
 const saveKey = "treasure-grove-v3";
 const migrationKey = saveKey + "-before-combat";
+const livingMigrationKey = saveKey + "-before-living-field";
 const documentUrl = "https://button-field.test/";
 const standalone = readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const executablePath = process.env.CHROMIUM_PATH ||
@@ -455,7 +456,9 @@ for (const [release, legacy] of legacySaves) {
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 5);
+    assert.equal(migrated.schemaVersion, 6);
+    assert.deepEqual(migrated.fieldDiscoveries, []);
+    assert.equal(await stored(page, livingMigrationKey), raw);
     assert.equal(await stored(page, migrationKey), raw);
     assert.equal(migrated.lootRules.equip, "off");
     assert.equal(migrated.lootRules.salvage, false);
@@ -521,7 +524,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 5);
+    assert.equal((await saved(page)).schemaVersion, 6);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -1145,11 +1148,15 @@ browserTest("mobile Guard, mid-fight refresh, hidden tabs, travel confirmation a
     combat: {records: {scarab: {wins: 1, best: 12000}}, clears: {scarab: "claimed"}}});
   await startBoss(page, "jackal");
   assert.ok(await page.locator("#combatPanel").evaluate(el => el.getBoundingClientRect().right <= innerWidth));
-  await page.clock.runFor(3150);
-  assert.match(await text(page, "#combatTell"), /Feint/);
+  // Combat ticks every 250 ms, with an offset relative to the fight start.
+  const waitForWarning = async (warning) => {
+    for (let tick = 0; tick < 17 && !warning.test(await text(page, "#combatTell")); tick++)
+      await page.clock.runFor(250);
+    assert.match(await text(page, "#combatTell"), warning);
+  };
+  await waitForWarning(/Feint/);
   assert.ok(await page.locator("#combatGuard").isDisabled());
-  await page.clock.runFor(1600);
-  assert.match(await text(page, "#combatTell"), /Pounce/);
+  await waitForWarning(/^Pounce/);
   await page.locator("#combatGuard").tap();
   const armed = (await saved(page)).combat.attempt;
   assert.equal(armed.guarded, true);
@@ -1238,4 +1245,180 @@ browserTest("a defeat leaves earnings alone and provides a fresh retry", async p
   await click(page, "#combatRetreat");
   assert.equal((await saved(page)).combat.attempt, null);
   assert.ok(await page.locator("#combatPanel").isHidden());
+});
+
+const landmark = (id) => '[data-landmark="' + id + '"]';
+const fieldFind = (id) => '[data-discovery="' + id + '"]';
+const keepsake = (id) => '[data-keepsake="' + id + '"]';
+
+browserTest("Living Field opens quietly and builds a Workshop through fresh play", async (page) => {
+  assert.ok(await page.locator("#livingField").isHidden());
+  assert.ok(await page.locator(landmark("workshop")).isHidden());
+  assert.ok(await page.locator(".living-ambient.tree").first().isVisible());
+  const breeze = page.locator(".living-ambient.grass").first();
+  assert.equal(await breeze.evaluate(el => getComputedStyle(el).animationName), "field-breeze");
+  await fieldPresses(page, 8);
+  await click(page, "[data-chest]:not(.opening)");
+  await fieldPresses(page, 24 - (await saved(page)).total);
+  assert.match(await text(page, "#livingRequirement"), /24 \/ 25 earned/);
+  const built = await page.evaluate(() => {
+    document.getElementById("press").click();
+    return document.querySelector('[data-field-plot="workshop"]').getAnimations().length;
+  });
+  assert.ok(built > 0);
+  await page.locator(landmark("workshop")).focus();
+  await page.keyboard.press("Enter");
+  assert.equal(await text(page, "#modalTitle"), "Workshop");
+  assert.equal(await text(page, "#close"), "Return to field");
+  assert.equal(await breeze.evaluate(el => getComputedStyle(el).animationPlayState), "paused");
+  await click(page, "#workshopItems [data-buy='0']");
+  await escape(page);
+  assert.ok(await page.locator(landmark("workshop")).evaluate(el => el === document.activeElement));
+  await click(page, fieldFind("stone"));
+  assert.ok(await page.locator(keepsake("stone")).isVisible());
+  assert.match(await text(page, "#ticker"), /Carved stone/);
+  const run = await saved(page);
+  assert.deepEqual([run.total, run.scrap, run.up.power], [25, 1, 1]);
+  await fieldPresses(page, 1);
+  assert.equal((await saved(page)).total, 28);
+  await page.evaluate(() => {
+    window.testHidden = true;
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  assert.equal(await breeze.evaluate(el => getComputedStyle(el).animationPlayState), "paused");
+}, {
+  viewport: { width: 1280, height: 800 }, motion: "no-preference",
+  init: () => {
+    window.testHidden = false;
+    Object.defineProperty(document, "hidden", { get: () => window.testHidden });
+  },
+});
+
+browserTest("Living Field garden, mine and Forge form a playable mobile route", async (page) => {
+  await importSave(page, { total: 599, coins: 1500, opened: 1, scrap: 2 });
+  assert.ok(await page.locator(landmark("camp")).isVisible());
+  assert.ok(await page.locator(landmark("farm")).isHidden());
+  assert.ok(await page.locator(landmark("mine")).isHidden());
+  await page.locator(landmark("camp")).tap();
+  assert.ok(await page.locator("#petRoster").isVisible());
+  await click(page, "#close");
+  await fieldPresses(page, 1);
+  assert.ok(await page.locator(landmark("grove")).isVisible());
+  await page.locator(landmark("farm")).tap();
+  assert.equal(await text(page, "#modalTitle"), "Garden");
+  assert.ok(await page.locator("#locationArt").isVisible());
+  const bed = page.locator("#plot-0 .location-bed");
+  assert.equal(await bed.getAttribute("data-growth"), "0");
+  await click(page, "#plant-0");
+  assert.equal(await bed.getAttribute("data-growth"), "1");
+  await page.clock.runFor(12500);
+  assert.equal(await bed.getAttribute("data-growth"), "4");
+  await click(page, "#harvest-0");
+  await escape(page);
+  await page.locator(fieldFind("carving")).tap();
+  assert.equal((await saved(page)).glowleaf, 4);
+  await importSave(page, { ...(await saved(page)), total: 2500 });
+  await page.locator(landmark("mine")).tap();
+  const vein = page.locator(".mine-vein").filter({ has: page.locator("#mine-copper") }).locator(".location-vein");
+  assert.equal(await vein.getAttribute("data-toughness"), "4");
+  for (let hit = 0; hit < 3; hit++) await click(page, "#mine-copper");
+  assert.equal(await vein.getAttribute("data-toughness"), "0");
+  await escape(page);
+  await click(page, fieldFind("lantern"));
+  await page.locator(landmark("forge")).tap();
+  await click(page, "[data-open=recipes]");
+  assert.equal(await page.locator("#modal").getAttribute("data-location"), "forge");
+  await click(page, "#craftGatheredGear");
+  assert.equal((await saved(page)).items.length, 1);
+  await escape(page);
+  assert.ok(await page.locator(landmark("forge")).evaluate(el => el === document.activeElement));
+  assert.equal(await page.locator(".living-ambient.tree").first().evaluate(el => getComputedStyle(el).animationName), "none");
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+}, { viewport: { width: 320, height: 568 }, touch: true });
+
+browserTest("Living Field advanced routes preserve chests, trophies, fight saves and keepsakes", async (page) => {
+  const grasslandChests = [25, 75].flatMap((y, row) =>
+    [13, 28, 43, 57, 72, 85].map((x, i) => ({ id: 1 + 6 * row + i, x, y, r: 0, level: 1 })));
+  await importSave(page, {
+    total: 1_000_000, coins: 10_000, presses: 100, opened: 1,
+    combat: { records: { bramble: { wins: 1, best: 20000 } }, clears: { bramble: "unclaimed" } },
+    chests: [...grasslandChests, chest(13, "desert")],
+  });
+  await click(page, fieldFind("stone"));
+  await click(page, fieldFind("carving"));
+  await click(page, fieldFind("lantern"));
+  assert.equal(await page.locator("#fieldPennants i:visible").count(), 4);
+  assert.ok(await page.getByAltText("Bramble Crown trophy").isVisible());
+  const separated = await page.evaluate(() => {
+    const board = document.getElementById("board").getBoundingClientRect();
+    return document.getElementById("livingField").getBoundingClientRect().top >= board.bottom - 7;
+  });
+  assert.ok(separated);
+  assert.equal(await page.locator("#chests [data-chest]").count(), 12);
+  await click(page, landmark("bosses"));
+  await click(page, "[data-boss-start=mossguard]");
+  await page.reload();
+  let run = await saved(page);
+  assert.deepEqual(run.fieldDiscoveries, ["stone", "carving", "lantern"]);
+  assert.equal(run.combat.attempt.id, "mossguard");
+  assert.equal(run.combat.clears.bramble, "unclaimed");
+  await click(page, landmark("gate"));
+  page.once("dialog", dialog => dialog.dismiss());
+  await click(page, "[data-travel=desert]");
+  assert.equal((await saved(page)).combat.attempt.id, "mossguard");
+  page.once("dialog", dialog => dialog.accept());
+  await click(page, "[data-travel=desert]");
+  assert.ok(await page.locator("#livingField").isHidden());
+  assert.equal(await page.locator("#chests [data-chest]").count(), 1);
+  await click(page, "#worldHome");
+  assert.equal((await saved(page)).world, "grasslands");
+  assert.equal(await page.locator("#chests [data-chest]").count(), 12);
+  await click(page, '#chests [data-chest="1"]');
+  assert.equal((await saved(page)).chests.length, 12);
+  await click(page, landmark("grove"));
+  await click(page, "[data-tree-tab=ascend]");
+  await click(page, "[data-asc-start]");
+  await click(page, "[data-asc-confirm]");
+  await escape(page);
+  run = await saved(page);
+  assert.deepEqual(run.fieldDiscoveries, ["stone", "carving", "lantern"]);
+  assert.deepEqual([run.scrap, run.glowleaf, run.copperOre, run.total], [0, 0, 0, 0]);
+  assert.ok(await page.locator(keepsake("lantern")).isVisible());
+  assert.ok(await page.locator(fieldFind("lantern")).isHidden());
+  assert.ok(await page.locator(landmark("gate")).isHidden());
+});
+
+const combatSaveBeforeLivingField = JSON.stringify({
+  schemaVersion: 5, total: 5000, coins: 2650,
+  items: [equipment(0, { forge: 1 })], equip: { 0: 1 },
+  combat: { records: { mossguard: { wins: 1, best: 10025 } }, clears: { mossguard: "unclaimed" } },
+});
+browserTest("Living Field backs up schema 5 and exposes the byte-exact export", async (page) => {
+  const run = await saved(page);
+  assert.equal(run.schemaVersion, 6);
+  assert.equal(run.items[0].forge, 1);
+  assert.equal(run.combat.clears.mossguard, "unclaimed");
+  assert.equal(await stored(page, livingMigrationKey), combatSaveBeforeLivingField);
+  assert.equal(await stored(page, migrationKey), null);
+  assert.ok(await page.locator(landmark("bosses")).isVisible());
+  assert.equal(await page.locator('[data-field-plot="bosses"]').evaluate(el => el.getAnimations().length), 0);
+  await click(page, "#settings");
+  await click(page, "#exportPreLivingField");
+  assert.equal(await page.locator("#saveText").inputValue(), combatSaveBeforeLivingField);
+}, { init: Function("localStorage.setItem(" + JSON.stringify(saveKey) + "," + JSON.stringify(combatSaveBeforeLivingField) + ")") });
+
+browserTest("Living Field leaves a schema 5 save intact when the new backup cannot be written", async (page) => {
+  assert.match(await text(page, "#saveStatus"), /Autosave paused/i);
+  await fieldPresses(page, 1);
+  assert.equal(await stored(page, saveKey), '{"schemaVersion":5,"total":25,"coins":25}');
+  assert.equal(await stored(page, livingMigrationKey), null);
+}, {
+  init: () => {
+    localStorage.setItem("treasure-grove-v3", '{"schemaVersion":5,"total":25,"coins":25}');
+    const set = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "treasure-grove-v3-before-living-field") throw new DOMException("Simulated quota", "QuotaExceededError");
+      return set.call(this, key, value);
+    };
+  },
 });

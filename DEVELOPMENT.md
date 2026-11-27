@@ -17,6 +17,12 @@ Install development dependencies with `npm ci`, then run `npm run build`. Commit
 
 Older exports remain supported. The first migration keeps an unmodified local copy, available in **Save & settings** as the corresponding backup export, such as **Export pre-combat backup**. If a local save cannot be read or backed up, the game pauses autosave to protect it.
 
+## The Living Field
+
+Grasslands landmarks share the milestones in `progression.js` and the activity screens used by the dock. `field-view.js` owns the scene, landmark routing, and transitions. `field-art.js` draws the standalone pixel sprites. Add future local entrances to the scene registry and provide a route into the activity and back to the field. Use the existing world catalog and travel handler for regional destinations.
+
+Schema 6 stores the IDs of claimed field discoveries. The locations, scenery, and construction are derived from the current run. Original saves remain exportable through **Save & settings**.
+
 ## Worlds
 
 Open **Worlds** in the dock to travel. Unlocks use coins earned during the current run, so spending coins leaves your unlocks available. Chests and bonus charge stay in their own field while you travel. The reward wheel follows you, and Auto Chest opens chests in the field you’re visiting.

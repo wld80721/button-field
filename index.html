@@ -3015,6 +3015,427 @@ textarea {
     filter: none;
   }
 }
+
+/* Living Field */
+.living-ambient-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.living-sprite {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+.living-ambient {
+  position: absolute;
+  bottom: calc(100% - var(--y));
+  left: var(--x);
+  width: min(var(--size), 24%);
+  translate: -50% 28%;
+  transform-origin: 50% 85%;
+  animation: field-breeze 3.3s steps(5, end) var(--phase) infinite alternate;
+}
+.living-ambient:is(.tree, .oak) {
+  animation-duration: 5.5s;
+  filter: drop-shadow(4px 6px #18392855);
+}
+.living-ambient.bird {
+  animation: field-perch 5.8s steps(8, end) infinite alternate;
+}
+.living-ambient.butterfly {
+  animation: field-flight 7s steps(21, end) var(--phase) infinite alternate;
+}
+.living-ambient.butterfly img {
+  animation: field-wings 430ms steps(2, end) infinite alternate;
+}
+.living-pollen {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: 3px;
+  height: 3px;
+  background: #ffe993;
+  opacity: 0.65;
+  animation: field-drift 6s steps(10, end) var(--phase) infinite alternate;
+}
+[data-stage="0"] :is([data-growth="1"], [data-growth="2"], [data-growth="3"]),
+[data-stage="1"] :is([data-growth="2"], [data-growth="3"]),
+[data-stage="2"] [data-growth="3"] {
+  display: none;
+}
+.living-path-mouth {
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  translate: -50%;
+  width: min(28%, 180px);
+  height: 25%;
+  background:
+    linear-gradient(transparent 95%, #795744 95%) 0 0 / 22px 12px,
+    linear-gradient(#91ac5d, #af895d 64%, #ba9765);
+  clip-path: polygon(44% 0, 57% 0, 62% 28%, 67% 28%, 67% 46%, 76% 46%, 76% 59%, 90% 59%, 90% 80%, 100% 80%, 100% 100%, 0 100%, 0 80%, 10% 80%, 10% 59%, 24% 59%, 24% 46%, 34% 46%, 34% 28%, 44% 28%);
+  opacity: 0;
+}
+[data-living-trail="true"] .living-path-mouth { opacity: 0.84; }
+
+.living-field {
+  position: relative;
+  margin-top: -12px;
+  padding: 12px 12px 9px;
+  border: 4px solid #0a2524;
+  border-radius: 0 0 5px 5px;
+  background:
+    var(--trail-flowers) 15px 5px / 126px 79px repeat-x,
+    repeating-linear-gradient(90deg, #2c654426 0 2px, transparent 2px 24px),
+    repeating-linear-gradient(0deg, #173e3455 0 1px, transparent 1px 18px),
+    linear-gradient(#3e7751, #254a3a);
+  box-shadow: inset 0 0 0 2px #579269, 0 4px #07191e;
+  image-rendering: pixelated;
+}
+.living-field::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 3px;
+  left: 50%;
+  width: min(14%, 105px);
+  translate: -50%;
+  background: repeating-linear-gradient(#ac8959 0 7px, #9c794d 7px 9px);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.living-landmarks {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px 4px;
+}
+.living-plot {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0 0 8px;
+  background:
+    linear-gradient(90deg, transparent 41%, #aa8758 41% 59%, transparent 59%) bottom / 100% 17px no-repeat,
+    linear-gradient(90deg, #796347 0 14%, #a6895c 14% 85%, #796347 85%) bottom / 100% 6px no-repeat;
+}
+.living-discovery-result {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 100%;
+  width: max-content;
+  max-width: 145px;
+  padding: 3px 5px;
+  border: 1px solid #f6c977;
+  background: #183b37;
+  color: #fff4cc;
+  text-align: center;
+  font-size: 0.74rem;
+  pointer-events: none;
+}
+.living-landmark {
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  min-width: 44px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 3px 2px;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+}
+.living-landmark > img {
+  width: min(100%, 92px);
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(2px 3px #16342d);
+}
+.living-landmark > span,
+.living-world-home > span {
+  position: relative;
+  max-width: 100%;
+  padding: 1px 5px;
+  border: 1px solid #8d7751;
+  border-radius: 2px;
+  background: #233a30;
+  color: #fff1c5;
+  font-size: 0.79rem;
+  line-height: 1.2;
+}
+.living-landmark:hover img,
+.living-find:hover img {
+  filter: brightness(1.22);
+}
+.living-find,
+.living-keepsake {
+  position: absolute;
+  right: 0;
+  bottom: 8px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+}
+.living-find {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.living-find:hover {
+  background: #274a397d;
+  border-color: #9bc08a;
+}
+.living-find::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  top: 9px;
+  right: 8px;
+  background: #ffe994;
+  box-shadow: 0 0 0 2px #f1db6861;
+  animation: field-glint 1.9s steps(3, end) infinite alternate;
+}
+.living-plot:has(.living-find:not([hidden]), .living-keepsake:not([hidden])) {
+  padding-right: 46px;
+}
+#fieldExpeditionKit,
+#fieldTrophies,
+#fieldPennants {
+  position: absolute;
+  top: 3px;
+  right: 1px;
+  pointer-events: none;
+}
+#fieldExpeditionKit { width: 30px; }
+#fieldTrophies {
+  display: flex;
+  max-width: 50px;
+  flex-wrap: wrap;
+  justify-content: end;
+}
+#fieldTrophies img { width: 15px; }
+#fieldPennants { display: flex; gap: 2px; }
+#fieldPennants i {
+  display: block;
+  width: 7px;
+  height: 13px;
+  background: var(--pennant);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 77%, 0 100%);
+}
+.living-trail {
+  position: relative;
+  display: flex;
+  min-height: 30px;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding-top: 5px;
+}
+.living-sign {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0 7px;
+  padding: 2px 7px;
+  color: #fff1c5;
+  background: #4b392d;
+  border: 2px solid #ac8857;
+  box-shadow: 0 2px #28382b;
+  border-radius: 2px;
+}
+.living-sign small { color: #f4dcb5; }
+.living-pavers {
+  position: relative;
+  display: block;
+  width: 80px;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #556952 0 8px, transparent 8px 10px);
+}
+.living-pavers::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: var(--trail-fill, 0%);
+  background: repeating-linear-gradient(90deg, #efd293 0 8px, transparent 8px 10px);
+  transition: width 200ms steps(2, end);
+}
+[data-pavers="1"] { --trail-fill: 12.5%; }
+[data-pavers="2"] { --trail-fill: 25%; }
+[data-pavers="3"] { --trail-fill: 37.5%; }
+[data-pavers="4"] { --trail-fill: 50%; }
+[data-pavers="5"] { --trail-fill: 62.5%; }
+[data-pavers="6"] { --trail-fill: 75%; }
+[data-pavers="7"] { --trail-fill: 87.5%; }
+[data-pavers="8"] { --trail-fill: 100%; }
+.living-world-home {
+  min-height: 44px;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #254738;
+  border: 2px solid #6b9878;
+  border-radius: 4px;
+}
+.living-world-home img { width: 43px; }
+
+.modal:where([data-location]:not([data-location=""])) {
+  --location-sky: #285d50;
+  --location-floor: #345b44;
+  --location-light: #8aad72;
+}
+.modal[data-location="workshop"] { --location-sky: #7a4e42; --location-floor: #4a3a34; --location-light: #dc9565; }
+.modal[data-location="forge"] { --location-sky: #564755; --location-floor: #3b3843; --location-light: #edaa6e; }
+.modal[data-location="camp"] { --location-sky: #4a665b; --location-floor: #435c44; --location-light: #cfaa76; }
+.modal[data-location="farm"] { --location-sky: #588457; --location-floor: #694832; --location-light: #e6c37f; }
+.modal[data-location="grove"] { --location-sky: #503e69; --location-floor: #263e47; --location-light: #c6ace9; }
+.modal[data-location="mine"] { --location-sky: #2d4152; --location-floor: #353d4b; --location-light: #92aaba; }
+.modal[data-location="bosses"] { --location-sky: #3a5f50; --location-floor: #3e473a; --location-light: #dfb476; }
+.modal[data-location="gate"] { --location-sky: #405e60; --location-floor: #354956; --location-light: #ead49c; }
+
+.modal[data-location]:not([data-location=""]) .window {
+  width: min(1060px, 100%);
+  min-height: min(76dvh, 720px);
+  border-color: var(--location-light);
+  background: var(--location-floor);
+}
+.modal[data-location]:not([data-location=""]) .window-head {
+  background: color-mix(in srgb, var(--location-floor), #0d2026 38%);
+  border-color: var(--location-light);
+}
+.modal[data-location]:not([data-location=""]) #close {
+  min-height: 44px;
+  padding: 6px 11px;
+  width: auto;
+  font-size: 0.85rem;
+  background: #1d3332;
+  color: #fff5d8;
+  border-color: var(--location-light);
+}
+.location-art {
+  --location-floor: inherit;
+  --location-sky: inherit;
+  --location-light: inherit;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: clamp(0px, 5vw, 65px);
+  height: clamp(92px, 19dvh, 190px);
+  flex: none;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 31px, #162e3529 31px 33px) bottom / 100% 32% no-repeat,
+    repeating-linear-gradient(0deg, transparent 0 8px, #142f3345 8px 10px) bottom / 100% 32% no-repeat,
+    linear-gradient(var(--location-sky) 0 67%, var(--location-floor) 67% 100%);
+  border-bottom: 2px solid var(--location-light);
+}
+.location-art::before {
+  content: "";
+  position: absolute;
+  inset: 25% 0 24%;
+  background: color-mix(in srgb, var(--location-sky), #152e32 34%);
+  clip-path: polygon(0 54%, 10% 54%, 10% 31%, 22% 31%, 22% 11%, 35% 11%, 35% 45%, 52% 45%, 52% 62%, 69% 62%, 69% 29%, 82% 29%, 82% 13%, 91% 13%, 91% 43%, 100% 43%, 100% 100%, 0 100%);
+  z-index: -1;
+}
+.location-art img { width: clamp(52px, 15vw, 154px); max-height: 96%; object-fit: contain; }
+.location-art img:nth-child(2) { width: clamp(126px, 26vw, 230px); }
+[data-location="grove"] .location-art { height: clamp(66px, 12dvh, 112px); }
+[data-location="forge"][data-recipes-ready="false"] [data-open="recipes"] { display: none; }
+[data-location="gate"] .world-card {
+  background: linear-gradient(#314a47, #152f35);
+  border-bottom: 4px solid var(--world-accent);
+}
+
+@keyframes field-breeze { to { transform: skewX(5deg) translateX(2px); } }
+@keyframes field-flight { to { transform: translate(34px, -18px); } }
+@keyframes field-wings { to { transform: scaleX(0.43); } }
+@keyframes field-perch {
+  0%, 52% { transform: translateX(0); }
+  54% { transform: translate(4px, -5px); }
+  61%, 100% { transform: translateX(10px); }
+}
+@keyframes field-drift { to { transform: translate(20px, -19px); opacity: 0.18; } }
+@keyframes field-glint { to { opacity: 0.36; } }
+#game:is([inert], .living-paused) :is(.living-ambient, .living-ambient img, .living-pollen, .living-find::after) {
+  animation-play-state: paused;
+}
+
+@media (max-width: 650px) {
+  .living-field { padding: 7px 5px; }
+  .living-landmarks { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .living-landmark > img { height: 51px; }
+  .living-landmark > span { font-size: 0.72rem; }
+  .living-ambient { width: min(var(--size), 27%); }
+}
+@media (651px <= width <= 1080px) {
+  .living-landmarks { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 360px) {
+  .living-landmarks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .living-ambient, .living-ambient img, .living-pollen, .living-find::after { animation: none; }
+  .living-pavers::before { transition: none; }
+}
+.location-bed,
+.location-vein {
+  display: grid;
+  justify-items: center;
+  align-items: end;
+  min-height: 56px;
+  margin: 2px 0 5px;
+  border: 2px solid #83654c;
+  background:
+    linear-gradient(0deg, #241f2533 0 3px, transparent 3px 8px) 0 0 / 100% 8px,
+    linear-gradient(90deg, #986b49, #79503a 50%, #986b49);
+  overflow: hidden;
+}
+.location-bed img,
+.location-vein img {
+  width: 90px;
+  height: 68px;
+  object-fit: contain;
+  transform-origin: 50% 77%;
+  transition: transform 160ms, filter 160ms;
+}
+.location-bed[data-growth="0"] img { visibility: hidden; }
+.location-bed[data-growth="1"] img { transform: scale(0.4); filter: saturate(0.6); }
+.location-bed[data-growth="2"] img { transform: scale(0.63); }
+.location-bed[data-growth="3"] img { transform: scale(0.82); }
+.location-bed[data-crop="ironroot"] img { filter: hue-rotate(-25deg); }
+.location-bed[data-crop="prismbloom"] img { filter: hue-rotate(218deg); }
+.location-vein {
+  border-color: #6a7c8a;
+  background:
+    repeating-linear-gradient(168deg, #314451 0 9px, #253844 9px 15px);
+}
+.location-vein img { filter: drop-shadow(0 1px 0 var(--ore)); }
+.location-vein[data-toughness="0"] img { transform: scale(0.48, 0.3); filter: grayscale(1) brightness(0.62); }
+.location-vein[data-toughness="1"] img { transform: scale(0.62); }
+.location-vein[data-toughness="2"] img { transform: scale(0.75); }
+.location-vein[data-toughness="3"] img { transform: scale(0.88); }
+.world-waystone {
+  display: grid;
+  justify-items: center;
+  border-bottom: 2px solid var(--world-accent);
+  background: radial-gradient(ellipse at 50% 85%, color-mix(in srgb, var(--world-accent), transparent 44%), transparent 70%);
+}
+.world-waystone img { width: 82px; }
+@media (prefers-reduced-motion: reduce) {
+  .location-bed img, .location-vein img { transition: none; }
+}
 </style>
   </head>
   <body>
@@ -3056,6 +3477,7 @@ textarea {
       </header>
       <section class="board-frame" id="board" aria-label="Treasure field">
         <canvas id="terrain" aria-hidden="true"></canvas>
+        <div id="livingAmbient" class="living-ambient-layer" aria-hidden="true" hidden></div>
         <div class="vignette"></div>
         <div class="board-top">
           <div class="quest">
@@ -3178,6 +3600,18 @@ textarea {
           </div>
         </div>
       </section>
+      <section class="living-field" id="livingField" aria-label="Grasslands trails" hidden>
+        <div id="livingLandmarks" class="living-landmarks"></div>
+        <span class="visually-hidden" id="fieldDiscoveryStatus" role="status"></span>
+        <div id="livingTrail" class="living-trail">
+          <span class="living-pavers" aria-hidden="true"></span>
+          <div class="living-sign">
+            <strong id="livingNext"></strong>
+            <small id="livingRequirement"></small>
+          </div>
+        </div>
+      </section>
+      <button id="worldHome" class="living-world-home" hidden></button>
       <section
         id="combatPanel"
         class="combat-panel"
@@ -3293,6 +3727,7 @@ textarea {
           <h2 id="modalTitle"></h2>
           <button id="close" aria-label="Close dialog">✕</button>
         </header>
+        <div class="location-art" id="locationArt" aria-hidden="true" hidden></div>
         <div class="window-body" id="modalBody"></div>
       </section>
     </div>
@@ -6275,6 +6710,7 @@ textarea {
     ascConfirm: false,
     chestClock: 0,
     modalType: "",
+    fieldLocation: "",
     lastFocus: null,
     saveDirty: false,
     wheelResult: null,
@@ -6283,13 +6719,50 @@ textarea {
     pendingWorldUnlock: null
   };
 
+  // src/js/field-discoveries.js
+  var discoveries = {
+    stone: {
+      at: milestones.workshop,
+      name: "Carved stone",
+      clue: "Inspect the glint by the trail",
+      resource: "scrap",
+      reward: "1 scrap"
+    },
+    carving: {
+      at: milestones.shards,
+      name: "Wooden carving",
+      clue: "Look inside the hollow stump",
+      resource: "glowleaf",
+      reward: "1 Glowleaf"
+    },
+    lantern: {
+      at: milestones.helper,
+      name: "Old lantern",
+      clue: "Lift the loose rock",
+      resource: "copperOre",
+      reward: "1 Copper Ore"
+    }
+  };
+  function normalizeDiscoveries(raw) {
+    return Object.keys(discoveries).filter((id) => Array.isArray(raw) && raw.includes(id));
+  }
+  function claimDiscovery(state, id) {
+    if (!Object.hasOwn(discoveries, id) || state.world !== firstWorld) return null;
+    const find = discoveries[id];
+    if (state.total < find.at || state.fieldDiscoveries.includes(id)) return null;
+    state.fieldDiscoveries.push(id);
+    creditResource(state, find.resource, 1);
+    return find;
+  }
+
   // src/js/state.js
-  var schemaVersion = 5;
+  var schemaVersion = 6;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
     sites: freshSites(),
     combat: freshCombat(),
+    fieldDiscoveries: [],
     companions: freshCompanions(),
     lootRules: defaultLootRules(),
     abilityProgress: defaultAbilityProgress(),
@@ -6532,9 +7005,11 @@ textarea {
     );
     normalizeCompanions(f, o.companions);
     normalizeCombat(f, o.combat);
+    f.fieldDiscoveries = normalizeDiscoveries(o.fieldDiscoveries);
     return f;
   }
   var KEY = "treasure-grove-v3";
+  var preLivingFieldSaveKey = KEY + "-before-living-field";
   var preForgeSaveKey = KEY + "-before-forge";
   var preCombatSaveKey = KEY + "-before-combat";
   var preCompanionsSaveKey = KEY + "-before-companions";
@@ -6555,6 +7030,9 @@ textarea {
   }
   function readPreCombatSave() {
     return readBackup(preCombatSaveKey);
+  }
+  function readPreLivingFieldSave() {
+    return readBackup(preLivingFieldSaveKey);
   }
   function readPreCompanionsSave() {
     return readBackup(preCompanionsSaveKey);
@@ -6618,12 +7096,13 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preCombatSaveKey, raw);
+        preserveBackup(preLivingFieldSaveKey, raw);
+        if (version < 5) preserveBackup(preCombatSaveKey, raw);
         if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
         if (version < 3) preserveBackup(preSitesSaveKey, raw);
         if (version < 2) preserveBackup(preExpansionSaveKey, raw);
         if (version < 1) preserveBackup(preFoundationSaveKey, raw);
-        if (!Object.hasOwn(payload, "scrap"))
+        if (version < 5 && !Object.hasOwn(payload, "scrap"))
           preserveBackup(preForgeSaveKey, raw);
       } catch {
         pauseSaving(
@@ -6667,6 +7146,10 @@ textarea {
     ],
     tap: [[180, 115, 0.065, 0, "triangle", 0.09]],
     menu: [[450, 350, 0.075, 0, "triangle", 0.045]],
+    discovery: [
+      [587, 587, 0.11, 0, "triangle", 0.05],
+      [880, 880, 0.16, 0.08, "sine", 0.06]
+    ],
     chest: [
       [220, 115, 0.09, 0, "triangle", 0.07],
       [410, 410, 0.1, 0.065, "triangle", 0.05],
@@ -7017,6 +7500,286 @@ textarea {
     }
   }
 
+  // src/js/field-art.js
+  var sprites = /* @__PURE__ */ new Map();
+  function pixelSprite(id) {
+    if (sprites.has(id)) return sprites.get(id);
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 52;
+    const c = canvas.getContext("2d");
+    const box = (color, x, y, width, height) => {
+      c.fillStyle = color;
+      c.fillRect(x, y, width, height);
+    };
+    const shape = (color, points) => {
+      c.fillStyle = color;
+      c.beginPath();
+      c.moveTo(...points[0]);
+      for (const point of points.slice(1)) c.lineTo(...point);
+      c.closePath();
+      c.fill();
+    };
+    const ink = "#162e35";
+    const soil = "#76503c";
+    const wood = "#a46a43";
+    const honey = "#e7ac66";
+    const shade = "#173d396f";
+    const shadow = (x = 3, width = 58) => box(shade, x, 45, width, 4);
+    const roof = (dark, light) => {
+      shape(ink, [[3, 26], [17, 8], [47, 8], [61, 26], [61, 30], [3, 30]]);
+      shape(dark, [[6, 25], [18, 10], [46, 10], [58, 25]]);
+      shape(light, [[16, 19], [22, 11], [45, 11], [51, 19]]);
+      for (let x = 13; x < 53; x += 9) box(dark, x, 18, 2, 5);
+      box(light, 7, 25, 50, 2);
+    };
+    const cabin = (dark, light) => {
+      shadow();
+      box(ink, 9, 25, 46, 21);
+      box(wood, 12, 26, 40, 17);
+      for (let y = 30; y < 43; y += 5) box(soil, 12, y, 40, 1);
+      box(honey, 12, 27, 3, 15);
+      box(ink, 27, 30, 12, 15);
+      box(soil, 29, 32, 8, 12);
+      box(honey, 34, 38, 2, 2);
+      box(ink, 16, 31, 8, 8);
+      box("#f9d782", 18, 33, 4, 4);
+      box(ink, 42, 31, 8, 8);
+      box("#f9d782", 44, 33, 4, 4);
+      roof(dark, light);
+    };
+    const pine = (x, y) => {
+      box("#553d34", x + 10, y + 27, 6, 11);
+      box("#936045", x + 11, y + 27, 2, 10);
+      shape("#173e38", [[x + 13, y], [x + 24, y + 17], [x + 20, y + 17], [x + 29, y + 32], [x, y + 32], [x + 6, y + 19], [x + 3, y + 19]]);
+      shape("#2d794c", [[x + 13, y + 3], [x + 17, y + 13], [x + 15, y + 13], [x + 24, y + 27], [x + 5, y + 27]]);
+      box("#64a858", x + 9, y + 22, 6, 2);
+      box("#8cba66", x + 12, y + 12, 3, 2);
+    };
+    const oak = () => {
+      shadow(10, 43);
+      box("#4b4631", 25, 28, 13, 19);
+      box("#936347", 27, 28, 8, 17);
+      box("#b4845a", 28, 31, 3, 11);
+      shape("#18473a", [[8, 22], [13, 22], [13, 14], [20, 14], [20, 8], [37, 8], [37, 12], [48, 12], [48, 20], [56, 20], [56, 34], [47, 34], [47, 39], [16, 39], [16, 35], [8, 35]]);
+      shape("#3a824d", [[11, 23], [17, 23], [17, 16], [23, 16], [23, 10], [37, 10], [37, 14], [46, 14], [46, 24], [51, 24], [51, 31], [43, 31], [43, 34], [18, 34], [18, 30], [11, 30]]);
+      box("#6ba85a", 24, 12, 11, 4);
+      box("#70b261", 19, 18, 13, 4);
+      box("#508f47", 36, 17, 8, 6);
+      box("#a9c873", 21, 18, 4, 2);
+      box("#a9c873", 31, 12, 3, 3);
+      box("#e9be71", 42, 25, 2, 2);
+      box("#edab6b", 23, 27, 2, 2);
+    };
+    const flower = (x, y, color) => {
+      box("#226348", x, y + 2, 2, 9);
+      box("#6ba65b", x - 3, y + 6, 4, 2);
+      box(color, x - 3, y, 8, 3);
+      box(color, x, y - 2, 2, 7);
+      box("#f8e6a8", x, y + 1, 2, 2);
+    };
+    const stone = (x, y, width) => {
+      box(ink, x, y + 3, width, 10);
+      box("#69867d", x + 2, y, width - 4, 10);
+      box("#b1b79a", x + 3, y + 1, width - 8, 2);
+      box("#45665f", x + 2, y + 8, width - 4, 3);
+    };
+    switch (id) {
+      case "workshop":
+        cabin("#854537", "#cb7355");
+        box(ink, 42, 4, 7, 11);
+        box("#a56a63", 44, 3, 6, 5);
+        box(honey, 29, 20, 7, 4);
+        break;
+      case "forge":
+        cabin("#47586d", "#728a9a");
+        box(ink, 43, 3, 9, 17);
+        box("#738185", 45, 5, 5, 13);
+        box("#fa923c", 29, 35, 8, 8);
+        box("#ffd270", 31, 39, 4, 4);
+        shape("#293d49", [[1, 36], [16, 36], [13, 40], [10, 40], [10, 44], [4, 44], [4, 39]]);
+        box("#abc3ca", 2, 36, 13, 1);
+        break;
+      case "camp":
+        shadow();
+        shape(ink, [[4, 44], [24, 12], [46, 44]]);
+        shape("#b47f55", [[8, 42], [24, 15], [41, 42]]);
+        shape("#e6be7d", [[12, 39], [24, 16], [26, 25], [20, 39]]);
+        shape("#25473f", [[19, 42], [25, 29], [33, 42]]);
+        stone(45, 34, 15);
+        box("#e77a46", 49, 33, 6, 9);
+        box("#ffe3a0", 51, 35, 3, 7);
+        break;
+      case "farm":
+        shadow();
+        shape("#47372e", [[8, 23], [54, 23], [63, 44], [2, 44]]);
+        shape("#9c6647", [[11, 25], [52, 25], [59, 41], [6, 41]]);
+        box("#bb8657", 9, 31, 46, 3);
+        box("#bb8657", 7, 38, 50, 2);
+        flower(17, 25, "#f5ae68");
+        flower(31, 20, "#b9e083");
+        flower(46, 25, "#f5d777");
+        box(honey, 3, 20, 2, 15);
+        box(honey, 56, 19, 2, 15);
+        box(wood, 2, 24, 56, 2);
+        break;
+      case "grove":
+        shadow();
+        pine(1, 9);
+        pine(32, 4);
+        box("#5c5980", 27, 21, 12, 25);
+        box("#8990af", 29, 19, 8, 25);
+        box("#d4b9ee", 32, 25, 3, 10);
+        box("#efdbfc", 30, 29, 7, 2);
+        break;
+      case "mine":
+        shadow();
+        shape(ink, [[2, 44], [2, 36], [13, 22], [13, 17], [26, 9], [40, 9], [49, 17], [61, 36], [61, 44]]);
+        shape("#596d76", [[5, 41], [14, 25], [16, 17], [27, 11], [39, 11], [47, 18], [58, 41]]);
+        shape("#879294", [[17, 19], [28, 12], [39, 12], [43, 17], [34, 20], [19, 24]]);
+        box(honey, 19, 26, 28, 5);
+        box(wood, 19, 29, 5, 14);
+        box(wood, 42, 29, 5, 14);
+        box("#192931", 24, 31, 18, 13);
+        box("#cf916d", 11, 34, 4, 3);
+        box("#ae9cd8", 50, 32, 3, 4);
+        box("#a4a9a0", 23, 44, 20, 2);
+        break;
+      case "bosses":
+        shadow();
+        pine(0, 8);
+        pine(37, 4);
+        box(ink, 18, 23, 29, 17);
+        box(wood, 20, 25, 25, 12);
+        box(honey, 22, 26, 21, 2);
+        box("#f0d69a", 28, 30, 9, 5);
+        box(soil, 21, 39, 4, 7);
+        box(soil, 41, 39, 4, 7);
+        break;
+      case "gate":
+        shadow();
+        stone(3, 31, 19);
+        stone(42, 31, 19);
+        box(ink, 14, 14, 36, 30);
+        box("#819486", 16, 16, 32, 27);
+        box("#a9ad8c", 18, 17, 28, 3);
+        box("#4c665f", 22, 21, 20, 23);
+        box("#243d3c", 25, 24, 14, 20);
+        box("#c0a86b", 29, 13, 7, 6);
+        box("#f2d78c", 29, 26, 1, 12);
+        box("#f2d78c", 35, 31, 1, 10);
+        box("#d59c50", 10, 28, 4, 9);
+        box("#f5d27a", 11, 27, 2, 5);
+        box("#d59c50", 50, 28, 4, 9);
+        box("#f5d27a", 51, 27, 2, 5);
+        break;
+      case "tree":
+        shadow(13, 39);
+        pine(15, 5);
+        pine(28, 11);
+        break;
+      case "oak":
+        oak();
+        break;
+      case "flowers":
+        flower(17, 27, "#f9d781");
+        flower(31, 16, "#f6a78a");
+        flower(44, 24, "#ddbef0");
+        box("#67aa66", 7, 36, 8, 2);
+        box("#9fb963", 48, 37, 10, 2);
+        break;
+      case "grass":
+        for (const [x, y] of [[6, 16], [20, 33], [27, 21], [44, 36], [52, 12]]) {
+          shape("#215d43", [[x, y], [x + 4, y + 3], [x + 6, y + 8], [x + 6, y + 1], [x + 9, y - 1], [x + 8, y + 11], [x + 2, y + 11]]);
+          box("#70b45b", x + 6, y + 2, 2, 5);
+        }
+        break;
+      case "crop":
+        flower(19, 26, "#f3cb73");
+        flower(30, 20, "#f3cb73");
+        flower(43, 27, "#f3cb73");
+        break;
+      case "vein":
+        stone(11, 24, 43);
+        stone(19, 15, 28);
+        box("#c7cdaa", 22, 16, 16, 2);
+        box("#d59770", 35, 19, 7, 5);
+        box("#ffd19a", 38, 19, 3, 4);
+        box("#c78a67", 18, 28, 7, 6);
+        box("#e8af85", 20, 28, 3, 3);
+        box("#bc806b", 39, 29, 9, 5);
+        break;
+      case "workbench":
+        box(ink, 7, 26, 51, 6);
+        box(honey, 7, 26, 51, 3);
+        box(wood, 10, 32, 8, 13);
+        box(wood, 45, 32, 8, 13);
+        box(soil, 17, 34, 29, 3);
+        box("#899d9a", 18, 20, 12, 5);
+        box(soil, 27, 22, 9, 2);
+        box("#909a83", 42, 18, 10, 7);
+        box("#f7d784", 45, 19, 4, 5);
+        break;
+      case "anvil":
+        box(soil, 20, 34, 25, 11);
+        box(honey, 21, 34, 23, 3);
+        shape(ink, [[6, 21], [57, 21], [52, 28], [39, 30], [39, 35], [24, 35], [24, 30], [14, 28]]);
+        shape("#708a98", [[10, 21], [54, 21], [51, 25], [37, 27], [36, 32], [27, 32], [27, 27], [16, 25]]);
+        box("#c5cebf", 10, 21, 43, 2);
+        break;
+      case "butterfly":
+        box("#ffd685", 21, 16, 9, 9);
+        box("#ffad79", 34, 16, 9, 9);
+        box("#d88360", 25, 23, 14, 6);
+        box(ink, 30, 19, 4, 12);
+        break;
+      case "bird":
+        shape("#384253", [[10, 26], [26, 27], [28, 19], [42, 19], [44, 24], [48, 25], [44, 28], [42, 32], [31, 36], [23, 36]]);
+        box("#9fc4bd", 31, 20, 10, 7);
+        box("#d9ddd0", 29, 28, 12, 4);
+        box("#6e9a9e", 21, 27, 12, 3);
+        box(ink, 39, 22, 2, 2);
+        box(honey, 45, 25, 4, 2);
+        break;
+      case "stone":
+        stone(17, 26, 30);
+        box("#c5dc9b", 30, 28, 3, 7);
+        box("#c5dc9b", 26, 31, 11, 2);
+        break;
+      case "stump":
+      case "carving":
+        box(ink, 16, 21, 33, 21);
+        box(wood, 19, 24, 27, 15);
+        box(honey, 18, 19, 29, 7);
+        box("#704634", 25, 21, 14, 3);
+        box(id === "stump" ? ink : "#f0d29c", 29, 28, 8, 10);
+        break;
+      case "rock":
+        stone(18, 26, 28);
+        break;
+      case "lantern":
+        box(ink, 24, 16, 17, 25);
+        box(wood, 26, 19, 13, 19);
+        box("#ffd679", 29, 22, 7, 13);
+        box("#fff0b7", 31, 26, 3, 7);
+        box(honey, 28, 15, 9, 3);
+        break;
+      case "trophy":
+        box(ink, 21, 13, 22, 26);
+        box("#c68749", 23, 15, 18, 9);
+        box("#f7d378", 27, 14, 10, 14);
+        box("#c68749", 30, 27, 4, 7);
+        box("#f7d378", 25, 34, 14, 3);
+        break;
+    }
+    const url = canvas.toDataURL();
+    sprites.set(id, url);
+    return url;
+  }
+  function fieldSprite(id) {
+    return '<img class="living-sprite" alt="" draggable="false" src="' + pixelSprite(id) + '">';
+  }
+
   // src/js/site-view.js
   var seconds = (ms) => Math.ceil(ms / 1e3) + "s";
   var costText = (cost) => Object.entries(cost).map(([id, amount]) => fmtExact(amount) + " " + (materials[id] || id)).join(" + ");
@@ -7031,6 +7794,7 @@ textarea {
     const cropOptions = Object.entries(crops).map(([id, crop]) => `<option value="${id}">${crop.name}</option>`).join("");
     const plots = s.sites.plots.map(
       (_, index) => `<article class="up-card site-plot" id="plot-${index}">
+    ${runtime.fieldLocation === "farm" ? '<div class="location-bed" aria-hidden="true">' + fieldSprite("crop") + "</div>" : ""}
     <h3>Plot ${index + 1}</h3><p id="plotStatus-${index}"></p>
     <div class="site-controls" id="plantControls-${index}">
       <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}</select>
@@ -7058,6 +7822,7 @@ textarea {
         def
       ]) => `<article class="up-card mine-vein" style="--ore:${def.color}">
       <h3>${def.name}</h3><p>${def.rarity} \xB7 ${def.yield} ${materials[def.material]} per clear</p><p id="vein-${id}"></p>
+      ${runtime.fieldLocation === "mine" ? '<div class="location-vein" aria-hidden="true">' + fieldSprite("vein") + "</div>" : ""}
       <button class="action gold" data-site-action="mine" data-site-id="${id}" id="mine-${id}">Mine</button></article>`
     ).join("")}</div>
     <h3>Mining upgrades</h3><div class="site-upgrades">
@@ -7099,6 +7864,13 @@ textarea {
     for (let index = 0; index < site.plots.length; index++) {
       setValue($("plot-" + index), "hidden", index >= plotCount(s));
       const plot = site.plots[index];
+      if (runtime.fieldLocation === "farm") {
+        const visual = $("plot-" + index).querySelector(".location-bed");
+        const duration = plot && crops[plot.crop].ms - (site.research.irrigation ? 3e3 : 0);
+        const growth = plot ? Math.max(1, 4 - Math.ceil(4 * plot.remaining / duration)) : 0;
+        setValue(visual.dataset, "growth", String(growth));
+        setValue(visual.dataset, "crop", plot?.crop ?? "");
+      }
       const select = $("seed-" + index);
       for (const option of select.options) {
         const locked = s.total < crops[option.value].at;
@@ -7153,6 +7925,11 @@ textarea {
       const accessible = depositAccess(s, id);
       const status = accessible ? vein.remaining > 0 ? "Recovering \xB7 " + seconds(vein.remaining) : "Available \xB7 " + vein.hp + " / " + def.hp + " toughness" : s.total < def.at ? "Unlocks at " + fmtExact(def.at) + " earned" : "Requires Copper Pick";
       setText($("vein-" + id), status);
+      if (runtime.fieldLocation === "mine") {
+        const visual = $("vein-" + id).closest(".mine-vein").querySelector(".location-vein");
+        const toughness = !accessible || vein.remaining ? 0 : Math.ceil(4 * vein.hp / def.hp);
+        setValue(visual.dataset, "toughness", String(toughness));
+      }
       setValue($("mine-" + id), "disabled", !accessible || vein.remaining > 0);
     }
     setValue($("minerControls"), "hidden", !site.minerOwned);
@@ -7534,6 +8311,7 @@ textarea {
     const run = fresh();
     run.companions = keepCompanions(state);
     run.combat = keepCombat(state);
+    run.fieldDiscoveries = [...state.fieldDiscoveries];
     run.lootRules = { ...state.lootRules };
     run.asc = {
       ...state.asc,
@@ -7717,6 +8495,191 @@ textarea {
     el.innerHTML = `<div class="ground-shadow"></div><div class="ground-sprite">${gearIcon(item)}</div><div class="ground-label">${itemName(item)}<small>${itemStat(item)}</small></div>`;
     layer.append(el);
     setTimeout(() => el.remove(), 2650);
+  }
+
+  // src/js/field-view.js
+  var landmarks = {
+    workshop: { name: "Workshop", at: milestones.workshop, screens: ["upgrades"], art: "workbench", find: "stone", cover: "rock" },
+    forge: { name: "Forge", at: milestones.forge, screens: ["inventory", "forge", "recipes"], art: "anvil" },
+    camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
+    farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
+    grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
+    mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
+    bosses: { name: "Boss clearing", at: milestones.combat, screens: ["bosses"] },
+    gate: { name: "Trade gate", at: worlds.desert.at, screens: ["worlds"] }
+  };
+  var regionalRoutes = Object.entries(worlds).filter(([id]) => id !== firstWorld);
+  var fieldPlots = Object.entries(landmarks);
+  var reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var previousRun;
+  var previousWorld;
+  var previousTotal = 0;
+  var previousLandmarks = /* @__PURE__ */ new Set();
+  var trophyKey;
+  function landmarkOpen(run, id, landmark) {
+    return id === "grove" ? progressionAccess(run).skills : hasRunCoins(run, landmark.at);
+  }
+  function landmarkMarkup([id, { name, find, cover }]) {
+    const secret = find ? '<button class="living-find" data-discovery="' + find + '" aria-label="' + discoveries[find].clue + '">' + fieldSprite(cover) + '</button><span class="living-keepsake" data-keepsake="' + find + '" title="' + discoveries[find].name + '" hidden>' + fieldSprite(find) + "</span>" : "";
+    return '<div class="living-plot" data-field-plot="' + id + '" hidden><button class="living-landmark" data-landmark="' + id + '">' + fieldSprite(id) + "<span>" + name + "</span></button>" + secret + (id === "camp" ? '<span id="fieldExpeditionKit" aria-hidden="true" hidden>' + fieldSprite("lantern") + "</span>" : "") + (id === "bosses" ? '<span id="fieldTrophies" hidden></span>' : "") + (id === "gate" ? '<span id="fieldPennants" aria-hidden="true"></span>' : "") + "</div>";
+  }
+  function initLivingField() {
+    const ambient = [
+      ["tree", 7, 19, 130],
+      ["oak", 91, 17, 155],
+      ["tree", 4, 76, 111],
+      ["tree", 94, 76, 138],
+      ["grass", 17, 22, 61],
+      ["grass", 72, 22, 75],
+      ["grass", 12, 72, 82],
+      ["grass", 82, 70, 64],
+      ["flowers", 22, 79, 90],
+      ["flowers", 82, 83, 93],
+      ["flowers", 12, 55, 65, 2],
+      ["flowers", 92, 53, 71, 2],
+      ["oak", 28, 15, 105, 3],
+      ["tree", 75, 14, 115, 3],
+      ["flowers", 11, 86, 65, 3],
+      ["flowers", 94, 41, 74, 3],
+      ["bird", 83, 24, 48, 3],
+      ["butterfly", 23, 71, 36, 1],
+      ["butterfly", 78, 30, 41, 2]
+    ];
+    $("livingAmbient").innerHTML = ambient.map(
+      ([sprite, x, y, size, stage = 0], index) => '<span class="living-ambient ' + sprite + '" data-growth="' + stage + '" style="--x:' + x + "%;--y:" + y + "%;--size:" + size + "px;--phase:" + -0.7 * (index % 6) + 's">' + fieldSprite(sprite) + "</span>"
+    ).join("") + [
+      [15, 41],
+      [23, 68],
+      [74, 21],
+      [89, 74],
+      [33, 73],
+      [64, 28]
+    ].map(
+      ([x, y], i) => '<i class="living-pollen" data-growth="1" style="--x:' + x + "%;--y:" + y + "%;--phase:" + -1.3 * i + 's"></i>'
+    ).join("") + '<span class="living-path-mouth" aria-hidden="true"></span>';
+    $("livingLandmarks").innerHTML = fieldPlots.map(landmarkMarkup).join("");
+    $("livingField").style.setProperty("--trail-flowers", 'url("' + pixelSprite("flowers") + '")');
+    $("worldHome").innerHTML = fieldSprite("gate") + "<span>Return to Grasslands</span>";
+    $("fieldPennants").innerHTML = regionalRoutes.map(
+      ([id, world]) => '<i data-pennant="' + id + '" style="--pennant:' + world.accent + '" hidden></i>'
+    ).join("");
+  }
+  function renderFieldTrophies(run) {
+    const earned = Object.keys(bosses).filter((id) => run.combat.records[id]);
+    const key = earned.join(",");
+    if (key === trophyKey) return;
+    trophyKey = key;
+    const display = $("fieldTrophies");
+    display.hidden = earned.length === 0;
+    display.innerHTML = earned.map(
+      (id) => '<img class="living-sprite" alt="' + bosses[id].name + ' trophy" title="' + bosses[id].name + ' trophy" src="' + pixelSprite("trophy") + '">'
+    ).join("");
+  }
+  function animateConstruction(nodes) {
+    if (reducedMotion() || document.hidden || !$("modal").hidden) return;
+    nodes.forEach((node, index) => node.animate([
+      { filter: "brightness(1.55)", transform: "translateY(7px)", opacity: 0.48 },
+      { filter: "brightness(1)", transform: "translateY(0)", opacity: 1 }
+    ], { duration: 440, delay: index * 100, easing: "steps(7, end)", fill: "backwards" }));
+  }
+  function renderLivingField(run) {
+    const home = run.world === firstWorld;
+    const enabled = new Set(fieldPlots.filter(([id, landmark]) => landmarkOpen(run, id, landmark)).map(([id]) => id));
+    const trailVisible = run.total > 0 || enabled.size > 0 || run.fieldDiscoveries.length > 0;
+    setValue($("livingAmbient"), "hidden", !home);
+    setValue($("livingField"), "hidden", !home || !trailVisible);
+    setValue($("worldHome"), "hidden", home);
+    setValue($("board").dataset, "livingTrail", String(home && trailVisible));
+    if ($("modal").dataset.location === "forge") {
+      const ready = hasRunCoins(run, milestones.helper);
+      const recipes = $("modalBody").querySelector('[data-open="recipes"]');
+      setValue($("modal").dataset, "recipesReady", String(ready));
+      if (ready && recipes) setText(recipes, "Set recipes");
+    }
+    const live = home && previousRun === run && previousWorld === run.world && previousTotal < run.total;
+    previousRun = run;
+    previousWorld = run.world;
+    previousTotal = run.total;
+    if (!home) return;
+    const growth = run.total >= milestones.combat ? 3 : run.total >= milestones.shards ? 2 : enabled.size ? 1 : 0;
+    setValue($("livingAmbient").dataset, "stage", String(growth));
+    setValue($("livingField").dataset, "stage", String(growth));
+    const built = [];
+    for (const [id, { find }] of fieldPlots) {
+      const plot = $("livingLandmarks").querySelector('[data-field-plot="' + id + '"]');
+      const collected = Boolean(find && run.fieldDiscoveries.includes(find));
+      setValue(plot, "hidden", !enabled.has(id) && !collected);
+      setValue(plot.firstElementChild, "hidden", !enabled.has(id));
+      if (find) {
+        setValue(plot.querySelector("[data-discovery]"), "hidden", collected || !enabled.has(id));
+        setValue(plot.querySelector("[data-keepsake]"), "hidden", !collected);
+      }
+      if (live && enabled.has(id) && !previousLandmarks.has(id)) built.push(plot);
+    }
+    animateConstruction(built);
+    previousLandmarks = enabled;
+    renderFieldTrophies(run);
+    setValue($("fieldExpeditionKit"), "hidden", !hasRunCoins(run, milestones.expeditions));
+    for (const [id, world] of regionalRoutes) {
+      setValue($("fieldPennants").querySelector('[data-pennant="' + id + '"]'), "hidden", !hasRunCoins(run, world.at));
+    }
+    const nextLandmark = fieldPlots.find(([id]) => !enabled.has(id))?.[1];
+    const nextWorld2 = regionalRoutes.find(([, world]) => !hasRunCoins(run, world.at))?.[1];
+    const next = nextLandmark ?? nextWorld2;
+    const previousGate = next && Math.max(0, ...fieldPlots.map(([, place]) => place.at).concat(regionalRoutes.map(([, world]) => world.at)).filter((at) => at < next.at));
+    const pavers = next ? Math.floor(8 * (run.total - previousGate) / (next.at - previousGate)) : 8;
+    setValue($("livingTrail").dataset, "pavers", String(pavers));
+    setValue($("livingTrail"), "hidden", !next);
+    if (next) {
+      setText($("livingNext"), next.name);
+      setText($("livingRequirement"), fmtExact(Math.floor(run.total)) + " / " + fmtExact(next.at) + " earned");
+    }
+  }
+  function fieldLocationFor(run, id, type) {
+    const landmark = Object.hasOwn(landmarks, id) && landmarks[id];
+    if (run.world !== firstWorld || !landmark || !landmarkOpen(run, id, landmark) || type && !landmark.screens.includes(type)) return null;
+    return landmark;
+  }
+  function renderLocationScene(run, id, entering) {
+    const modal = $("modal");
+    const backdrop = $("locationArt");
+    setValue(modal.dataset, "location", id);
+    setValue(modal.dataset, "recipesReady", String(hasRunCoins(run, milestones.helper)));
+    backdrop.hidden = !id;
+    if (!id) return;
+    if (backdrop.dataset.location !== id) {
+      backdrop.dataset.location = id;
+      const fixtures = landmarks[id].art;
+      backdrop.innerHTML = fixtures ? fieldSprite(fixtures) + fieldSprite(id) + fieldSprite(fixtures) : fieldSprite("tree") + fieldSprite(id) + fieldSprite("flowers");
+    }
+    if (entering && !reducedMotion()) {
+      modal.querySelector(".window").animate([
+        { opacity: 0.2, transform: "translateY(9px)" },
+        { opacity: 1, transform: "translateY(0)" }
+      ], { duration: 230, easing: "ease-out" });
+    }
+  }
+  function playFieldReturn() {
+    if (reducedMotion()) return;
+    $("board").animate([{ opacity: 0.75 }, { opacity: 1 }], {
+      duration: 230,
+      easing: "ease-out"
+    });
+  }
+  function playDiscovery(keepsake, found) {
+    const result2 = document.createElement("span");
+    result2.className = "living-discovery-result";
+    result2.setAttribute("aria-hidden", "true");
+    keepsake.append(result2);
+    const message = found.name + " \xB7 +" + found.reward;
+    setText($("fieldDiscoveryStatus"), message);
+    setText(result2, message);
+    setTimeout(() => result2.remove(), 3e3);
+    if (reducedMotion()) return;
+    keepsake.animate([
+      { filter: "brightness(2)", transform: "translateY(5px)" },
+      { filter: "brightness(1)", transform: "translateY(0)" }
+    ], { duration: 440, easing: "steps(6, end)" });
   }
 
   // src/js/guide.js
@@ -8237,6 +9200,7 @@ textarea {
     setValue($("collection"), "hidden", !access.collection);
     setText($("ticker"), s.notice);
     worldReadout(pieces);
+    renderLivingField(s);
     if (runtime.pendingWorldUnlock) {
       toast(runtime.pendingWorldUnlock);
       runtime.pendingWorldUnlock = null;
@@ -8414,7 +9378,7 @@ textarea {
       ({ item, found, name, grade }) => `<div class="up-card" style="border-color:${found ? grade.color : "#3b6262"}"><div class="item-top" style="opacity:${found ? 1 : 0.45}">${iconMarkup(item)}<div><div class="rarity" style="--rarity:${grade.color}">${grade.name}</div><h3>${name}</h3></div></div></div>`
     ).join("");
   }
-  function openModal(type, id) {
+  function openModal(type, id, location = runtime.fieldLocation) {
     if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt || type === "bosses" && s.total < milestones.combat)
       return;
     if (type === "wheel" && !wheelReady()) return;
@@ -8423,15 +9387,19 @@ textarea {
     hideComparison();
     sound("menu");
     if ($("modal").hidden) runtime.lastFocus = document.activeElement;
+    const landmark = fieldLocationFor(s, location, type);
+    const entering = Boolean(landmark && $("modal").hidden);
+    runtime.fieldLocation = landmark ? location : "";
     runtime.modalType = type;
     $("modal").hidden = false;
     $("game").inert = true;
     $("modal").classList.toggle("constellation", type === "skills");
     $("modal").classList.toggle("milestone-wheel", type === "wheel");
-    $("close").textContent = type === "skills" ? "DONE" : "\u2715";
+    renderLocationScene(s, runtime.fieldLocation, entering);
+    $("close").textContent = landmark ? "Return to field" : type === "skills" ? "DONE" : "\u2715";
     $("close").setAttribute(
       "aria-label",
-      type === "skills" ? "Done, return to field" : "Close dialog"
+      landmark ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog"
     );
     const oldLegend = $("treeLegend");
     if (oldLegend) oldLegend.remove();
@@ -8455,7 +9423,7 @@ textarea {
       t.textContent = "Equipment & gear";
       if (runtime.gearWorldFilter !== "all" && !isKnownWorld(s, runtime.gearWorldFilter))
         runtime.gearWorldFilter = "all";
-      b.innerHTML = inventory();
+      b.innerHTML = (landmark && !s.items.length ? '<p class="subtext">Open a chest in the clearing to find equipment for the anvil.</p>' : "") + inventory();
       $("filter").value = runtime.filter;
       $("gearWorldFilter").value = runtime.gearWorldFilter;
       updateLootRuleSummary();
@@ -8530,6 +9498,7 @@ textarea {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreLivingFieldSave() ? '<button class="action secondary" id="exportPreLivingField">Export pre-Living Field backup</button>' : ""}
         ${readPreCombatSave() ? '<button class="action secondary" id="exportPreCombat">Export pre-combat backup</button>' : ""}
         ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
@@ -8545,6 +9514,7 @@ textarea {
         $("saveWarning").hidden = false;
       }
     }
+    if (landmark) t.textContent = landmark.name;
     if (type === "skills") updateBuyButtons();
     $("close").focus();
   }
@@ -8558,6 +9528,9 @@ textarea {
     $("modal").hidden = true;
     $("game").inert = false;
     runtime.modalType = "";
+    if (runtime.fieldLocation) playFieldReturn();
+    runtime.fieldLocation = "";
+    renderLocationScene(s, "", false);
     resetCombatClock();
     if (runtime.lastFocus?.isConnected && !runtime.lastFocus.closest("[hidden]"))
       runtime.lastFocus.focus();
@@ -8685,6 +9658,7 @@ textarea {
   }
   function worldCard(id, world) {
     return `<article class="up-card world-card" style="--world-accent:${world.accent}">
+    ${runtime.fieldLocation === "gate" ? '<div class="world-waystone" aria-hidden="true">' + fieldSprite("gate") + "</div>" : ""}
     <h3>${world.name}</h3>
     <p><strong>${world.mechanic}</strong> \xB7 ${world.description}</p>
     <p>${world.gearBonus || "Find the original Treasure Grove equipment here."}</p>
@@ -8732,7 +9706,7 @@ textarea {
     notice("Arrived in " + world.name + ".");
     render();
     save();
-    closeModal();
+    if (!$("modal").hidden) closeModal();
     $("press").focus();
   }
 
@@ -8964,6 +9938,32 @@ textarea {
   initSound();
   initSkillUI();
   initFieldEffects();
+  initLivingField();
+  document.addEventListener("visibilitychange", () => {
+    $("game").classList.toggle("living-paused", document.hidden);
+  });
+  $("worldHome").addEventListener("click", () => travel(firstWorld));
+  $("livingLandmarks").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-landmark], [data-discovery]");
+    if (!button) return;
+    const { landmark: id, discovery } = button.dataset;
+    if (id) {
+      const entrance = fieldLocationFor(s, id);
+      if (!entrance) return;
+      button.focus({ preventScroll: true });
+      openModal(entrance.screens[0], void 0, id);
+      return;
+    }
+    const found = claimDiscovery(s, discovery);
+    if (!found) return;
+    sound("discovery");
+    notice("Discovered " + found.name + " \xB7 +" + found.reward);
+    render();
+    const plot = button.closest(".living-plot");
+    playDiscovery(plot.querySelector("[data-keepsake]"), found);
+    plot.querySelector("[data-landmark]").focus({ preventScroll: true });
+    save();
+  });
   $("coinIcon").innerHTML = coin();
   $("tapIcon").innerHTML = itemIcon(0, 0);
   $("autoIcon").innerHTML = itemIcon(2, 1);
@@ -9270,10 +10270,11 @@ textarea {
       "exportPreSites",
       "exportPreCompanions",
       "exportPreCombat",
+      "exportPreLivingField",
       "exportPreExpansion",
       "exportPreFoundation"
     ].includes(b.id)) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : readPreFoundationSave();
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : b.id === "exportPreLivingField" ? readPreLivingFieldSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();

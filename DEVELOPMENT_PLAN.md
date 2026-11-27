@@ -4,7 +4,13 @@
 
 Start with one red button. As the field changes, paths and interactive objects lead to distinct playable spaces. Each space introduces its own actions and rewards that open options elsewhere. Keep the home field, central button, existing mechanics, and old saves playable throughout. [AGENTS.md](AGENTS.md) defines the expansion and approval requirements.
 
-## Next expansion · Boss Arenas
+## Expansion 1 · The Living Field
+
+**Status** · Implemented on the `living-field` review branch. Grasslands grows from a clearing into a settlement. Branching paths and illustrated landmarks open Workshop, Forge, companions, Farming, the skill tree, Mining, and the Boss Board at existing milestones. The trade gate connects to the four established regions. Three hidden finds award small, one-time material bundles and leave permanent decorations.
+
+Local scenes use the shipped activity rules. The dedicated redesigns below will deepen the activities. See [Progress](PROGRESS.md) for verification and coverage.
+
+## Next expansion after The Living Field · Boss Arenas
 
 **Status** · Arena redesign proposed. The ten existing field bosses are live.
 

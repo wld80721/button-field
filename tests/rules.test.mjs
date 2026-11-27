@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { upgrades } from "../src/js/data.js";
+import { claimDiscovery } from "../src/js/field-discoveries.js";
 import {
   applyPress,
   buyWorkshopUpgrade,
@@ -96,7 +97,7 @@ test("old and current saves normalize without reusing gear or chest IDs", () => 
     equip: { 0: item.id, 1: item.id },
     chests: [{ id: item.id, r: 0, level: 1, x: 28, y: 40 }],
   });
-  assert.equal(run.schemaVersion, 5);
+  assert.equal(run.schemaVersion, 6);
   assert.equal(run.coins, 2e16);
   assert.deepEqual(run.items, [item]);
   assert.deepEqual(run.equip, { 0: item.id });
@@ -106,7 +107,7 @@ test("old and current saves normalize without reusing gear or chest IDs", () => 
   assert.deepEqual(normalize(JSON.parse(JSON.stringify(run))), run);
   for (const invalid of [{}, [], { coins: "2" }, { coins: 2, items: {} }])
     assert.throws(() => normalize(invalid), /Invalid save/);
-  assert.throws(() => normalize({ ...run, schemaVersion: 6 }), /newer version/);
+  assert.throws(() => normalize({ ...run, schemaVersion: 7 }), /newer version/);
 });
 
 test("Ascension builds a new run and preserves only the permanent records", () => {
@@ -127,6 +128,26 @@ test("Ascension builds a new run and preserves only the permanent records", () =
   assert.equal(run.total, 0);
   assert.equal(run.world, "grasslands");
   assert.equal(old.scrap, 4);
+});
+
+test("discoveries require their Grasslands milestone and pay once per save", () => {
+  const run = fresh();
+  run.coins = 100;
+  run.total = 24;
+  assert.equal(claimDiscovery(run, "stone"), null);
+  run.total = 25;
+  assert.equal(claimDiscovery(run, "stone").reward, "1 scrap");
+  assert.equal(claimDiscovery(run, "stone"), null);
+  assert.deepEqual([run.coins, run.total, run.scrap], [100, 25, 1]);
+  run.total = 10000;
+  run.world = "desert";
+  assert.equal(claimDiscovery(run, "carving"), null);
+  const restored = normalize({ ...run, fieldDiscoveries: ["stone", "stone", "unknown", 3] });
+  assert.deepEqual(restored.fieldDiscoveries, ["stone"]);
+  const next = performAscension(restored).run;
+  next.total = 25;
+  assert.equal(claimDiscovery(next, "stone"), null);
+  assert.equal(next.scrap, 0);
 });
 
 test("compact formatting respects boundaries and extreme rates remain finite", () => {

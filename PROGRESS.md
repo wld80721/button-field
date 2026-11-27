@@ -2,7 +2,7 @@
 
 ## Handoff · 2026-11-27
 
-The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the standalone root `index.html` from `main`. The current checkout contains that gameplay and the handoff documentation. Boss Arenas are at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
+The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the standalone root `index.html` from `main`. The `living-field` review branch implements Expansion 1. Boss Arenas remains at the proposal stage and follows this expansion. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
 ## Shipped
 
@@ -15,9 +15,18 @@ The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the stan
 
 - Edit `src/` and run `npm run build` to regenerate the root `index.html`. The output embeds CSS, scripts, art, and synthesized sound.
 - Use the existing progression selectors and shared resource ledger. Run earnings are separate from spendable coins. Combat rules are in `src/js/combat.js`, boss definitions in `boss-data.js`, and presentation in `combat-view.js`. Continue using the existing field, sites, and companion rules.
-- Save schema **5** uses the existing `treasure-grove-v3` storage key. Local migration preserves the raw save in an exportable backup and pauses autosave if backup fails. Resumed combat has no offline damage. Keep saved IDs stable and define reset and carry-over rules for every new system.
+- The published combat release uses schema **5** under `treasure-grove-v3`. The review branch uses schema **6** with the same key and saves only the three new discovery IDs. Local migration preserves the raw save in an exportable backup and pauses autosave if backup fails. Resumed combat has no offline damage. Keep saved IDs stable and define reset and carry-over rules for every new system.
 
-## Verification
+## The Living Field · review branch
+
+- Grasslands landmarks and scenery derive from existing run milestones. Local scenes share existing screens and actions. The trade gate and the return route use the existing world travel rules.
+- The three discoveries add one scrap, one Glowleaf, and one Copper Ore respectively. Keepsakes survive Ascension. The materials reset with the existing resource balances.
+- The shipped HTML and representative saves were backed up before implementation. Schema 5 migrates with a byte-exact backup and autosave protection. Local scenes and environmental animations do not add another gameplay clock.
+- The standalone build check, all **36 unit tests**, and all **41 offline Chromium checks** passed. The shipped baseline comparison showed zero linear bag scans and zero stable HUD mutations in both builds.
+- Played from a fresh save through the Workshop purchase, then used seeded midgame and advanced saves to exercise garden growth and harvest, mining, crafting, boss entry and reload, travel with populated chest fields, and Ascension. Inspected early, middle, and advanced screenshots at 1280 × 800 and 390 × 844. Also exercised touch at 320 × 568 and 844 × 390, keyboard return focus, reduced motion, and hidden-tab pausing.
+- The managed browser blocked direct `file://` loading with `ERR_BLOCKED_BY_ADMINISTRATOR`. The standalone HTML passed through an offline Chromium context with no external assets. Physical devices, Safari, and Firefox were outside this test pass.
+
+## Published baseline verification
 
 - **Current standalone:** `npm run check:build` and all **35 unit tests** passed on the handoff checkout. The published HTML matched the local build byte for byte.
 - **Browser regression:** All **36 offline Chromium checks** passed on this gameplay build. They cover migration, saves, desktop and emulated mobile controls, reduced motion, reward claims, and effects under rapid input. See [how to rerun the suite](tests/README.md#combat-release-baseline).
@@ -27,4 +36,4 @@ The latest shipped gameplay commit is `d476c42`. GitHub Pages publishes the stan
 
 ## Known issues
 
-Farm growth and mining damage read largely as numbers. Forge crafting uses dropdowns, and expeditions are countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.
+The Living Field gives farm growth and mining damage visible changes. The later Farming and Mining phase will deepen their interactions. Forge crafting still uses dropdowns, and expeditions are countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.

@@ -25,6 +25,7 @@ import {
   toastTimer,
 } from "./effects.js";
 import { updateForge, updateRecipes } from "./equipment.js";
+import { renderLivingField } from "./field-view.js";
 import {
   applyPress,
   collectChest,
@@ -274,6 +275,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   setValue($("collection"), "hidden", !access.collection);
   setText($("ticker"), s.notice);
   worldReadout(pieces);
+  renderLivingField(s);
   if (runtime.pendingWorldUnlock) {
     toast(runtime.pendingWorldUnlock);
     runtime.pendingWorldUnlock = null;

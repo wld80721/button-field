@@ -32,6 +32,8 @@ import {
   inventoryFilters,
 } from "./dialogs.js";
 import { initFieldEffects, toast } from "./effects.js";
+import { claimDiscovery } from "./field-discoveries.js";
+import { fieldLocationFor, initLivingField, playDiscovery } from "./field-view.js";
 import { addGearItem, forgeGear, salvageGear } from "./gear.js";
 import {
   autoChestTick,
@@ -64,6 +66,7 @@ import {
   readPreSitesSave,
   readPreCompanionsSave,
   readPreCombatSave,
+  readPreLivingFieldSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -88,11 +91,39 @@ import {
 import { $, setText } from "./ui-dom.js";
 import { collectWheel, placeReel } from "./wheel.js";
 import { travel } from "./worlds.js";
+import { firstWorld } from "./world-data.js";
 
 loadStoredRun();
 initSound();
 initSkillUI();
 initFieldEffects();
+initLivingField();
+
+document.addEventListener("visibilitychange", () => {
+  $("game").classList.toggle("living-paused", document.hidden);
+});
+$("worldHome").addEventListener("click", () => travel(firstWorld));
+$("livingLandmarks").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-landmark], [data-discovery]");
+  if (!button) return;
+  const { landmark: id, discovery } = button.dataset;
+  if (id) {
+    const entrance = fieldLocationFor(s, id);
+    if (!entrance) return;
+    button.focus({ preventScroll: true });
+    openModal(entrance.screens[0], undefined, id);
+    return;
+  }
+  const found = claimDiscovery(s, discovery);
+  if (!found) return;
+  sound("discovery");
+  notice("Discovered " + found.name + " · +" + found.reward);
+  render();
+  const plot = button.closest(".living-plot");
+  playDiscovery(plot.querySelector("[data-keepsake]"), found);
+  plot.querySelector("[data-landmark]").focus({ preventScroll: true });
+  save();
+});
 
 $("coinIcon").innerHTML = coin();
 $("tapIcon").innerHTML = itemIcon(0, 0);
@@ -422,6 +453,7 @@ $("modalBody").addEventListener("click", (e) => {
       "exportPreSites",
       "exportPreCompanions",
       "exportPreCombat",
+      "exportPreLivingField",
       "exportPreExpansion",
       "exportPreFoundation",
     ].includes(b.id)
@@ -437,7 +469,9 @@ $("modalBody").addEventListener("click", (e) => {
               ? readPreCompanionsSave()
               : b.id === "exportPreCombat"
                 ? readPreCombatSave()
-                : readPreFoundationSave();
+                : b.id === "exportPreLivingField"
+                  ? readPreLivingFieldSave()
+                  : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();

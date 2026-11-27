@@ -1,4 +1,5 @@
 import { fmtExact } from "./numbers.js";
+import { fieldSprite } from "./field-art.js";
 import { runtime } from "./runtime.js";
 import {
   buyMiner,
@@ -49,6 +50,7 @@ function farmMarkup() {
   const plots = s.sites.plots
     .map(
       (_, index) => `<article class="up-card site-plot" id="plot-${index}">
+    ${runtime.fieldLocation === "farm" ? '<div class="location-bed" aria-hidden="true">' + fieldSprite("crop") + "</div>" : ""}
     <h3>Plot ${index + 1}</h3><p id="plotStatus-${index}"></p>
     <div class="site-controls" id="plantControls-${index}">
       <select id="seed-${index}" data-seed-choice aria-label="Seed for plot ${index + 1}">${cropOptions}</select>
@@ -82,6 +84,7 @@ function mineMarkup() {
           def,
         ]) => `<article class="up-card mine-vein" style="--ore:${def.color}">
       <h3>${def.name}</h3><p>${def.rarity} · ${def.yield} ${materials[def.material]} per clear</p><p id="vein-${id}"></p>
+      ${runtime.fieldLocation === "mine" ? '<div class="location-vein" aria-hidden="true">' + fieldSprite("vein") + "</div>" : ""}
       <button class="action gold" data-site-action="mine" data-site-id="${id}" id="mine-${id}">Mine</button></article>`,
       )
       .join("")}</div>
@@ -134,6 +137,13 @@ function updateFarm() {
   for (let index = 0; index < site.plots.length; index++) {
     setValue($("plot-" + index), "hidden", index >= plotCount(s));
     const plot = site.plots[index];
+    if (runtime.fieldLocation === "farm") {
+      const visual = $("plot-" + index).querySelector(".location-bed");
+      const duration = plot && (crops[plot.crop].ms - (site.research.irrigation ? 3000 : 0));
+      const growth = plot ? Math.max(1, 4 - Math.ceil(4 * plot.remaining / duration)) : 0;
+      setValue(visual.dataset, "growth", String(growth));
+      setValue(visual.dataset, "crop", plot?.crop ?? "");
+    }
     const select = $("seed-" + index);
     for (const option of select.options) {
       const locked = s.total < crops[option.value].at;
@@ -206,6 +216,11 @@ function updateMine() {
         ? "Unlocks at " + fmtExact(def.at) + " earned"
         : "Requires Copper Pick";
     setText($("vein-" + id), status);
+    if (runtime.fieldLocation === "mine") {
+      const visual = $("vein-" + id).closest(".mine-vein").querySelector(".location-vein");
+      const toughness = !accessible || vein.remaining ? 0 : Math.ceil(4 * vein.hp / def.hp);
+      setValue(visual.dataset, "toughness", String(toughness));
+    }
     setValue($("mine-" + id), "disabled", !accessible || vein.remaining > 0);
   }
   setValue($("minerControls"), "hidden", !site.minerOwned);

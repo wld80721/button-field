@@ -4,7 +4,11 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
-Boss Arenas are the next proposal. See the [development plan](DEVELOPMENT_PLAN.md#next-expansion--boss-arenas) for scope and the [handoff](PROGRESS.md) for verification. The current gameplay release is `d476c42`.
+- **The Living Field.** Grasslands grows around the red button with animated flora, wildlife, paths, and landmark construction. Enter illustrated activity scenes from the field and use the trade gate to visit unlocked regions.
+- Find three hidden keepsakes with one-time materials. The decorations carry over after Ascension.
+- Saves migrate to schema 6 under the existing storage key. Export the original save under **Save & settings → Export pre-Living Field backup**.
+
+Boss Arenas remains the next proposal after this expansion. The current published gameplay release is `d476c42`.
 
 ## 2026-11-27
 

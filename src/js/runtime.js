@@ -8,6 +8,7 @@ const runtime = {
   ascConfirm: false,
   chestClock: 0,
   modalType: "",
+  fieldLocation: "",
   lastFocus: null,
   saveDirty: false,
   wheelResult: null,

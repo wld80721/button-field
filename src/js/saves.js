@@ -1,5 +1,6 @@
 import { normalizeCombat } from "./combat.js";
 import { normalizeCompanions } from "./companions.js";
+import { normalizeDiscoveries } from "./field-discoveries.js";
 import { normalizeSites } from "./sites.js";
 import {
   builds,
@@ -205,9 +206,11 @@ function normalizeRun(o) {
   );
   normalizeCompanions(f, o.companions);
   normalizeCombat(f, o.combat);
+  f.fieldDiscoveries = normalizeDiscoveries(o.fieldDiscoveries);
   return f;
 }
 const KEY = "treasure-grove-v3";
+const preLivingFieldSaveKey = KEY + "-before-living-field";
 const preForgeSaveKey = KEY + "-before-forge";
 const preCombatSaveKey = KEY + "-before-combat";
 const preCompanionsSaveKey = KEY + "-before-companions";
@@ -231,6 +234,10 @@ function readPreForgeSave() {
 
 function readPreCombatSave() {
   return readBackup(preCombatSaveKey);
+}
+
+function readPreLivingFieldSave() {
+  return readBackup(preLivingFieldSaveKey);
 }
 
 function readPreCompanionsSave() {
@@ -309,12 +316,13 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preCombatSaveKey, raw);
+      preserveBackup(preLivingFieldSaveKey, raw);
+      if (version < 5) preserveBackup(preCombatSaveKey, raw);
       if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
       if (version < 3) preserveBackup(preSitesSaveKey, raw);
       if (version < 2) preserveBackup(preExpansionSaveKey, raw);
       if (version < 1) preserveBackup(preFoundationSaveKey, raw);
-      if (!Object.hasOwn(payload, "scrap"))
+      if (version < 5 && !Object.hasOwn(payload, "scrap"))
         preserveBackup(preForgeSaveKey, raw);
     } catch {
       pauseSaving(
@@ -354,6 +362,7 @@ export {
   readPreSitesSave,
   readPreCompanionsSave,
   readPreCombatSave,
+  readPreLivingFieldSave,
   readPreFoundationSave,
   resumeSaving,
   save,

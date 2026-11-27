@@ -22,6 +22,7 @@ import {
   hideComparison,
 } from "./equipment.js";
 import { chestInterval } from "./field.js";
+import { fieldLocationFor, playFieldReturn, renderLocationScene } from "./field-view.js";
 import { workshopCost } from "./gameplay.js";
 import { progressionGuideMarkup, updateProgressionGuide } from "./guide.js";
 import { fmt, fmtExact } from "./numbers.js";
@@ -41,6 +42,7 @@ import {
   readPreSitesSave,
   readPreCompanionsSave,
   readPreCombatSave,
+  readPreLivingFieldSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -224,7 +226,7 @@ function showCollection(id) {
     .join("");
 }
 
-function openModal(type, id) {
+function openModal(type, id, location = runtime.fieldLocation) {
   if (
     (type === "farm" && s.total < farmAt) ||
     (type === "mine" && s.total < mineAt) ||
@@ -238,15 +240,19 @@ function openModal(type, id) {
   hideComparison();
   sound("menu");
   if ($("modal").hidden) runtime.lastFocus = document.activeElement;
+  const landmark = fieldLocationFor(s, location, type);
+  const entering = Boolean(landmark && $("modal").hidden);
+  runtime.fieldLocation = landmark ? location : "";
   runtime.modalType = type;
   $("modal").hidden = false;
   $("game").inert = true;
   $("modal").classList.toggle("constellation", type === "skills");
   $("modal").classList.toggle("milestone-wheel", type === "wheel");
-  $("close").textContent = type === "skills" ? "DONE" : "✕";
+  renderLocationScene(s, runtime.fieldLocation, entering);
+  $("close").textContent = landmark ? "Return to field" : type === "skills" ? "DONE" : "✕";
   $("close").setAttribute(
     "aria-label",
-    type === "skills" ? "Done, return to field" : "Close dialog",
+    landmark ? "Return to field" : type === "skills" ? "Done, return to field" : "Close dialog",
   );
   const oldLegend = $("treeLegend");
   if (oldLegend) oldLegend.remove();
@@ -274,7 +280,9 @@ function openModal(type, id) {
       !isKnownWorld(s, runtime.gearWorldFilter)
     )
       runtime.gearWorldFilter = "all";
-    b.innerHTML = inventory();
+    b.innerHTML = (landmark && !s.items.length
+      ? '<p class="subtext">Open a chest in the clearing to find equipment for the anvil.</p>'
+      : "") + inventory();
     $("filter").value = runtime.filter;
     $("gearWorldFilter").value = runtime.gearWorldFilter;
     updateLootRuleSummary();
@@ -362,6 +370,7 @@ function openModal(type, id) {
         <button class="action" id="export">Export</button>
         <button class="action" id="import">Import</button>
         ${readBlockedSave() !== null ? '<button class="action secondary" id="exportStoredSave">Export stored save</button>' : ""}
+        ${readPreLivingFieldSave() ? '<button class="action secondary" id="exportPreLivingField">Export pre-Living Field backup</button>' : ""}
         ${readPreCombatSave() ? '<button class="action secondary" id="exportPreCombat">Export pre-combat backup</button>' : ""}
         ${readPreCompanionsSave() ? '<button class="action secondary" id="exportPreCompanions">Export pre-companions backup</button>' : ""}
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
@@ -377,6 +386,7 @@ function openModal(type, id) {
       $("saveWarning").hidden = false;
     }
   }
+  if (landmark) t.textContent = landmark.name;
   if (type === "skills") updateBuyButtons();
   $("close").focus();
 }
@@ -390,6 +400,9 @@ function closeModal() {
   $("modal").hidden = true;
   $("game").inert = false;
   runtime.modalType = "";
+  if (runtime.fieldLocation) playFieldReturn();
+  runtime.fieldLocation = "";
+  renderLocationScene(s, "", false);
   resetCombatClock();
   if (runtime.lastFocus?.isConnected && !runtime.lastFocus.closest("[hidden]"))
     runtime.lastFocus.focus();
