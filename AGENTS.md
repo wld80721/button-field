@@ -2,6 +2,13 @@
 
 These standards apply to every major gameplay phase and to redesigns of existing systems.
 
+## One red button, many interconnected games
+
+- Give players one obvious action when they start the game. Pressing the red button gradually reveals new places and activities through changes in the field, such as a growing trail, an arriving companion, or an opening gate.
+- Give each destination its own way to play and a clear way back to the field. Use the field and its interactive objects as the main route between activities. Menus support setup, reference, and management.
+- Design connections in both directions. An existing activity should help players discover or prepare for the new one, and the new activity should reward something that changes what players can do elsewhere. Use rewards that open new interactions, tools, and routes.
+- Playtest from a fresh save. Discover an activity from the field, learn its core action, earn a reward, and use it in another part of the game. Check that the red button remains useful throughout.
+
 ## Design the expansion first
 
 - Inspect the current game and the systems the expansion will connect to. Identify which recent features fall short of these standards and schedule their redesign one phase at a time.
