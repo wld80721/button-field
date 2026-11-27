@@ -6,7 +6,7 @@ This log tracks player-facing changes and save compatibility.
 
 Boss Arenas is the next proposal.
 
-## 2026-11-28 · The Living Field
+## 2026-11-27 · The Living Field
 
 - **The Living Field.** Grasslands grows around the red button with animated flora, wildlife, paths, and landmark construction. Enter illustrated activity scenes from the field and use the trade gate to visit unlocked regions.
 - Find three hidden keepsakes with one-time materials. The decorations carry over after Ascension.
