@@ -4,6 +4,12 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
+## 2026-11-28 · Meadowbrook Farm
+
+- Visit Meadowbrook from the Garden at 600 run earnings. Explore the farm, work the soil, water and harvest four crops, buy seeds, and complete the farm journal.
+- Crop sales and journal rewards earn Button Field coins. Existing Garden crops continue supplying crafting materials.
+- Save schema 8 stores Meadowbrook with Button Field. The original local save is available under **Save & settings → Export pre-Meadowbrook backup**.
+
 ## 2026-11-28 · Auto Sell
 
 - Choose Auto Sell for spare chest loot in Gear → Loot automation. It converts the usual scrap payout into extra coins and uses the same rarity and duplicate filters as Auto Salvage. Old saves retain their existing setting.

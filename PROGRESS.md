@@ -4,6 +4,12 @@
 
 The Legendary Blacksmith follows The Living Field (`b78f443`). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
+## Meadowbrook Farm · 2026-11-28
+
+- Adapted the supplied farm map and pixel art into a walkable Garden destination. Tools, seed supplies, four market crops, daily watering, weather, rest, and journal goals use the shared Button Field save. Seed purchases debit the existing coin balance. Sales and journal rewards credit coins and run earnings.
+- Kept the Garden's crafting-material plots and upgrades. Backed up the previous standalone build and representative schema 7 saves before development. Save schema 8 retains the original local save as an exportable backup and preserves existing equipment, crop timers, and other progress. Meadowbrook resets on Ascension.
+- Verified the standalone build, unit suite, and offline Chromium regression suite. Played from a fresh save through the first crop sale. Checked touch, keyboard tools, reduced motion, overnight crop growth, the seed shop, save migration, reload, and a developed farm across regions. Reviewed desktop and emulated mobile screenshots. Physical mobile devices, Safari, and Firefox were outside this verification pass.
+
 ## Navigation and Blacksmith fixes · 2026-11-28
 
 - Removed redundant Grasslands shortcuts and kept the equivalent routes in other worlds. Consolidated Forge payment actions, wheel exit, and Boss Board entry.

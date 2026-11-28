@@ -16,6 +16,12 @@ Local scenes use the shipped activity rules. The dedicated redesigns below will 
 
 Four blueprints connect the workshop to mining, farming, expeditions, and the Boss Board. Their equipment supports mining strikes, clone presses, free Glowleaf planting, or Guard-triggered fireballs. Players can mix signature pieces or invest in two- and four-piece bonuses. Save schema 7 preserves existing equipment and keeps blueprint discoveries through Ascension.
 
+## Meadowbrook Farm
+
+Meadowbrook is an explorable farm reached through the Garden at 600 run earnings. Its map leads to the fenced field, farmhouse, and seed shop. Players use tools to till, plant, water, clear weeds, and harvest. Resting advances the day and grows watered crops. The journal starts with the ripe turnips and progresses through planting and selling goals.
+
+Seed purchases, crop sales, and journal rewards use Button Field coins. Garden beds continue producing crafting materials and keep their press growth, research, and automation. Meadowbrook shares the Button Field save, pauses when closed, and starts fresh on Ascension.
+
 ## Later expansion · Boss Arenas
 
 **Status** · Arena redesign proposed. The ten existing field bosses are live.
@@ -29,7 +35,7 @@ Start the expansion on a separate branch from the documented `main`. The first i
 
 ## Later phases
 
-1. **Farming and Mining.** Turn the plot and deposit screens into connected playable spaces. Grow and harvest visible crops and let players expose and extract veins. Reuse the existing crop effects, research, materials, and automation.
+1. **Garden and Mining.** Deepen the crafting-material Garden beds and turn deposits into a space where players can expose and extract veins. Reuse the existing crop effects, research, materials, and automation.
 2. **Companion camp and expeditions.** Build a physical camp and route map with choices to make along expeditions. Keep the 15 companions, roles, progression, and offline trip timers.
 
 Revisit the wider backlog after the current systems feel like places to play. It includes capped offline coin income, Buy 1/10/100/MAX, achievements and a richer collection book, a 50-plus-upgrade Ascension tree, Transcendence, challenge runs, ambient music, detailed statistics, and performance settings. Scope and test each phase independently.

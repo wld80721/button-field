@@ -11,7 +11,7 @@ const landmarks = {
   workshop: { name: "Workshop", at: milestones.workshop, screens: ["upgrades"], art: "workbench", find: "stone", cover: "rock" },
   forge: { name: "Forge", at: milestones.forge, screens: ["blacksmith", "inventory", "forge", "recipes"], art: "anvil" },
   camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
-  farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
+  farm: { name: "Garden", at: milestones.shards, screens: ["farm", "meadowbrook"], find: "carving", cover: "stump", art: "crop" },
   grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
   mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
   bosses: { name: "Boss Board", at: milestones.combat, screens: ["bosses"] },

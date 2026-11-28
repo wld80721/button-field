@@ -2,6 +2,7 @@ import { normalizeBlacksmith } from "./blacksmith-data.js";
 import { normalizeCombat } from "./combat.js";
 import { normalizeCompanions } from "./companions.js";
 import { normalizeDiscoveries } from "./field-discoveries.js";
+import { normalizeMeadowbrook } from "./meadowbrook.js";
 import { normalizeSites } from "./sites.js";
 import {
   builds,
@@ -57,6 +58,7 @@ function normalizeRun(o) {
   f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
   f.total = num(o.total, Number.MAX_VALUE);
   normalizeSites(f, o.sites);
+  f.meadowbrook = normalizeMeadowbrook(o.meadowbrook);
   for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
   for (const k of ["earned", "runs"])
     f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
@@ -212,6 +214,7 @@ function normalizeRun(o) {
   return f;
 }
 const KEY = "treasure-grove-v3";
+const preMeadowbrookSaveKey = KEY + "-before-meadowbrook";
 const preBlacksmithSaveKey = KEY + "-before-blacksmith";
 const preLivingFieldSaveKey = KEY + "-before-living-field";
 const preForgeSaveKey = KEY + "-before-forge";
@@ -237,6 +240,10 @@ function readPreForgeSave() {
 
 function readPreCombatSave() {
   return readBackup(preCombatSaveKey);
+}
+
+function readPreMeadowbrookSave() {
+  return readBackup(preMeadowbrookSaveKey);
 }
 
 function readPreBlacksmithSave() {
@@ -323,7 +330,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preBlacksmithSaveKey, raw);
+      preserveBackup(preMeadowbrookSaveKey, raw);
+      if (version < 7) preserveBackup(preBlacksmithSaveKey, raw);
       if (version < 6) preserveBackup(preLivingFieldSaveKey, raw);
       if (version < 5) preserveBackup(preCombatSaveKey, raw);
       if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
@@ -372,6 +380,7 @@ export {
   readPreCombatSave,
   readPreLivingFieldSave,
   readPreBlacksmithSave,
+  readPreMeadowbrookSave,
   readPreFoundationSave,
   resumeSaving,
   save,

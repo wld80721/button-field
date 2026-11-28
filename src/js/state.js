@@ -29,7 +29,7 @@ import { creditCoins, initializeResources } from "./resources.js";
 import { runtime } from "./runtime.js";
 import { firstWorld, recordWorld, worlds } from "./world-data.js";
 
-const schemaVersion = 7;
+const schemaVersion = 8;
 const zeroLevels = (definitions) =>
   Object.fromEntries(definitions.map(({ id }) => [id, 0]));
 
@@ -37,6 +37,7 @@ const fresh = () =>
   initializeResources({
     schemaVersion,
     sites: freshSites(),
+    meadowbrook: null,
     blacksmith: freshBlacksmith(),
     combat: freshCombat(),
     fieldDiscoveries: [],

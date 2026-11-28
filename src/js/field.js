@@ -1,3 +1,4 @@
+import { refreshMeadowbrook } from "./meadowbrook-view.js";
 import { advanceClone, fieldSignatures } from "./blacksmith-effects.js";
 import { signatureMark } from "./sprites.js";
 import { strikeBoss } from "./combat.js";
@@ -345,6 +346,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   }
   wheelHUD();
   renderSites();
+  refreshMeadowbrook();
   if (recruitPets(s).length) runtime.saveDirty = true;
   renderCompanions();
   renderCombatField();

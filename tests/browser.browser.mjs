@@ -468,7 +468,7 @@ for (const [release, legacy] of legacySaves) {
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 7);
+    assert.equal(migrated.schemaVersion, 8);
     assert.deepEqual(migrated.fieldDiscoveries, []);
     assert.equal(await stored(page, livingMigrationKey), raw);
     assert.equal(await stored(page, migrationKey), raw);
@@ -536,7 +536,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 7);
+    assert.equal((await saved(page)).schemaVersion, 8);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -1412,7 +1412,7 @@ const combatSaveBeforeLivingField = JSON.stringify({
 });
 browserTest("Living Field backs up schema 5 and exposes the byte-exact export", async (page) => {
   const run = await saved(page);
-  assert.equal(run.schemaVersion, 7);
+  assert.equal(run.schemaVersion, 8);
   assert.equal(run.items[0].forge, 1);
   assert.equal(run.combat.clears.mossguard, "unclaimed");
   assert.equal(await stored(page, livingMigrationKey), combatSaveBeforeLivingField);
@@ -1539,7 +1539,7 @@ browserTest("discovered blueprints craft and trigger mixed gear in the mobile fi
 browserTest("Blacksmith migration exports untouched schema 6 and evolves legacy gear with the same identity", async (page) => {
   const raw = '{ "schemaVersion": 6, "total": 10000000, "coins": 2000000, "scrap": 220, "shards": 140, "items": [{"id":1,"slot":0,"r":4,"level":1,"value":10,"forge":3,"set":"hammerhand","locked":true}], "equip":{"0":1} }';
   assert.equal(await stored(page, blacksmithBackup), raw);
-  assert.equal((await saved(page)).schemaVersion, 7);
+  assert.equal((await saved(page)).schemaVersion, 8);
   await click(page, "#settings");
   await click(page, "#exportPreBlacksmith");
   assert.equal(await page.locator("#saveText").inputValue(), raw);
@@ -1679,3 +1679,143 @@ browserTest("Auto Sell trades eligible chest gear for coins and keeps protected 
   assert.equal(run.items.length, 3);
   assert.equal(run.equip[0], 1);
 }, { touch: true });
+
+const meadowScreenshots = process.env.BUTTON_FIELD_MEADOW_SCREENSHOTS;
+async function meadowScreenshot(page, name) {
+  if (meadowScreenshots) await page.screenshot({ path: meadowScreenshots + "/" + name + ".png", animations: "disabled" });
+}
+
+async function openMeadowbrook(page) {
+  await click(page, visibleEntrance("#farm"));
+  await click(page, '[data-open="meadowbrook"]');
+  assert.match(await text(page, "#modalTitle"), /Meadowbrook Farm/);
+}
+
+async function meadowTile(page, column, row, touch = false) {
+  const position = await page.locator("#meadowCanvas").evaluate((canvas, [x, y]) => {
+    const rect = canvas.getBoundingClientRect();
+    return { x: rect.left + rect.width * (x + 0.5) / 32, y: rect.top + rect.height * (y + 0.5) / 20 };
+  }, [column, row]);
+  if (touch) await page.touchscreen.tap(position.x, position.y);
+  else await page.mouse.click(position.x, position.y);
+  await page.clock.runFor(1600);
+}
+
+browserTest("Meadowbrook unlocks through the Garden and sells a fresh harvest into the field wallet", async (page) => {
+  assert.ok(await page.locator(visibleEntrance("#farm")).isHidden());
+  const quickPresses = (count) => page.evaluate((presses) => {
+    for (let i = 0; i < presses; i++) document.getElementById("press").click();
+  }, count);
+  await quickPresses(25);
+  await page.clock.runFor(500);
+  await click(page, landmark("workshop"));
+  await click(page, "#workshopItems [data-buy='0']");
+  await escape(page);
+  await quickPresses(14);
+  await page.clock.runFor(500);
+  await click(page, landmark("workshop"));
+  await click(page, "#workshopItems [data-buy='0']");
+  await escape(page);
+  await quickPresses(106);
+  assert.ok(await page.locator(visibleEntrance("#farm")).isHidden());
+  await quickPresses(1);
+  await page.clock.runFor(500);
+  const freshRun = await saved(page);
+  await openMeadowbrook(page);
+  await meadowScreenshot(page, "01-desktop-arrival");
+  for (const x of [11, 12, 13]) await meadowTile(page, x, 10);
+  assert.match(await text(page, "#meadowGoal"), /Fresh beginnings/);
+  let run = await saved(page);
+  assert.deepEqual([run.coins, run.total, run.meadowbrook.bag.turnip, run.meadowbrook.energy], [freshRun.coins + 45, freshRun.total + 45, 3, 97]);
+  await click(page, "#meadowSell");
+  assert.match(await text(page, "#meadowNotice"), /Sold 3 crops for 60 coins/);
+  await meadowScreenshot(page, "02-desktop-new-goal");
+  await escape(page);
+  assert.ok(await page.locator(landmark("farm")).evaluate(el => el === document.activeElement));
+  assert.equal(await text(page, "#coins"), String(freshRun.coins + 105));
+  await page.reload();
+  await openMeadowbrook(page);
+  run = await saved(page);
+  assert.equal(run.meadowbrook.quest, 1);
+  assert.equal(run.meadowbrook.bag.turnip, 0);
+  assert.equal(run.meadowbrook.plots["11,10"].crop, null);
+  assert.equal(run.coins, freshRun.coins + 105);
+}, { viewport: { width: 1280, height: 800 }, motion: "no-preference" });
+
+browserTest("Meadowbrook touch map, keyboard tools, shop, rest and farm save migration", async (page) => {
+  const backup = await stored(page, saveKey + "-before-meadowbrook");
+  assert.equal(backup, '{"schemaVersion":7,"total":2500,"coins":600,"sites":{"plots":[{"crop":"glowleaf","remaining":8000}]}}');
+  assert.equal((await saved(page)).sites.plots[0].crop, "glowleaf");
+  await openMeadowbrook(page);
+  await meadowScreenshot(page, "03-mobile-arrival");
+  await meadowTile(page, 11, 10, true);
+  assert.equal((await saved(page)).meadowbrook.bag.turnip, 1);
+  await page.locator("#meadowCanvas").focus();
+  await page.keyboard.press("2");
+  assert.equal(await page.locator('[data-meadow-tool="1"]').getAttribute("aria-pressed"), "true");
+  await page.locator("#meadowCanvas").evaluate(el => el.scrollIntoView({ block: "center" }));
+  await meadowTile(page, 10, 11, true);
+  assert.equal((await saved(page)).meadowbrook.plots["10,11"].tilled, true);
+  await page.locator("#meadowSeed").selectOption("turnip");
+  await page.locator("#meadowCanvas").evaluate(el => el.scrollIntoView({ block: "center" }));
+  await meadowTile(page, 10, 11, true);
+  assert.equal((await saved(page)).meadowbrook.plots["10,11"].crop, "turnip");
+  await page.locator("#meadowCanvas").focus();
+  await page.keyboard.press("4");
+  await meadowTile(page, 10, 11, true);
+  assert.equal((await saved(page)).meadowbrook.plots["10,11"].water, true);
+
+  await page.locator('[data-meadow-target="home"]').tap();
+  await page.clock.runFor(4500);
+  await click(page, "[data-meadow-sleep]");
+  let run = await saved(page);
+  assert.equal(run.meadowbrook.day, 2);
+  assert.equal(run.meadowbrook.energy, 100);
+  assert.equal(run.meadowbrook.plots["10,11"].growth, 1);
+
+  await page.locator('[data-meadow-target="shop"]').tap();
+  await page.clock.runFor(6400);
+  await click(page, '[data-meadow-buy="pumpkin"][data-quantity="1"]');
+  run = await saved(page);
+  assert.equal(run.meadowbrook.seeds.pumpkin, 1);
+  assert.equal(run.coins, 560);
+  assert.equal(run.total, 2500);
+  await meadowScreenshot(page, "04-mobile-seed-shop");
+  await escape(page);
+  assert.ok(await page.locator("#meadowCanvas").isVisible());
+  assert.ok(await page.locator("#meadowService").isHidden());
+  await escape(page);
+  await page.clock.runFor(10000);
+  assert.equal((await saved(page)).meadowbrook.time, run.meadowbrook.time);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+}, {
+  touch: true,
+  init: () => localStorage.setItem("treasure-grove-v3", '{"schemaVersion":7,"total":2500,"coins":600,"sites":{"plots":[{"crop":"glowleaf","remaining":8000}]}}'),
+});
+
+browserTest("Meadowbrook's developed farm harvests pumpkins and keeps its progress across fields", async (page) => {
+  await importSave(page, {
+    total: 50000, coins: 450, opened: 1, world: "desert",
+    meadowbrook: {
+      day: 115, time: 840, energy: 36, weather: "Rainy",
+      player: { x: 10.5, y: 10.5 }, seeds: { turnip: 0, carrot: 2, strawberry: 5, pumpkin: 3 },
+      plots: { "11,10": { crop: "pumpkin", growth: 5, water: true }, "12,10": { crop: "strawberry", growth: 3, water: true } },
+      quest: 4, progress: { harvest: 30, plant: 32, sold: 29, earned: 940 },
+    },
+  });
+  await openMeadowbrook(page);
+  assert.match(await text(page, "#meadowDay"), /Day 115 · Spring/);
+  assert.equal(await text(page, "#meadowWeather"), "Rainy");
+  await meadowScreenshot(page, "05-desktop-developed-farm");
+  await meadowTile(page, 11, 10);
+  await click(page, "#meadowSell");
+  const run = await saved(page);
+  assert.equal(run.meadowbrook.quest, 5);
+  assert.equal(run.coins, 970);
+  assert.equal(run.total, 50520);
+  await escape(page);
+  await click(page, "#worldHome");
+  await openMeadowbrook(page);
+  assert.equal(await text(page, "#meadowGoal"), "Meadowbrook master");
+  assert.equal((await saved(page)).meadowbrook.day, 115);
+}, { viewport: { width: 1280, height: 800 } });

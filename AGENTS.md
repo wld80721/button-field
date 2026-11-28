@@ -38,4 +38,4 @@ These requirements apply to every major expansion and to redesigns of existing s
 ## Changelog and approval
 
 - Maintain [CHANGELOG.md](CHANGELOG.md). Record player-facing changes and save or compatibility notes as part of each update. Keep pending changes under Unreleased until they ship.
-- Prepare major updates on a separate branch for review. Push completed, verified Button Field updates to GitHub by default. The owner has given standing approval to merge verified updates into `main` when they ask to push or publish an update. Verify the GitHub Pages deployment after publishing.
+- Prepare major updates on a separate branch for review. Always push every completed, verified Button Field update to GitHub as part of the same task. The owner has given standing approval to merge verified updates into `main` and publish them to GitHub Pages without a separate request. Verify the live deployment before reporting the update complete.

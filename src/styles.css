@@ -3632,3 +3632,99 @@ textarea {
   .smith-bench .actions button { min-height: 34px; }
   .smith-room:has(+ .smith-bench:not([hidden])) ~ .smith-wallet { display: none; }
 }
+
+/* Meadowbrook Farm */
+.meadow-entrance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-bottom: 14px;
+  padding: 8px;
+  border: 2px solid #719d71;
+  border-radius: 5px;
+  background: #244a3a;
+}
+.meadow-entrance button { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.meadow-entrance img { width: 40px; height: 29px; object-fit: contain; }
+.meadow-entrance p { margin: 0; color: #dfedc8; }
+.modal.meadowbrook-window[data-location] .window { width: min(1150px, 100%); background: #20382c; border-color: #85a66d; }
+.modal.meadowbrook-window[data-location] .window-head { background: #1a2c24; border-color: #85a66d; }
+.meadowbrook-window .location-art { display: none; }
+.modal.meadowbrook-window[data-location] #close { min-height: 44px; white-space: nowrap; background: #1d3332; border-color: #85a66d; }
+.meadowbrook { --meadow-edge: #689164; --meadow-dark: #192e24; --meadow-gold: #ffdb91; }
+.meadow-layout { display: grid; grid-template-columns: minmax(0, 3.4fr) minmax(220px, 1fr); gap: 12px; }
+.meadow-play { min-width: 0; }
+.meadow-hud { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+.meadow-hud span {
+  padding: 4px 8px;
+  background: var(--meadow-dark);
+  border: 1px solid var(--meadow-edge);
+  border-radius: 3px;
+  color: #e8f0cb;
+}
+#meadowCoins { color: var(--meadow-gold); }
+.meadow-viewport { overflow-x: auto; border: 2px solid var(--meadow-edge); border-radius: 4px; background: #345e3b; }
+.meadow-map { position: relative; min-width: 580px; }
+#meadowCanvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+#meadowCanvas:focus-visible { outline: 3px solid var(--meadow-gold); outline-offset: -3px; }
+.meadow-pin {
+  position: absolute;
+  top: 22%;
+  padding: 3px 6px;
+  min-height: 31px;
+  transform: translateX(-50%);
+  color: #fff1c3;
+  background: #253a2d;
+  border: 2px solid #c4b278;
+  border-radius: 4px;
+}
+.meadow-home-pin { left: 17.2%; }
+.meadow-shop-pin { left: 79.7%; }
+.meadow-controls, .meadow-directions, .meadow-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.meadow-controls { justify-content: space-between; margin: 8px 0; }
+.meadow-tools button, .meadow-directions button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 3px 6px;
+  border: 1px solid var(--meadow-edge);
+  border-radius: 4px;
+  background: var(--meadow-dark);
+  color: #fff3c6;
+}
+.meadow-tools button { display: inline-flex; align-items: center; gap: 4px; }
+.meadow-tools button[aria-pressed="true"] { background: #514930; border-color: var(--meadow-gold); }
+.meadow-directions button { touch-action: none; }
+.meadow-tools canvas { width: 24px; height: 24px; image-rendering: pixelated; pointer-events: none; }
+.meadow-tools kbd { color: #f8dc9d; font-size: .72em; }
+.meadow-help { margin: 8px 0 3px; }
+.meadow-pan-help { display: none; }
+.meadow-notice { color: #ffe6a6; margin: 4px 0 0; min-height: 1.4em; }
+.meadow-panel { margin-bottom: 8px; padding: 9px; background: var(--meadow-dark); border: 1px solid var(--meadow-edge); border-radius: 4px; }
+.meadow-panel h3 { color: #f5df9f; margin: 0 0 4px; }
+.meadow-panel p { margin: 5px 0; }
+.meadow-panel small { color: #cbdec1; }
+.meadow-panel table { width: 100%; margin: 3px 0 9px; text-align: left; }
+.meadow-panel th, .meadow-panel td { padding: 2px; }
+.meadow-panel tbody th { font-weight: normal; }
+.meadow-panel td { font-variant-numeric: tabular-nums; }
+.meadow-panel :is(select, button) { min-height: 44px; }
+.meadow-seed { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; }
+.meadow-seed select { min-height: 36px; padding-inline: 6px; background: #102b23; color: #fff3c6; border: 1px solid var(--meadow-edge); }
+#meadowSell { margin-top: 7px; width: 100%; }
+.meadow-panel-head { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+.meadow-shop-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 5px; padding: 5px 0; }
+.meadow-shop-row small { display: block; }
+.meadow-shop-row button { white-space: nowrap; padding: 2px 5px; }
+.meadow-skip { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.meadow-skip:focus { position: static; width: auto; height: auto; clip-path: none; color: var(--meadow-gold); }
+@media (min-width: 781px) {
+  .meadow-map { max-width: max(580px, calc((100dvh - 350px) * 1.6)); margin-inline: auto; }
+}
+@media (max-width: 620px) {
+  .meadow-pan-help { display: inline; }
+}
+@media (max-width: 780px) {
+  .meadow-layout { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .meadowbrook-window .window-body { padding: 8px; }
+}
