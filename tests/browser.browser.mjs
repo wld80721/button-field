@@ -468,7 +468,7 @@ for (const [release, legacy] of legacySaves) {
   browserTest(`migrate and back up ${release}`, async (page) => {
     assert.match(await text(page, "#saveStatus"), /Saved locally/i);
     const migrated = await saved(page);
-    assert.equal(migrated.schemaVersion, 8);
+    assert.equal(migrated.schemaVersion, 9);
     assert.deepEqual(migrated.fieldDiscoveries, []);
     assert.equal(await stored(page, livingMigrationKey), raw);
     assert.equal(await stored(page, migrationKey), raw);
@@ -536,7 +536,7 @@ for (const [reason, bad] of [["corrupt JSON", "{this is invalid"], ["unsupported
     await escape(page);
     await importSave(page, { coins: 7, total: 7 });
     assert.equal((await saved(page)).coins, 7);
-    assert.equal((await saved(page)).schemaVersion, 8);
+    assert.equal((await saved(page)).schemaVersion, 9);
   }, { init: `localStorage.setItem(${JSON.stringify(saveKey)}, ${JSON.stringify(bad)})` });
 }
 
@@ -1412,7 +1412,7 @@ const combatSaveBeforeLivingField = JSON.stringify({
 });
 browserTest("Living Field backs up schema 5 and exposes the byte-exact export", async (page) => {
   const run = await saved(page);
-  assert.equal(run.schemaVersion, 8);
+  assert.equal(run.schemaVersion, 9);
   assert.equal(run.items[0].forge, 1);
   assert.equal(run.combat.clears.mossguard, "unclaimed");
   assert.equal(await stored(page, livingMigrationKey), combatSaveBeforeLivingField);
@@ -1539,7 +1539,7 @@ browserTest("discovered blueprints craft and trigger mixed gear in the mobile fi
 browserTest("Blacksmith migration exports untouched schema 6 and evolves legacy gear with the same identity", async (page) => {
   const raw = '{ "schemaVersion": 6, "total": 10000000, "coins": 2000000, "scrap": 220, "shards": 140, "items": [{"id":1,"slot":0,"r":4,"level":1,"value":10,"forge":3,"set":"hammerhand","locked":true}], "equip":{"0":1} }';
   assert.equal(await stored(page, blacksmithBackup), raw);
-  assert.equal((await saved(page)).schemaVersion, 8);
+  assert.equal((await saved(page)).schemaVersion, 9);
   await click(page, "#settings");
   await click(page, "#exportPreBlacksmith");
   assert.equal(await page.locator("#saveText").inputValue(), raw);
@@ -1819,3 +1819,110 @@ browserTest("Meadowbrook's developed farm harvests pumpkins and keeps its progre
   assert.equal(await text(page, "#meadowGoal"), "Meadowbrook master");
   assert.equal((await saved(page)).meadowbrook.day, 115);
 }, { viewport: { width: 1280, height: 800 } });
+
+const hollowScreenshots = process.env.BUTTON_FIELD_HOLLOW_SCREENSHOTS;
+async function hollowScreenshot(page, name) {
+  if (hollowScreenshots) await page.screenshot({ path: hollowScreenshots + "/" + name + ".png", animations: "disabled" });
+}
+async function openHollow(page) {
+  await click(page, visibleEntrance("#mine"));
+  await click(page, '[data-open="deep-hollow"]');
+  assert.equal(await text(page, "#modalTitle"), "Deep Hollow");
+}
+
+browserTest("Deep Hollow unlocks from the red button and banks crafting copper from a fresh shaft", async (page) => {
+  const quickPresses = (count) => page.evaluate((presses) => {
+    for (let i = 0; i < presses; i++) document.getElementById("press").click();
+  }, count);
+  const reinforce = async (count = 1) => {
+    await page.clock.runFor(450);
+    await click(page, landmark("workshop"));
+    for (let i = 0; i < count; i++) await click(page, "#workshopItems [data-buy='0']");
+    await escape(page);
+  };
+  await quickPresses(25);
+  await reinforce();
+  await quickPresses(14);
+  await reinforce();
+  await quickPresses(40);
+  await reinforce(2);
+  const run = await saved(page);
+  const beforeGate = Math.ceil((2500 - run.total) / Number(await text(page, "#tapValue"))) - 1;
+  await quickPresses(beforeGate);
+  assert.ok(await page.locator(visibleEntrance("#mine")).isHidden());
+  await quickPresses(1);
+  await page.clock.runFor(500);
+  await openHollow(page);
+  await hollowScreenshot(page, "01-desktop-camp");
+  await page.locator("#hollowCanvas").focus();
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.press("ArrowDown");
+    await page.clock.runFor(i < 4 ? 200 : 720);
+  }
+  assert.match(await text(page, "#hollowZone"), /Copper Ridge/);
+  assert.equal(await text(page, '[data-hollow-ore="3"]'), "1");
+  assert.equal(await text(page, "#hollowDepth"), "Depth 5 m");
+  assert.ok(await page.locator("#hollowTradeAction").isDisabled());
+  await hollowScreenshot(page, "02-desktop-copper-ridge");
+  await page.keyboard.press("r");
+  await page.locator("#hollowTrade").selectOption("bank");
+  await click(page, "#hollowTradeAction");
+  assert.match(await text(page, "#hollowNotice"), /Banked 1 Copper Ore/);
+  await escape(page);
+  assert.ok(await page.locator(landmark("mine")).evaluate(el => el === document.activeElement));
+  await click(page, visibleEntrance("#mine"));
+  assert.match(await text(page, "#mineWallet"), /1 Copper Ore/);
+  await escape(page);
+  await page.reload();
+  await openHollow(page);
+  await click(page, "#hollowLift");
+  assert.equal(await text(page, "#hollowDepth"), "Depth 5 m");
+  assert.equal((await saved(page)).deepHollow.cleared.length, 1);
+}, { viewport: { width: 1280, height: 800 }, motion: "no-preference" });
+
+browserTest("Deep Hollow uses touch digging, shared coins, contracts, and existing saves in the late mine", async (page) => {
+  const original = '{"schemaVersion":8,"total":50000,"coins":800,"copperOre":8,"meadowbrook":{"day":3}}';
+  assert.equal(await stored(page, saveKey + "-before-deep-hollow"), original);
+  assert.equal((await saved(page)).meadowbrook.day, 3);
+  await importSave(page, {
+    ...(await saved(page)), world: "desert",
+    deepHollow: { seed: 6, deep: { x: 26, y: 97 }, cleared: [97 * 52 + 26],
+      pick: 4, bag: 1, lamp: 3, goal: 6, inv: [0, 0, 0, 0, 0, 14] },
+  });
+  await openHollow(page);
+  await page.locator("#hollowLift").tap();
+  assert.equal(await text(page, "#hollowDepth"), "Depth 93 m");
+  assert.match(await text(page, "#hollowZone"), /The Deep Core/);
+  await hollowScreenshot(page, "03-mobile-deep-core");
+  await page.locator('[data-hollow-direction="down"]').tap();
+  await page.clock.runFor(1100);
+  assert.equal(await text(page, "#hollowDepth"), "Depth 94 m");
+  assert.equal(await text(page, '[data-hollow-ore="8"]'), "15");
+  assert.match(await text(page, "#hollowNotice"), /Contract rewards \+1800 coins/);
+  assert.ok(await page.locator('[data-hollow-upgrade="lamp"]').isDisabled());
+  await page.locator("#hollowLift").tap();
+  await page.locator("#hollowTradeAction").tap();
+  const haul = await saved(page);
+  assert.equal(haul.coins, 6750);
+  assert.equal(haul.total, 55950);
+  assert.equal(haul.deepHollow.goal, 8);
+  await page.locator('[data-hollow-upgrade="lamp"]').tap();
+  const upgraded = await saved(page);
+  assert.equal(upgraded.coins, 5950);
+  assert.equal(upgraded.total, haul.total);
+  assert.equal(upgraded.deepHollow.lamp, 4);
+  await hollowScreenshot(page, "04-mobile-sale");
+  await escape(page);
+  await page.reload();
+  await openHollow(page);
+  await page.locator("#hollowLift").tap();
+  assert.equal(await text(page, "#hollowDepth"), "Depth 94 m");
+  assert.equal(await text(page, "#hollowGoal"), "Legend of the Hollow");
+  assert.equal((await saved(page)).copperOre, 8);
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+}, {
+  touch: true,
+  init: () => {
+    if (!localStorage.getItem("treasure-grove-v3")) localStorage.setItem("treasure-grove-v3", '{"schemaVersion":8,"total":50000,"coins":800,"copperOre":8,"meadowbrook":{"day":3}}');
+  },
+});

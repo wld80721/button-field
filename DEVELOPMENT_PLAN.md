@@ -22,6 +22,12 @@ Meadowbrook is an explorable farm reached through the Garden at 600 run earnings
 
 Seed purchases, crop sales, and journal rewards use Button Field coins. Garden beds continue producing crafting materials and keep their press growth, research, and automation. Meadowbrook shares the Button Field save, pauses when closed, and starts fresh on Ascension.
 
+## Deep Hollow
+
+Deep Hollow opens from the Mine at 2,500 run earnings. The surface camp overlooks a diggable shaft. Players tap or hold a direction to move through open tunnels and cut through rock. The six ores, deeper strata, and upgrades to light, mining speed, and hauling capacity extend the original dig-and-return loop.
+
+The lift returns players to camp or to their deepest cleared tile. Camp sales and guild contracts pay Button Field coins, and copper can be banked for crafting instead. The existing renewable deposits and their upgrades continue to supply materials. Deep Hollow saves the tunnel layout, equipment, and contracts with the run and starts fresh at Ascension.
+
 ## Later expansion · Boss Arenas
 
 **Status** · Arena redesign proposed. The ten existing field bosses are live.
@@ -35,7 +41,7 @@ Start the expansion on a separate branch from the documented `main`. The first i
 
 ## Later phases
 
-1. **Garden and Mining.** Deepen the crafting-material Garden beds and turn deposits into a space where players can expose and extract veins. Reuse the existing crop effects, research, materials, and automation.
+1. **Garden beds and renewable deposits.** Deepen the crafting-material Garden beds and deposit interactions. Reuse the existing crop effects, research, materials, and automation.
 2. **Companion camp and expeditions.** Build a physical camp and route map with choices to make along expeditions. Keep the 15 companions, roles, progression, and offline trip timers.
 
 Revisit the wider backlog after the current systems feel like places to play. It includes capped offline coin income, Buy 1/10/100/MAX, achievements and a richer collection book, a 50-plus-upgrade Ascension tree, Transcendence, challenge runs, ambient music, detailed statistics, and performance settings. Scope and test each phase independently.

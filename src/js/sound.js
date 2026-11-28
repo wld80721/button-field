@@ -2,6 +2,8 @@ import { KEY } from "./saves.js";
 import { $ } from "./ui-dom.js";
 
 const soundTones = {
+  hollowChip: [[140, 80, 0.065, 0, "triangle", 0.048]],
+  hollowOre: [[260, 160, 0.045, 0, "triangle", 0.05], [540, 620, 0.13, 0.04, "sine", 0.06]],
   smithHeat: [[105, 180, 0.22, 0, "sawtooth", 0.035]],
   smithStrike: [[930, 470, 0.12, 0, "triangle", 0.1], [1440, 930, 0.16, 0, "sine", 0.055]],
   smithQuench: [[460, 120, 0.3, 0, "sawtooth", 0.035], [659, 784, 0.2, 0.1, "sine", 0.06]],

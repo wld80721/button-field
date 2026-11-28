@@ -13,7 +13,7 @@ const landmarks = {
   camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
   farm: { name: "Garden", at: milestones.shards, screens: ["farm", "meadowbrook"], find: "carving", cover: "stump", art: "crop" },
   grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
-  mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
+  mine: { name: "Mine", at: milestones.helper, screens: ["mine", "deep-hollow"], find: "lantern", cover: "rock", art: "vein" },
   bosses: { name: "Boss Board", at: milestones.combat, screens: ["bosses"] },
   gate: { name: "Trade gate", at: worlds.desert.at, screens: ["worlds"] },
 };

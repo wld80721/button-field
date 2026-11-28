@@ -61,7 +61,7 @@ function farmMarkup() {
     </article>`,
     )
     .join("");
-  return `<div class="meadow-entrance"><button class="action gold" data-open="meadowbrook">${fieldSprite("farm")}<span>Visit Meadowbrook Farm</span></button><p>Grow crops for coins at Meadowbrook. Use the Garden beds below for crafting materials.</p></div>
+  return `<div class="site-entrance"><button class="action gold" data-open="meadowbrook">${fieldSprite("farm")}<span>Visit Meadowbrook Farm</span></button><p>Grow crops for coins at Meadowbrook. Use the Garden beds below for crafting materials.</p></div>
     <p class="subtext">Grow Garden crops while the game is visible. Red-button presses speed them up.</p>
     <p id="farmWallet" class="site-wallet"></p>
     <div class="item-grid">${plots}</div>
@@ -77,7 +77,8 @@ function farmMarkup() {
 }
 
 function mineMarkup() {
-  return `<p class="subtext">Chip a deposit to gather materials. Red-button presses speed up recovery.</p>
+  return `<div class="site-entrance"><button class="action gold" data-open="deep-hollow">${fieldSprite("mine")}<span>Enter Deep Hollow</span></button><p>Dig tunnels for ore to sell or bank as crafting copper.</p></div>
+    <p class="subtext">Chip a deposit to gather materials. Red-button presses speed up recovery.</p>
     <p id="mineWallet" class="site-wallet"></p><p id="pickStatus"></p>
     <div class="item-grid">${Object.entries(deposits)
       .map(

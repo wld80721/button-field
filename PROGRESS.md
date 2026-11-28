@@ -4,6 +4,12 @@
 
 The Legendary Blacksmith follows The Living Field (`b78f443`). GitHub Pages publishes the standalone root `index.html` from `main`. Boss Arenas remains at the proposal stage. Resume from the [development plan](DEVELOPMENT_PLAN.md) and [project rules](AGENTS.md).
 
+## Deep Hollow · 2026-11-28
+
+- Adapted the supplied mining game as a native Mine destination. The procedural shaft, six ores, camp equipment, guild contracts, and two-way lift use the Button Field save. Ore sales and contracts credit the shared coin balance and run earnings. Banking copper feeds the existing crafting ledger.
+- Backed up the previous standalone build and representative schema 8 saves. Schema 9 preserves Meadowbrook, renewable deposits, equipment, and progress, and provides a byte-exact pre-Deep Hollow export. The shaft resets on Ascension.
+- Playtested the unlock from a fresh run and a developed mine at the deepest chamber. Checked keyboard and touch, reduced motion, migration, copper transfer, ore sales, contract rewards, equipment upgrades, and the lift across reloads. Reviewed desktop and mobile screenshots. Physical devices, Safari, and Firefox were outside this verification pass.
+
 ## Meadowbrook Farm · 2026-11-28
 
 - Adapted the supplied farm map and pixel art into a walkable Garden destination. Tools, seed supplies, four market crops, daily watering, weather, rest, and journal goals use the shared Button Field save. Seed purchases debit the existing coin balance. Sales and journal rewards credit coins and run earnings.
@@ -60,4 +66,4 @@ The workshop, four equipment sets, and schema 7 migration are included in Expans
 
 ## Known issues
 
-The Living Field gives farm growth and mining damage visible changes. The later Farming and Mining phase will deepen their interactions. Expeditions still use countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.
+The Living Field gives farm growth and mining damage visible changes. The existing Garden beds and renewable deposits can be deepened in a later phase. Expeditions still use countdowns. Bosses have distinct rules, but steady tapping and Guard can win the Orrery while the field barely reacts. These are the priority redesigns. General offline coin earnings and the other long-term backlog items remain open.
