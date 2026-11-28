@@ -71,6 +71,7 @@ import {
   readPreCombatSave,
   readPreLivingFieldSave,
   readPreBlacksmithSave,
+  readPreMeadowbrookSave,
   resumeSaving,
   save,
 } from "./saves.js";
@@ -424,6 +425,7 @@ $("modalBody").addEventListener("click", (e) => {
       "exportPreCombat",
       "exportPreLivingField",
       "exportPreBlacksmith",
+      "exportPreMeadowbrook",
       "exportPreExpansion",
       "exportPreFoundation",
     ].includes(b.id)
@@ -443,7 +445,9 @@ $("modalBody").addEventListener("click", (e) => {
                   ? readPreLivingFieldSave()
                   : b.id === "exportPreBlacksmith"
                     ? readPreBlacksmithSave()
-                    : readPreFoundationSave();
+                    : b.id === "exportPreMeadowbrook"
+                      ? readPreMeadowbrookSave()
+                      : readPreFoundationSave();
     if (backup !== null) {
       $("saveText").value = backup;
       $("saveText").select();

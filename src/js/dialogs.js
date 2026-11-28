@@ -6,6 +6,7 @@ import {
 } from "./combat-view.js";
 import { companionMarkup, renderCompanions } from "./companion-view.js";
 import { companionsAt } from "./companions.js";
+import { meadowMarkup, mountMeadowbrook, unmountMeadowbrook } from "./meadowbrook-view.js";
 import { farmMarkup, mineMarkup, renderSites } from "./site-view.js";
 import { farmAt, mineAt } from "./sites.js";
 import { builds, craftAt, designKey, hasSetDesign } from "./build-gear.js";
@@ -45,6 +46,7 @@ import {
   readPreCombatSave,
   readPreLivingFieldSave,
   readPreBlacksmithSave,
+  readPreMeadowbrookSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -230,7 +232,7 @@ function showCollection(id) {
 
 function openModal(type, id, location = runtime.fieldLocation) {
   if (
-    (type === "farm" && s.total < farmAt) ||
+    ((type === "farm" || type === "meadowbrook") && s.total < farmAt) ||
     (type === "mine" && s.total < mineAt) ||
     (type === "companions" && s.total < companionsAt) ||
     (type === "bosses" && s.total < milestones.combat)
@@ -239,6 +241,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
   if (type === "wheel" && !wheelReady()) return;
   syncCombat();
   clearWork();
+  unmountMeadowbrook();
   if (["blacksmith", "forge", "recipes"].includes(type)) location = "forge";
   hideSkillTip();
   hideComparison();
@@ -252,8 +255,9 @@ function openModal(type, id, location = runtime.fieldLocation) {
   $("game").inert = true;
   $("modal").classList.toggle("constellation", type === "skills");
   $("modal").classList.toggle("milestone-wheel", type === "wheel");
+  $("modal").classList.toggle("meadowbrook-window", type === "meadowbrook");
   renderLocationScene(s, runtime.fieldLocation, entering);
-  const returnsToField = landmark || type === "wheel";
+  const returnsToField = landmark || type === "wheel" || type === "meadowbrook";
   $("close").textContent = returnsToField ? "Return to field" : type === "skills" ? "DONE" : "✕";
   $("close").setAttribute(
     "aria-label",
@@ -310,6 +314,11 @@ function openModal(type, id, location = runtime.fieldLocation) {
     b.innerHTML = companionMarkup();
     b.closest(".window").scrollTop = 0;
     renderCompanions();
+  } else if (type === "meadowbrook") {
+    t.textContent = "Meadowbrook Farm";
+    b.innerHTML = meadowMarkup();
+    b.closest(".window").scrollTop = 0;
+    mountMeadowbrook(b.querySelector("#meadowbrook"));
   } else if (type === "farm" || type === "mine") {
     t.textContent = type === "farm" ? "Farming" : "Mining";
     b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
@@ -381,6 +390,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
+        ${readPreMeadowbrookSave() ? '<button class="action secondary" id="exportPreMeadowbrook">Export pre-Meadowbrook backup</button>' : ""}
         ${readPreBlacksmithSave() ? '<button class="action secondary" id="exportPreBlacksmith">Export pre-Blacksmith backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
@@ -392,7 +402,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
       $("saveWarning").hidden = false;
     }
   }
-  if (landmark) t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
+  if (landmark && type !== "meadowbrook") t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
   refreshBlacksmith();
   if (location === "forge") b.closest(".window").scrollTop = 0;
   if (type === "skills") updateBuyButtons();
@@ -422,6 +432,7 @@ function refreshBlacksmithDialog() {
 
 function closeModal() {
   clearWork();
+  unmountMeadowbrook();
   hideSkillTip();
   hideComparison();
   runtime.ascConfirm = false;
@@ -429,6 +440,7 @@ function closeModal() {
   runtime.wheelGeneration++;
   runtime.wheelMoving = false;
   $("modal").hidden = true;
+  $("modal").classList.remove("meadowbrook-window");
   $("game").inert = false;
   runtime.modalType = "";
   if (runtime.fieldLocation) playFieldReturn();

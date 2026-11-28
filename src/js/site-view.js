@@ -61,7 +61,8 @@ function farmMarkup() {
     </article>`,
     )
     .join("");
-  return `<p class="subtext">Grow crops while the game is visible. Red-button presses speed them up.</p>
+  return `<div class="meadow-entrance"><button class="action gold" data-open="meadowbrook">${fieldSprite("farm")}<span>Visit Meadowbrook Farm</span></button><p>Grow crops for coins at Meadowbrook. Use the Garden beds below for crafting materials.</p></div>
+    <p class="subtext">Grow Garden crops while the game is visible. Red-button presses speed them up.</p>
     <p id="farmWallet" class="site-wallet"></p>
     <div class="item-grid">${plots}</div>
     <h3>Research</h3><div class="site-upgrades">${Object.entries(research)

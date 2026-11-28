@@ -3642,6 +3642,102 @@ textarea {
   .smith-bench .actions button { min-height: 34px; }
   .smith-room:has(+ .smith-bench:not([hidden])) ~ .smith-wallet { display: none; }
 }
+
+/* Meadowbrook Farm */
+.meadow-entrance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-bottom: 14px;
+  padding: 8px;
+  border: 2px solid #719d71;
+  border-radius: 5px;
+  background: #244a3a;
+}
+.meadow-entrance button { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.meadow-entrance img { width: 40px; height: 29px; object-fit: contain; }
+.meadow-entrance p { margin: 0; color: #dfedc8; }
+.modal.meadowbrook-window[data-location] .window { width: min(1150px, 100%); background: #20382c; border-color: #85a66d; }
+.modal.meadowbrook-window[data-location] .window-head { background: #1a2c24; border-color: #85a66d; }
+.meadowbrook-window .location-art { display: none; }
+.modal.meadowbrook-window[data-location] #close { min-height: 44px; white-space: nowrap; background: #1d3332; border-color: #85a66d; }
+.meadowbrook { --meadow-edge: #689164; --meadow-dark: #192e24; --meadow-gold: #ffdb91; }
+.meadow-layout { display: grid; grid-template-columns: minmax(0, 3.4fr) minmax(220px, 1fr); gap: 12px; }
+.meadow-play { min-width: 0; }
+.meadow-hud { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+.meadow-hud span {
+  padding: 4px 8px;
+  background: var(--meadow-dark);
+  border: 1px solid var(--meadow-edge);
+  border-radius: 3px;
+  color: #e8f0cb;
+}
+#meadowCoins { color: var(--meadow-gold); }
+.meadow-viewport { overflow-x: auto; border: 2px solid var(--meadow-edge); border-radius: 4px; background: #345e3b; }
+.meadow-map { position: relative; min-width: 580px; }
+#meadowCanvas { display: block; width: 100%; height: auto; image-rendering: pixelated; }
+#meadowCanvas:focus-visible { outline: 3px solid var(--meadow-gold); outline-offset: -3px; }
+.meadow-pin {
+  position: absolute;
+  top: 22%;
+  padding: 3px 6px;
+  min-height: 31px;
+  transform: translateX(-50%);
+  color: #fff1c3;
+  background: #253a2d;
+  border: 2px solid #c4b278;
+  border-radius: 4px;
+}
+.meadow-home-pin { left: 17.2%; }
+.meadow-shop-pin { left: 79.7%; }
+.meadow-controls, .meadow-directions, .meadow-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.meadow-controls { justify-content: space-between; margin: 8px 0; }
+.meadow-tools button, .meadow-directions button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 3px 6px;
+  border: 1px solid var(--meadow-edge);
+  border-radius: 4px;
+  background: var(--meadow-dark);
+  color: #fff3c6;
+}
+.meadow-tools button { display: inline-flex; align-items: center; gap: 4px; }
+.meadow-tools button[aria-pressed="true"] { background: #514930; border-color: var(--meadow-gold); }
+.meadow-directions button { touch-action: none; }
+.meadow-tools canvas { width: 24px; height: 24px; image-rendering: pixelated; pointer-events: none; }
+.meadow-tools kbd { color: #f8dc9d; font-size: .72em; }
+.meadow-help { margin: 8px 0 3px; }
+.meadow-pan-help { display: none; }
+.meadow-notice { color: #ffe6a6; margin: 4px 0 0; min-height: 1.4em; }
+.meadow-panel { margin-bottom: 8px; padding: 9px; background: var(--meadow-dark); border: 1px solid var(--meadow-edge); border-radius: 4px; }
+.meadow-panel h3 { color: #f5df9f; margin: 0 0 4px; }
+.meadow-panel p { margin: 5px 0; }
+.meadow-panel small { color: #cbdec1; }
+.meadow-panel table { width: 100%; margin: 3px 0 9px; text-align: left; }
+.meadow-panel th, .meadow-panel td { padding: 2px; }
+.meadow-panel tbody th { font-weight: normal; }
+.meadow-panel td { font-variant-numeric: tabular-nums; }
+.meadow-panel :is(select, button) { min-height: 44px; }
+.meadow-seed { display: inline-flex; align-items: center; gap: 5px; margin-top: 7px; }
+.meadow-seed select { min-height: 36px; padding-inline: 6px; background: #102b23; color: #fff3c6; border: 1px solid var(--meadow-edge); }
+#meadowSell { margin-top: 7px; width: 100%; }
+.meadow-panel-head { display: flex; gap: 6px; align-items: center; justify-content: space-between; }
+.meadow-shop-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 5px; padding: 5px 0; }
+.meadow-shop-row small { display: block; }
+.meadow-shop-row button { white-space: nowrap; padding: 2px 5px; }
+.meadow-skip { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.meadow-skip:focus { position: static; width: auto; height: auto; clip-path: none; color: var(--meadow-gold); }
+@media (min-width: 781px) {
+  .meadow-map { max-width: max(580px, calc((100dvh - 350px) * 1.6)); margin-inline: auto; }
+}
+@media (max-width: 620px) {
+  .meadow-pan-help { display: inline; }
+}
+@media (max-width: 780px) {
+  .meadow-layout { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .meadowbrook-window .window-body { padding: 8px; }
+}
 </style>
   </head>
   <body>
@@ -5372,7 +5468,7 @@ textarea {
   }
   function normalizeSites(state, raw) {
     const site = state.sites;
-    const bounded = (value, cap) => Number.isFinite(value) ? Math.max(0, Math.min(cap, value)) : 0;
+    const bounded2 = (value, cap) => Number.isFinite(value) ? Math.max(0, Math.min(cap, value)) : 0;
     for (const [id, def] of Object.entries(research))
       site.research[id] = state.total >= def.at && raw?.research?.[id] === true;
     for (let i = 0; i < plotCount(state); i++) {
@@ -5383,28 +5479,28 @@ textarea {
       if (state.total >= def.at && Number.isFinite(plot.remaining))
         site.plots[i] = {
           crop: plot.crop,
-          remaining: bounded(plot.remaining, def.ms)
+          remaining: bounded2(plot.remaining, def.ms)
         };
     }
     if (state.total >= farmAt)
-      site.growthCharges = Math.floor(bounded(raw?.growthCharges, 3));
+      site.growthCharges = Math.floor(bounded2(raw?.growthCharges, 3));
     site.autoHarvest = site.research.harvester && raw?.autoHarvest === true;
     if (state.total < mineAt) return;
-    site.pick = Math.floor(bounded(raw?.pick, tools.length - 1));
+    site.pick = Math.floor(bounded2(raw?.pick, tools.length - 1));
     for (const [id, def] of Object.entries(deposits)) {
       if (!depositAccess(state, id)) continue;
       const vein = raw?.veins?.[id];
-      const remaining = bounded(vein?.remaining, def.ms);
+      const remaining = bounded2(vein?.remaining, def.ms);
       site.veins[id] = {
         remaining,
-        hp: remaining > 0 ? 0 : Math.max(1, Math.floor(bounded(vein?.hp ?? def.hp, def.hp)))
+        hp: remaining > 0 ? 0 : Math.max(1, Math.floor(bounded2(vein?.hp ?? def.hp, def.hp)))
       };
     }
     site.crystalFocus = state.total >= crops.prismbloom.at && raw?.crystalFocus === true;
     site.minerOwned = state.total >= minerUpgrade.at && site.pick >= 1 && raw?.minerOwned === true;
     site.autoMine = site.minerOwned && raw?.autoMine === true;
     if (depositAccess(state, raw?.target)) site.target = raw.target;
-    site.swing = site.autoMine && site.veins[site.target].remaining === 0 ? bounded(raw?.swing, swingMs - 1) : 0;
+    site.swing = site.autoMine && site.veins[site.target].remaining === 0 ? bounded2(raw?.swing, swingMs - 1) : 0;
   }
 
   // src/js/build-gear.js
@@ -6706,7 +6802,7 @@ textarea {
   }
   function normalizeCompanions(state, raw) {
     const camp = state.companions;
-    const bounded = (n, max) => Number.isFinite(n) ? Math.max(0, Math.min(n, max)) : 0;
+    const bounded2 = (n, max) => Number.isFinite(n) ? Math.max(0, Math.min(n, max)) : 0;
     if (Array.isArray(raw?.artifacts))
       camp.artifacts = [
         ...new Set(raw.artifacts.filter((id) => isKnown(artifacts, id)))
@@ -6716,14 +6812,14 @@ textarea {
       const p = raw?.pets?.[id];
       if (!p || typeof p !== "object" || Array.isArray(p)) continue;
       const pet = newPet();
-      pet.xp = Math.floor(bounded(p.xp, maxXp));
+      pet.xp = Math.floor(bounded2(p.xp, maxXp));
       pet.evolved = petLevel(pet) >= 5 && p.evolved === true;
       pet.role = petLevel(pet) >= 4 && ["field", "scout"].includes(p.role) ? p.role : "";
       if (camp.artifacts.includes(p.gear) && !held.has(p.gear)) {
         pet.gear = p.gear;
         held.add(p.gear);
       }
-      pet.cooldown = Number.isFinite(p.cooldown) ? bounded(p.cooldown, roster[id].seconds * 1e3) : null;
+      pet.cooldown = Number.isFinite(p.cooldown) ? bounded2(p.cooldown, roster[id].seconds * 1e3) : null;
       pet.last = typeof p.last === "string" ? p.last.slice(0, 100) : "";
       camp.pets[id] = pet;
     }
@@ -7169,12 +7265,288 @@ textarea {
     return find;
   }
 
+  // src/js/meadowbrook-map.js
+  var tileSize = 24;
+  var mapWidth = 32;
+  var mapHeight = 20;
+  var trees = [
+    [0, 1],
+    [2, 0],
+    [5, 0],
+    [8, 1],
+    [11, 0],
+    [15, 0],
+    [18, 1],
+    [21, 0],
+    [25, 0],
+    [29, 0],
+    [31, 2],
+    [0, 5],
+    [0, 9],
+    [0, 13],
+    [0, 17],
+    [3, 19],
+    [7, 19],
+    [10, 19],
+    [15, 19],
+    [19, 19],
+    [23, 19],
+    [27, 19],
+    [31, 18],
+    [31, 14],
+    [31, 10],
+    [31, 6],
+    [27, 7],
+    [29, 11],
+    [5, 14],
+    [4, 16],
+    [24, 16]
+  ];
+  var rocks = [
+    [2, 11],
+    [6, 17],
+    [25, 13],
+    [29, 8],
+    [9, 3],
+    [21, 17]
+  ];
+  function blocked(x, y) {
+    if (x < 1 || y < 1 || x >= mapWidth - 1 || y >= mapHeight - 1) return true;
+    if (x >= 3 && x <= 6 && y >= 2 && y <= 5 || x >= 23 && x <= 26 && y >= 2 && y <= 5)
+      return true;
+    if (trees.some((t) => t[0] === x && t[1] === y) || rocks.some((t) => t[0] === x && t[1] === y))
+      return true;
+    if (((x - 26.5) / 3.1) ** 2 + ((y - 10.5) / 4.1) ** 2 < 1.03)
+      return true;
+    if (y === 8 && (x >= 10 && x <= 13 || x >= 16 && x <= 20))
+      return true;
+    if (y === 16 && x >= 10 && x <= 20) return true;
+    return false;
+  }
+  var steps = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  function pathTo(player, x, y, interact) {
+    const start = [Math.floor(player.x), Math.floor(player.y)];
+    const queue = [start];
+    const visited = /* @__PURE__ */ new Map([[start.join(","), null]]);
+    for (let i = 0; i < queue.length; i++) {
+      const [column, row] = queue[i];
+      const distance = Math.abs(column - x) + Math.abs(row - y);
+      if (distance <= Number(interact)) {
+        const path = [];
+        let tile = queue[i];
+        while (tile !== start) {
+          path.push([tile[0] + 0.5, tile[1] + 0.5]);
+          tile = visited.get(tile.join(","));
+        }
+        return path.reverse();
+      }
+      for (const [dx, dy] of steps) {
+        const next = [column + dx, row + dy];
+        const key = next.join(",");
+        if (visited.has(key) || blocked(...next)) continue;
+        visited.set(key, queue[i]);
+        queue.push(next);
+      }
+    }
+    return null;
+  }
+
+  // src/js/meadowbrook.js
+  var meadowCrops = {
+    turnip: { name: "Turnip", cost: 8, sell: 20, days: 2, color: "#e9e1cb", leaf: "#5e9b47" },
+    carrot: { name: "Carrot", cost: 14, sell: 38, days: 3, color: "#e79544", leaf: "#629c45" },
+    strawberry: { name: "Berry", cost: 25, sell: 72, days: 4, color: "#e55c60", leaf: "#43863e" },
+    pumpkin: { name: "Pumpkin", cost: 40, sell: 120, days: 5, color: "#e49336", leaf: "#4c873e" }
+  };
+  var meadowTools = ["Hand", "Hoe", "Seeds", "Water", "Harvest", "Scythe"];
+  var meadowJournal = [
+    ["First harvest", "Harvest 3 crops.", "harvest", 3, 45],
+    ["Fresh beginnings", "Plant 8 seeds.", "plant", 8, 70],
+    ["A growing farm", "Sell 12 crops.", "sold", 12, 120],
+    ["Valley farmer", "Harvest 30 crops.", "harvest", 30, 250],
+    ["The golden harvest", "Earn 1,000 coins from crop sales.", "earned", 1e3, 400]
+  ];
+  var cropIds = Object.keys(meadowCrops);
+  var bedKeys = Array.from({ length: 77 }, (_, index) => `${10 + index % 11},${9 + Math.floor(index / 11)}`);
+  var stockLimit = 9999;
+  var dayStart = 360;
+  var dayLimit = 1e6;
+  var morning = () => ({ x: 5.5, y: 6.5 });
+  function freshMeadowbrook() {
+    const plots = Object.fromEntries(
+      bedKeys.map((key) => [key, { tilled: false, water: false, crop: null, growth: 0 }])
+    );
+    for (const x of [11, 12, 13]) plots[`${x},10`] = { tilled: true, water: false, crop: "turnip", growth: 2 };
+    for (const x of [15, 16, 17]) plots[`${x},10`] = { tilled: true, water: false, crop: "carrot", growth: 1 };
+    for (const x of [11, 12, 13]) plots[`${x},12`].tilled = true;
+    return {
+      day: 1,
+      time: dayStart,
+      energy: 100,
+      weather: "Sunny",
+      player: { x: 8.5, y: 9.5 },
+      seeds: { turnip: 8, carrot: 4, strawberry: 0, pumpkin: 0 },
+      bag: { turnip: 0, carrot: 0, strawberry: 0, pumpkin: 0 },
+      plots,
+      weeds: { "19,14": true, "10,15": true, "20,11": true },
+      progress: { harvest: 0, plant: 0, sold: 0, earned: 0 },
+      quest: 0
+    };
+  }
+  function bounded(value, min, max, fallback = min) {
+    return Number.isFinite(value) ? Math.min(max, Math.max(min, Math.floor(value))) : fallback;
+  }
+  function normalizeMeadowbrook(raw) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+    const farm = freshMeadowbrook();
+    farm.day = bounded(raw.day, 1, dayLimit);
+    farm.time = bounded(raw.time, dayStart, 1430);
+    farm.energy = bounded(raw.energy, 0, 100, 100);
+    farm.weather = raw.weather === "Rainy" ? "Rainy" : "Sunny";
+    const { x, y } = raw.player ?? {};
+    if (Number.isFinite(x) && Number.isFinite(y) && !blocked(Math.floor(x), Math.floor(y))) {
+      farm.player = { x, y };
+    }
+    for (const id of cropIds) {
+      farm.seeds[id] = bounded(raw.seeds?.[id], 0, stockLimit, farm.seeds[id]);
+      farm.bag[id] = bounded(raw.bag?.[id], 0, stockLimit);
+    }
+    for (const key of bedKeys) {
+      const plot = raw.plots?.[key];
+      if (!plot) continue;
+      const crop = typeof plot.crop === "string" && Object.hasOwn(meadowCrops, plot.crop) ? plot.crop : null;
+      const tilled = plot.tilled === true || Boolean(crop);
+      farm.plots[key] = {
+        tilled,
+        crop,
+        water: tilled && plot.water === true,
+        growth: crop ? bounded(plot.growth, 0, meadowCrops[crop].days) : 0
+      };
+    }
+    if (raw.weeds && typeof raw.weeds === "object") {
+      farm.weeds = Object.fromEntries(bedKeys.filter((key) => raw.weeds[key] === true && !farm.plots[key].crop).map((key) => [key, true]));
+    }
+    for (const key of Object.keys(farm.progress)) {
+      farm.progress[key] = bounded(raw.progress?.[key], 0, Number.MAX_SAFE_INTEGER);
+    }
+    farm.quest = bounded(raw.quest, 0, meadowJournal.length);
+    return farm;
+  }
+  function awardJournal(run) {
+    const farm = run.meadowbrook;
+    let coins = 0;
+    while (farm.quest < meadowJournal.length) {
+      const [, , counter, goal, reward2] = meadowJournal[farm.quest];
+      if (farm.progress[counter] < goal) break;
+      coins += reward2;
+      farm.quest++;
+    }
+    creditCoins(run, coins);
+    return coins ? ` Journal reward +${coins} coins.` : "";
+  }
+  function workMeadowPlot(run, key, tool, seed) {
+    const farm = run.meadowbrook;
+    const plot = Object.hasOwn(farm.plots, key) && farm.plots[key];
+    if (!plot) return { message: "Choose a tile in the fenced field." };
+    if (farm.weeds[key] && tool !== 5) return { message: "Clear the weeds with the scythe first." };
+    const current = meadowCrops[plot.crop];
+    const ready = current && plot.growth >= current.days;
+    const cost = tool === 1 ? 2 : 1;
+    if (tool === 0) {
+      if (!current) return { message: plot.tilled ? "Tilled soil. Choose a seed to plant." : "Untilled soil. Use the hoe to prepare it." };
+      const growth = ready ? "ripe" : `${plot.growth}/${current.days} days`;
+      return { message: `${current.name} \xB7 ${growth} \xB7 ${plot.water ? "watered" : "dry"}` };
+    }
+    if (tool === 4) {
+      if (!ready) return { message: current ? `${current.name} is still growing.` : "This tile has no crop to harvest." };
+      if (farm.bag[plot.crop] >= stockLimit) return { message: "Sell some crops to make room." };
+    } else if (tool === 5) {
+      if (!farm.weeds[key]) return { message: "There are no weeds here." };
+    } else if (tool === 1) {
+      if (plot.tilled) return { message: "This soil is already tilled." };
+    } else if (tool === 2 || tool === 3) {
+      if (!plot.tilled) return { message: "Till the soil first." };
+      if (tool === 2 && plot.crop) return { message: "A crop is already growing here." };
+      if (tool === 2 && !(farm.seeds[seed] > 0)) return { message: "Buy more seeds at the shop." };
+      if (tool === 3 && plot.water) return { message: "Already watered today." };
+    } else {
+      return { message: "Choose a tool." };
+    }
+    if (farm.energy < cost) return { message: "Rest at the farmhouse to restore energy." };
+    farm.energy -= cost;
+    let message;
+    switch (tool) {
+      case 4:
+        farm.bag[plot.crop]++;
+        farm.progress.harvest = Math.min(Number.MAX_SAFE_INTEGER, farm.progress.harvest + 1);
+        plot.crop = null;
+        plot.growth = 0;
+        message = `Harvested ${current.name}.`;
+        break;
+      case 1:
+        plot.tilled = true;
+        plot.water = farm.weather === "Rainy";
+        message = "Soil tilled.";
+        break;
+      case 2:
+        farm.seeds[seed]--;
+        plot.crop = seed;
+        farm.progress.plant = Math.min(Number.MAX_SAFE_INTEGER, farm.progress.plant + 1);
+        message = `Planted ${meadowCrops[seed].name}.`;
+        break;
+      case 3:
+        plot.water = true;
+        message = "Soil watered.";
+        break;
+      case 5:
+        delete farm.weeds[key];
+        message = "Weeds cleared.";
+        break;
+    }
+    return { changed: true, message: message + awardJournal(run) };
+  }
+  function buyMeadowSeed(run, id, quantity) {
+    if (!Object.hasOwn(meadowCrops, id) || ![1, 5].includes(quantity)) return false;
+    const farm = run.meadowbrook;
+    if (farm.seeds[id] + quantity > stockLimit || !spendResource(run, "coins", meadowCrops[id].cost * quantity)) return false;
+    farm.seeds[id] += quantity;
+    return true;
+  }
+  function sellMeadowCrops(run) {
+    const { bag, progress: progress2 } = run.meadowbrook;
+    let coins = 0;
+    let count = 0;
+    for (const id of cropIds) {
+      coins += bag[id] * meadowCrops[id].sell;
+      count += bag[id];
+      bag[id] = 0;
+    }
+    if (!count) return { message: "Harvest crops before selling." };
+    creditCoins(run, coins);
+    progress2.sold = Math.min(Number.MAX_SAFE_INTEGER, progress2.sold + count);
+    progress2.earned = Math.min(Number.MAX_SAFE_INTEGER, progress2.earned + coins);
+    return { changed: true, message: `Sold ${count} ${count === 1 ? "crop" : "crops"} for ${coins} coins.` + awardJournal(run) };
+  }
+  function sleepAtMeadowbrook(farm, random = Math.random) {
+    const rainy = random() < 0.22;
+    for (const plot of Object.values(farm.plots)) {
+      if (plot.crop && plot.water) plot.growth = Math.min(meadowCrops[plot.crop].days, plot.growth + 1);
+      plot.water = rainy && plot.tilled;
+    }
+    farm.day = Math.min(dayLimit, farm.day + 1);
+    farm.time = dayStart;
+    farm.energy = 100;
+    farm.weather = rainy ? "Rainy" : "Sunny";
+    farm.player = morning();
+  }
+
   // src/js/state.js
-  var schemaVersion = 7;
+  var schemaVersion = 8;
   var zeroLevels = (definitions) => Object.fromEntries(definitions.map(({ id }) => [id, 0]));
   var fresh = () => initializeResources({
     schemaVersion,
     sites: freshSites(),
+    meadowbrook: null,
     blacksmith: freshBlacksmith(),
     combat: freshCombat(),
     fieldDiscoveries: [],
@@ -7313,6 +7685,7 @@ textarea {
     f.abilityProgress = normalizeAbilityProgress(o.abilityProgress);
     f.total = num(o.total, Number.MAX_VALUE);
     normalizeSites(f, o.sites);
+    f.meadowbrook = normalizeMeadowbrook(o.meadowbrook);
     for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
     for (const k of ["earned", "runs"])
       f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
@@ -7427,6 +7800,7 @@ textarea {
     return f;
   }
   var KEY = "treasure-grove-v3";
+  var preMeadowbrookSaveKey = KEY + "-before-meadowbrook";
   var preBlacksmithSaveKey = KEY + "-before-blacksmith";
   var preLivingFieldSaveKey = KEY + "-before-living-field";
   var preForgeSaveKey = KEY + "-before-forge";
@@ -7449,6 +7823,9 @@ textarea {
   }
   function readPreCombatSave() {
     return readBackup(preCombatSaveKey);
+  }
+  function readPreMeadowbrookSave() {
+    return readBackup(preMeadowbrookSaveKey);
   }
   function readPreBlacksmithSave() {
     return readBackup(preBlacksmithSaveKey);
@@ -7518,7 +7895,8 @@ textarea {
     setRunState(run);
     if (version < schemaVersion) {
       try {
-        preserveBackup(preBlacksmithSaveKey, raw);
+        preserveBackup(preMeadowbrookSaveKey, raw);
+        if (version < 7) preserveBackup(preBlacksmithSaveKey, raw);
         if (version < 6) preserveBackup(preLivingFieldSaveKey, raw);
         if (version < 5) preserveBackup(preCombatSaveKey, raw);
         if (version < 4) preserveBackup(preCompanionsSaveKey, raw);
@@ -8238,7 +8616,8 @@ textarea {
     <button class="action gold" data-site-action="harvest" data-plot="${index}" id="harvest-${index}">Harvest</button>
     </article>`
     ).join("");
-    return `<p class="subtext">Grow crops while the game is visible. Red-button presses speed them up.</p>
+    return `<div class="meadow-entrance"><button class="action gold" data-open="meadowbrook">${fieldSprite("farm")}<span>Visit Meadowbrook Farm</span></button><p>Grow crops for coins at Meadowbrook. Use the Garden beds below for crafting materials.</p></div>
+    <p class="subtext">Grow Garden crops while the game is visible. Red-button presses speed them up.</p>
     <p id="farmWallet" class="site-wallet"></p>
     <div class="item-grid">${plots}</div>
     <h3>Research</h3><div class="site-upgrades">${Object.entries(research).map(
@@ -8789,47 +9168,6 @@ textarea {
     return success ? item : null;
   }
 
-  // src/js/prestige.js
-  function ascensionReward(state) {
-    return Math.floor(Math.sqrt(state.total / progressionThresholds.ascension));
-  }
-  function ascCoinGoal(stars) {
-    return Math.min(
-      Number.MAX_VALUE,
-      progressionThresholds.ascension * stars ** 2
-    );
-  }
-  function ascensionCost(state, upgrade) {
-    return Math.ceil(upgrade.base * Math.pow(1.65, state.asc.up[upgrade.id]));
-  }
-  function buyAscensionUpgrade(state, upgrade) {
-    if (!upgrade || state.asc.runs < upgrade.req || state.asc.up[upgrade.id] >= upgrade.max)
-      return false;
-    if (!spendResource(state, "stars", ascensionCost(state, upgrade)))
-      return false;
-    state.asc.up[upgrade.id]++;
-    return true;
-  }
-  function performAscension(state) {
-    const stars = ascensionReward(state);
-    if (stars < 1) return null;
-    const run = fresh();
-    run.companions = keepCompanions(state);
-    run.combat = keepCombat(state);
-    run.fieldDiscoveries = [...state.fieldDiscoveries];
-    run.blacksmith.recipes = [...state.blacksmith.recipes];
-    run.lootRules = { ...state.lootRules };
-    run.asc = {
-      ...state.asc,
-      runs: state.asc.runs + 1,
-      earned: Math.min(Number.MAX_VALUE, state.asc.earned + stars),
-      up: { ...state.asc.up }
-    };
-    creditResource(run, "stars", stars);
-    run.coins = run.asc.up.seed * 250;
-    return { run, stars };
-  }
-
   // src/js/blacksmith-effects.js
   var targets = ["crystal", "silver", "copper"];
   function chargeSignature(state, id, goal) {
@@ -9025,7 +9363,7 @@ textarea {
     workshop: { name: "Workshop", at: milestones.workshop, screens: ["upgrades"], art: "workbench", find: "stone", cover: "rock" },
     forge: { name: "Forge", at: milestones.forge, screens: ["blacksmith", "inventory", "forge", "recipes"], art: "anvil" },
     camp: { name: "Companion camp", at: milestones.companions, screens: ["companions"] },
-    farm: { name: "Garden", at: milestones.shards, screens: ["farm"], find: "carving", cover: "stump", art: "crop" },
+    farm: { name: "Garden", at: milestones.shards, screens: ["farm", "meadowbrook"], find: "carving", cover: "stump", art: "crop" },
     grove: { name: "Skill grove", at: milestones.shards, screens: ["skills"] },
     mine: { name: "Mine", at: milestones.helper, screens: ["mine"], find: "lantern", cover: "rock", art: "vein" },
     bosses: { name: "Boss Board", at: milestones.combat, screens: ["bosses"] },
@@ -9244,6 +9582,47 @@ textarea {
     if (goal) setText($("guideGoal"), goal);
     else if (secondTier)
       setText($("guideNextEarned"), guideProgress(s, secondTier.target));
+  }
+
+  // src/js/prestige.js
+  function ascensionReward(state) {
+    return Math.floor(Math.sqrt(state.total / progressionThresholds.ascension));
+  }
+  function ascCoinGoal(stars) {
+    return Math.min(
+      Number.MAX_VALUE,
+      progressionThresholds.ascension * stars ** 2
+    );
+  }
+  function ascensionCost(state, upgrade) {
+    return Math.ceil(upgrade.base * Math.pow(1.65, state.asc.up[upgrade.id]));
+  }
+  function buyAscensionUpgrade(state, upgrade) {
+    if (!upgrade || state.asc.runs < upgrade.req || state.asc.up[upgrade.id] >= upgrade.max)
+      return false;
+    if (!spendResource(state, "stars", ascensionCost(state, upgrade)))
+      return false;
+    state.asc.up[upgrade.id]++;
+    return true;
+  }
+  function performAscension(state) {
+    const stars = ascensionReward(state);
+    if (stars < 1) return null;
+    const run = fresh();
+    run.companions = keepCompanions(state);
+    run.combat = keepCombat(state);
+    run.fieldDiscoveries = [...state.fieldDiscoveries];
+    run.blacksmith.recipes = [...state.blacksmith.recipes];
+    run.lootRules = { ...state.lootRules };
+    run.asc = {
+      ...state.asc,
+      runs: state.asc.runs + 1,
+      earned: Math.min(Number.MAX_VALUE, state.asc.earned + stars),
+      up: { ...state.asc.up }
+    };
+    creditResource(run, "stars", stars);
+    run.coins = run.asc.up.seed * 250;
+    return { run, stars };
   }
 
   // src/js/skills.js
@@ -9784,6 +10163,7 @@ textarea {
     }
     wheelHUD();
     renderSites();
+    refreshMeadowbrook();
     if (recruitPets(s).length) runtime.saveDirty = true;
     renderCompanions();
     renderCombatField();
@@ -9848,6 +10228,772 @@ textarea {
       runtime.chestClock = 0;
       openChest(chest.id, "auto");
     }
+  }
+
+  // src/js/meadowbrook-art.js
+  function meadowRenderer(canvas) {
+    const background = document.createElement("canvas");
+    background.width = canvas.width;
+    background.height = canvas.height;
+    let g = background.getContext("2d");
+    function rect(x, y, w, h, c) {
+      g.fillStyle = c;
+      g.fillRect(Math.round(x), Math.round(y), w, h);
+    }
+    function box(x, y, w, h, c, outline = "#344d32") {
+      rect(x, y, w, h, outline);
+      rect(x + 1, y + 1, w - 2, h - 2, c);
+    }
+    function hash(x, y, s2 = 0) {
+      const n = Math.sin(x * 127.1 + y * 311.7 + s2 * 53.3) * 43758.5453;
+      return n - Math.floor(n);
+    }
+    function tile(x, y) {
+      let px = x * tileSize, py = y * tileSize, rand = hash(x, y);
+      rect(
+        px,
+        py,
+        tileSize,
+        tileSize,
+        ["#699b50", "#6da052", "#70a255", "#699c50"][Math.floor(rand * 4)]
+      );
+      for (let j = 0; j < 3; j++) {
+        let a = hash(x, y, j + 1), b = hash(x, y, j + 6);
+        rect(
+          px + 2 + Math.floor(a * 19),
+          py + 2 + Math.floor(b * 19),
+          2,
+          2,
+          j === 0 ? "#87ad5b" : "#5e9047"
+        );
+      }
+      if (rand > 0.85) {
+        rect(px + 8, py + 15, 1, 3, "#4f8742");
+        rect(px + 7, py + 14, 3, 2, "#e9d891");
+      }
+    }
+    function tree(x, y, kind = 0) {
+      let a = x * tileSize + 12, b = y * tileSize + 22;
+      rect(a - 12, b - 4, 24, 5, "#4f803e");
+      rect(a - 3, b - 18, 6, 18, "#75513a");
+      rect(a - 1, b - 17, 2, 15, "#a77545");
+      rect(a - 16, b - 35, 32, 21, "#335f38");
+      rect(a - 13, b - 43, 26, 29, "#3b753c");
+      rect(a - 8, b - 47, 16, 32, "#488744");
+      rect(a - 16, b - 33, 29, 13, "#4d8c43");
+      rect(a - 12, b - 40, 24, 21, "#58974a");
+      rect(a - 8, b - 44, 16, 16, "#73a952");
+      rect(a - 13, b - 29, 9, 8, "#417e3e");
+      rect(a + 5, b - 32, 10, 9, "#417e3e");
+      rect(a - 7, b - 39, 5, 3, "#8eb966");
+      if (kind) {
+        for (let i = 0; i < 4; i++) {
+          let xx = a - 11 + Math.floor(hash(x, y, i) * 22), yy = b - 36 + Math.floor(hash(y, x, i) * 15);
+          rect(xx, yy, 3, 3, "#d66b4d");
+          rect(xx, yy, 1, 1, "#ffbd71");
+        }
+      }
+    }
+    function pathTile(x, y) {
+      let a = x * tileSize, b = y * tileSize;
+      rect(a, b, 24, 24, "#c9b47b");
+      rect(a, b, 24, 2, "#c0a971");
+      for (let i = 0; i < 5; i++)
+        rect(
+          a + Math.floor(hash(x, y, i) * 22),
+          b + Math.floor(hash(y, x, i + 9) * 22),
+          2,
+          1,
+          i % 2 ? "#e0ca91" : "#b9a36e"
+        );
+    }
+    function building(x, y, w, h, shop = false) {
+      let a = x * tileSize, b = y * tileSize, ww = w * tileSize, hh = h * tileSize;
+      rect(a - 3, b + hh - 1, ww + 6, 8, "#4b773d");
+      box(a, b + 20, ww, hh - 20, shop ? "#e1c092" : "#ead3a0", "#5d5037");
+      for (let i = 0; i < ww; i += 12) {
+        rect(a + i, b + 25, 2, hh - 27, "#bc9a70");
+      }
+      rect(a + 2, b + hh - 7, ww - 4, 5, "#ad865d");
+      let roof = shop ? "#487e78" : "#af6246", dark = shop ? "#315c5c" : "#814333", light = shop ? "#669a88" : "#d17f56";
+      for (let i = 0; i < 25; i++) {
+        let inset = Math.max(0, 14 - i);
+        rect(
+          a - 8 + inset,
+          b - 10 + i,
+          ww + 16 - inset * 2,
+          1,
+          i % 5 === 0 ? dark : roof
+        );
+      }
+      rect(a - 8, b + 15, ww + 16, 9, dark);
+      rect(a - 8, b + 13, ww + 16, 4, light);
+      for (let i = 0; i < ww; i += 12)
+        rect(a + i, b + 3 + (i % 24 ? 3 : 0), 9, 2, light);
+      let door = a + Math.floor(ww / 2) - 8;
+      box(door, b + hh - 24, 16, 24, "#80593e", "#4a4330");
+      rect(door + 3, b + hh - 21, 10, 17, "#a7774e");
+      rect(door + 11, b + hh - 11, 2, 2, "#f0d183");
+      for (let off of [9, ww - 26]) {
+        box(a + off, b + 31, 17, 16, "#8db3ab", "#6b543d");
+        rect(a + off + 8, b + 32, 2, 14, "#f7e1aa");
+        rect(a + off + 1, b + 38, 15, 2, "#f7e1aa");
+      }
+      if (!shop) {
+        box(a + ww - 23, b - 19, 12, 16, "#97725e", "#694d42");
+        rect(a + ww - 25, b - 21, 16, 4, "#b08b74");
+      } else {
+        box(a + ww / 2 - 23, b + 24, 46, 10, "#e4c88b", "#6c5940");
+        g.fillStyle = "#4f5337";
+        g.font = "bold 7px monospace";
+        g.textAlign = "center";
+        g.fillText("SEEDS", a + ww / 2, b + 31);
+      }
+    }
+    function pond() {
+      for (let y = 7; y <= 14; y++)
+        for (let x = 24; x <= 29; x++) {
+          let d = ((x - 26.5) / 3.1) ** 2 + ((y - 10.5) / 4.1) ** 2;
+          if (d < 1.22) {
+            let a = x * tileSize, b = y * tileSize;
+            rect(a, b, tileSize, tileSize, "#b1ae72");
+            if (d < 1.03) {
+              rect(a, b, tileSize, tileSize, "#4c8e87");
+              rect(a + 2, b + 2, 20, 20, "#50978f");
+              let r = hash(x, y);
+              rect(
+                a + 3 + Math.floor(r * 9),
+                b + 6 + Math.floor(r * 9),
+                7,
+                1,
+                "#82b9a1"
+              );
+              if (r > 0.86) {
+                rect(a + 8, b + 10, 10, 5, "#659549");
+                rect(a + 11, b + 8, 4, 2, "#e8b4a9");
+              }
+            }
+          }
+        }
+    }
+    function cropDraw(k, stage, x, y) {
+      let a = x, b = y, c = meadowCrops[k], mature = stage >= c.days;
+      rect(a - 1, b - 7, 2, 8, "#3a7137");
+      if (stage === 0) {
+        rect(a - 3, b - 4, 3, 2, "#8eaf53");
+        rect(a + 1, b - 6, 3, 3, "#81aa50");
+        return;
+      }
+      rect(a - 6, b - 10, 5, 5, c.leaf);
+      rect(a + 1, b - 12, 5, 6, c.leaf);
+      rect(a - 3, b - 13, 3, 6, "#7eac52");
+      if (mature) {
+        if (k === "carrot") {
+          rect(a - 3, b - 6, 6, 7, c.color);
+          rect(a - 2, b + 1, 4, 2, c.color);
+          rect(a - 1, b + 3, 2, 1, "#bd693a");
+        } else if (k === "strawberry") {
+          for (let i of [-5, 3]) {
+            rect(a + i, b - 6, 5, 6, c.color);
+            rect(a + i + 1, b, 3, 2, "#b64450");
+            rect(a + i + 1, b - 4, 1, 1, "#f7ce8b");
+          }
+        } else if (k === "pumpkin") {
+          rect(a - 8, b - 7, 16, 9, "#b97632");
+          rect(a - 6, b - 9, 12, 12, c.color);
+          rect(a - 3, b - 8, 2, 10, "#f5b45c");
+          rect(a + 3, b - 8, 2, 10, "#c77f35");
+        } else {
+          rect(a - 4, b - 6, 8, 8, "#b5a9a1");
+          rect(a - 3, b - 7, 6, 8, c.color);
+          rect(a - 2, b + 2, 4, 2, "#b2768f");
+        }
+      }
+    }
+    function plotDraw(x, y, p, weed, anim) {
+      let a = x * tileSize, b = y * tileSize;
+      rect(a + 1, b + 1, 22, 22, "#85a75a");
+      if (p.tilled) {
+        rect(a + 1, b + 1, 22, 22, p.water ? "#765a42" : "#a77c50");
+        rect(a + 2, b + 2, 20, 20, p.water ? "#68503d" : "#966d48");
+        for (let i = 5; i < 23; i += 6) {
+          rect(a + 3, b + i, 18, 2, p.water ? "#836449" : "#b78959");
+          rect(a + 4, b + i + 2, 15, 1, p.water ? "#5e4937" : "#805a3e");
+        }
+      } else {
+        rect(a + 2, b + 2, 20, 20, "#94a967");
+        rect(a + 3, b + 3, 18, 18, "#a2b271");
+        rect(a + 5, b + 7, 2, 2, "#8fa25d");
+      }
+      if (weed) {
+        rect(a + 11, b + 9, 2, 10, "#436d39");
+        rect(a + 7, b + 11, 5, 3, "#54813c");
+        rect(a + 13, b + 7, 4, 4, "#638c42");
+      }
+      if (p.crop) {
+        cropDraw(p.crop, p.growth, a + 12, b + 16);
+        if (p.growth >= meadowCrops[p.crop].days && Math.floor(anim * 2 + x + y) % 5 === 0) {
+          rect(a + 18, b + 3, 1, 5, "#fff3bb");
+          rect(a + 16, b + 5, 5, 1, "#fff3bb");
+        }
+      }
+    }
+    function person(px, py, dir = "down", moving = false, npc = false, anim = 0) {
+      let a = Math.round(px * tileSize), b = Math.round(py * tileSize), step = moving ? Math.floor(anim * 9) % 2 : 0;
+      rect(a - 8, b + 5, 16, 4, "#46733e");
+      rect(a - 5, b - 1, 4, 7 + (step ? 1 : 0), "#3d5260");
+      rect(a + 1, b - 1, 4, 7 + (step ? 0 : 1), "#3d5260");
+      rect(a - 6, b + 5 + (step ? 1 : 0), 5, 2, "#513d32");
+      rect(a + 1, b + 5 + (step ? 0 : 1), 5, 2, "#513d32");
+      rect(a - 6, b - 10, 12, 11, npc ? "#9d6658" : "#557e88");
+      rect(a - 4, b - 9, 8, 9, npc ? "#c88a74" : "#7199a0");
+      rect(a - 8, b - 8, 2, 7, "#e3ad80");
+      rect(a + 6, b - 8, 2, 7, "#e3ad80");
+      rect(a - 5, b - 19, 10, 10, "#dca77b");
+      rect(a - 4, b - 17, 8, 7, "#f0c697");
+      if (dir !== "up") {
+        rect(a - 3, b - 15, 1, 2, "#483d35");
+        rect(a + 2, b - 15, 1, 2, "#483d35");
+        rect(a - 1, b - 12, 2, 1, "#b77d63");
+      }
+      rect(a - 8, b - 20, 16, 4, npc ? "#704b43" : "#c4a05b");
+      rect(a - 5, b - 24, 10, 5, npc ? "#895a49" : "#e5c67d");
+      rect(a - 5, b - 20, 10, 1, "#937143");
+    }
+    function fence(x, y, w) {
+      let a = x * tileSize, b = y * tileSize;
+      rect(a, b + 9, w * tileSize, 4, "#b89860");
+      rect(a, b + 16, w * tileSize, 3, "#987744");
+      for (let i = 0; i <= w; i++) {
+        rect(a + i * tileSize - 2, b + 5, 5, 17, "#876a40");
+        rect(a + i * tileSize - 1, b + 5, 3, 16, "#d1ad72");
+      }
+    }
+    function sign(x, y, t) {
+      let a = x * tileSize, b = y * tileSize;
+      rect(a + 11, b + 11, 3, 12, "#72543a");
+      box(a - 4, b + 1, 32, 12, "#dfc38b", "#72543a");
+      g.fillStyle = "#655138";
+      g.textAlign = "center";
+      g.font = "bold 7px monospace";
+      g.fillText(t, a + 12, b + 9);
+    }
+    function drawFarm(farm, { anim, facing, moving, selected: selected2, reduced }) {
+      g.drawImage(background, 0, 0);
+      for (const [key, plot] of Object.entries(farm.plots)) {
+        const [x, y] = key.split(",").map(Number);
+        plotDraw(x, y, plot, farm.weeds[key], reduced ? 0 : anim);
+      }
+      drawTrees(farm.player, facing, moving && !reduced, reduced ? 0 : anim);
+      if (farm.time >= 1080 || farm.time < 420) {
+        const shade = farm.time >= 1080 ? Math.min(0.42, (farm.time - 1080) / 600 + 0.05) : 0.16;
+        g.fillStyle = `rgba(40,48,90,${shade})`;
+        g.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      if (farm.weather === "Rainy") {
+        const weatherFrame = reduced ? 0 : anim;
+        for (let i = 0; i < 95; i++) {
+          const x = (hash(i, 0) * canvas.width + weatherFrame * 30) % canvas.width;
+          const y = (hash(i, 1) * canvas.height + weatherFrame * 210) % canvas.height;
+          rect(x, y, 1, 5, "#b6d6db88");
+        }
+      }
+      if (selected2) {
+        const [x, y] = selected2;
+        g.strokeStyle = "#fff0a7";
+        g.lineWidth = 2;
+        g.strokeRect(x * tileSize + 2, y * tileSize + 2, tileSize - 4, tileSize - 4);
+      }
+    }
+    const scenery = trees.map(([x, y], i) => ({ y: y + 1, draw: () => tree(x, y, i % 4 === 0) }));
+    scenery.push({ y: 6.8, draw: () => person(25.5, 6.8, "down", false, true, 0) });
+    scenery.sort((a, b) => a.y - b.y);
+    function drawTrees(player, facing, moving, anim) {
+      let drawn = false;
+      for (const entry of scenery) {
+        if (!drawn && player.y < entry.y) {
+          person(player.x, player.y, facing, moving, false, anim);
+          drawn = true;
+        }
+        entry.draw();
+      }
+      if (!drawn) person(player.x, player.y, facing, moving, false, anim);
+    }
+    for (let y = 0; y < mapHeight; y++) for (let x = 0; x < mapWidth; x++) tile(x, y);
+    for (let x = 2; x < 30; x++) pathTile(x, 6);
+    for (let y = 7; y < 19; y++) pathTile(8, y);
+    for (let x = 9; x < 24; x++) pathTile(x, 17);
+    for (let y = 7; y < 9; y++)
+      for (let x = 14; x < 16; x++) pathTile(x, y);
+    pond();
+    fence(10, 8, 4);
+    fence(16, 8, 5);
+    fence(10, 16, 11);
+    for (let [x, y] of rocks) {
+      let a = x * tileSize, b = y * tileSize;
+      rect(a + 4, b + 14, 15, 6, "#537841");
+      rect(a + 5, b + 10, 13, 7, "#77847a");
+      rect(a + 8, b + 7, 8, 6, "#a9aaa0");
+      rect(a + 7, b + 9, 5, 2, "#c1c2ae");
+    }
+    building(3, 2, 4, 4);
+    building(23, 2, 4, 4, true);
+    sign(9, 8, "FIELD");
+    g = canvas.getContext("2d");
+    g.imageSmoothingEnabled = false;
+    return drawFarm;
+  }
+  function drawMeadowTool(canvas, i) {
+    let a = canvas.getContext("2d");
+    a.imageSmoothingEnabled = false;
+    const r = (x, y, w, h, c) => {
+      a.fillStyle = c;
+      a.fillRect(x, y, w, h);
+    };
+    a.clearRect(0, 0, 24, 24);
+    if (i === 0) {
+      r(8, 5, 2, 9, "#ecc79c");
+      r(11, 3, 2, 10, "#ecc79c");
+      r(14, 5, 2, 9, "#ecc79c");
+      r(17, 8, 2, 7, "#ecc79c");
+      r(6, 11, 3, 7, "#cf9a78");
+      r(9, 12, 10, 8, "#ecc79c");
+      r(10, 20, 7, 2, "#c18b64");
+    }
+    if (i === 1 || i === 5) {
+      r(6, 7, 3, 14, "#b18b5c");
+      r(7, 8, 2, 12, "#ddbc7d");
+      if (i === 1) {
+        r(5, 4, 15, 4, "#9faeb0");
+        r(16, 7, 4, 5, "#788b89");
+        r(5, 4, 14, 1, "#d4d7c1");
+      } else {
+        r(8, 3, 12, 3, "#c9d1c2");
+        r(17, 6, 4, 4, "#9eafac");
+        r(13, 10, 5, 2, "#9eafac");
+      }
+    }
+    if (i === 2) {
+      r(5, 4, 14, 17, "#bc9b5d");
+      r(6, 5, 12, 15, "#e4c17b");
+      r(6, 3, 12, 3, "#e9d9a0");
+      r(10, 10, 4, 6, "#718d48");
+      r(8, 12, 3, 3, "#718d48");
+    }
+    if (i === 3) {
+      r(6, 9, 13, 12, "#789ba4");
+      r(8, 10, 8, 9, "#a0c2c3");
+      r(2, 5, 3, 8, "#93aab0");
+      r(3, 4, 6, 3, "#93aab0");
+      r(16, 6, 5, 6, "#8eabb0");
+      r(19, 3, 3, 5, "#b5c6bd");
+      r(5, 20, 14, 2, "#587a81");
+    }
+    if (i === 4) {
+      r(4, 11, 16, 9, "#bb9866");
+      r(5, 10, 14, 2, "#ebc98b");
+      r(7, 6, 2, 6, "#ad875a");
+      r(15, 6, 2, 6, "#ad875a");
+      r(9, 4, 6, 2, "#d9b980");
+      r(7, 13, 2, 6, "#8f704e");
+      r(12, 13, 2, 6, "#8f704e");
+      r(17, 13, 1, 6, "#8f704e");
+    }
+  }
+
+  // src/js/meadowbrook-view.js
+  var directions = {
+    left: [-1, 0],
+    right: [1, 0],
+    up: [0, -1],
+    down: [0, 1]
+  };
+  var keyDirections = {
+    a: "left",
+    d: "right",
+    w: "up",
+    s: "down",
+    arrowleft: "left",
+    arrowright: "right",
+    arrowup: "up",
+    arrowdown: "down"
+  };
+  var destinations = {
+    home: { name: "Farmhouse", tile: [5, 5] },
+    shop: { name: "Seed shop", tile: [25, 5] }
+  };
+  var seasons = ["Spring", "Summer", "Autumn", "Winter"];
+  var walkSpeed = 5.5;
+  var activeFarm;
+  function meadowMarkup() {
+    const cropEntries = Object.entries(meadowCrops);
+    return `<section class="meadowbrook" id="meadowbrook">
+    <a class="meadow-skip" href="#meadowTools">Skip map to farming tools</a>
+    <div class="meadow-hud" aria-label="Farm status">
+      <span id="meadowDay"></span><span id="meadowTime"></span><span id="meadowWeather"></span>
+      <span id="meadowCoins"></span><span id="meadowEnergy"></span>
+    </div>
+    <div class="meadow-layout">
+      <div class="meadow-play">
+        <div class="meadow-viewport">
+          <div class="meadow-map">
+            <canvas width="${mapWidth * tileSize}" height="${mapHeight * tileSize}" tabindex="0"
+              id="meadowCanvas" aria-label="Meadowbrook farm map" aria-describedby="meadowHelp"></canvas>
+            ${Object.entries(destinations).map(([id, { name }]) => `<button type="button" class="meadow-pin meadow-${id}-pin" data-meadow-target="${id}">${name}</button>`).join("")}
+          </div>
+        </div>
+        <div class="meadow-controls">
+          <div class="meadow-directions" aria-label="Move farmer">
+            ${Object.keys(directions).map((id, index) => `<button type="button" data-meadow-direction="${id}" aria-label="Move ${id}">${["\u2190", "\u2192", "\u2191", "\u2193"][index]}</button>`).join("")}
+          </div>
+          <button type="button" class="action secondary" data-meadow-use>Use tool</button>
+        </div>
+        <div class="meadow-tools" id="meadowTools" role="group" aria-label="Farming tools" tabindex="-1">
+          ${meadowTools.map((name, index) => `<button type="button" data-meadow-tool="${index}" aria-pressed="${index === 4}">
+            <canvas width="24" height="24" aria-hidden="true"></canvas><span>${name}</span><kbd>${index + 1}</kbd>
+          </button>`).join("")}
+        </div>
+        <label class="meadow-seed">Seed <select id="meadowSeed">${cropEntries.map(([id, crop]) => `<option value="${id}">${crop.name}</option>`).join("")}</select></label>
+        <p class="meadow-notice" role="status" id="meadowNotice"></p>
+        <p class="subtext meadow-help" id="meadowHelp">Tap a tile to walk there and use your tool. <span class="meadow-pan-help">Swipe the map to explore. </span>Focus the map for WASD or arrow keys, 1\u20136 for tools, and Space to use the selected tool.</p>
+      </div>
+      <aside class="meadow-sidebar">
+        <section class="meadow-panel" id="meadowJournal">
+          <h3>Farm journal</h3><strong id="meadowGoal"></strong><p id="meadowTask"></p><small id="meadowProgress"></small>
+        </section>
+        <section class="meadow-panel" id="meadowStock">
+          <h3>Backpack</h3>
+          <table><thead><tr><th scope="col">Crop</th><th scope="col">Seeds</th><th scope="col">Harvest</th></tr></thead>
+            <tbody>${cropEntries.map(([id, crop]) => `<tr><th scope="row">${crop.name}</th><td data-meadow-seeds="${id}"></td><td data-meadow-crops="${id}"></td></tr>`).join("")}</tbody>
+          </table>
+          <button type="button" class="action gold" id="meadowSell">Sell crops</button>
+        </section>
+        <section class="meadow-panel" id="meadowService" aria-labelledby="meadowServiceTitle" hidden>
+          <div class="meadow-panel-head"><h3 id="meadowServiceTitle"></h3><button type="button" class="action secondary" data-meadow-dismiss>Done</button></div>
+          <div id="meadowServiceContent"></div>
+        </section>
+      </aside>
+    </div>
+  </section>`;
+  }
+  function mountMeadowbrook(root) {
+    const firstVisit = !s.meadowbrook;
+    const farm = s.meadowbrook ??= freshMeadowbrook();
+    const find = (selector) => root.querySelector(selector);
+    const canvas = find("#meadowCanvas");
+    const view = find(".meadow-viewport");
+    const paint2 = meadowRenderer(canvas);
+    const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    const abort = new AbortController();
+    const options = { signal: abort.signal };
+    const toolButtons = [...root.querySelectorAll("[data-meadow-tool]")];
+    const status = find("#meadowNotice");
+    const servicePanel = find("#meadowService");
+    let tool = 4;
+    let seed = "turnip";
+    let facing = "down";
+    let keys = /* @__PURE__ */ new Set();
+    let route = [];
+    let pending;
+    let selected2;
+    let service;
+    let serviceFocus;
+    let frame2;
+    let last2 = 0;
+    let lastPaint = 0;
+    let clock = 0;
+    let anim = 0;
+    let redraw = true;
+    toolButtons.forEach((button, index) => drawMeadowTool(button.querySelector("canvas"), index));
+    function refresh() {
+      const season = seasons[Math.floor((farm.day - 1) / 28) % seasons.length];
+      const hour = Math.floor(farm.time / 60);
+      const mins = String(farm.time % 60).padStart(2, "0");
+      setText(find("#meadowDay"), `Day ${farm.day} \xB7 ${season}`);
+      setText(find("#meadowTime"), `${hour % 12 || 12}:${mins} ${hour < 12 ? "AM" : "PM"}`);
+      setText(find("#meadowWeather"), farm.weather);
+      setText(find("#meadowCoins"), `${fmtRate(s.coins)} coins`);
+      setText(find("#meadowEnergy"), `${farm.energy}/100 energy`);
+      const quest = meadowJournal[farm.quest];
+      setText(find("#meadowGoal"), quest?.[0] ?? "Meadowbrook master");
+      setText(find("#meadowTask"), quest?.[1] ?? "All journal goals completed.");
+      setText(find("#meadowProgress"), quest ? `${Math.min(farm.progress[quest[2]], quest[3])}/${quest[3]} \xB7 +${quest[4]} coins` : "");
+      for (const id of Object.keys(meadowCrops)) {
+        setText(find(`[data-meadow-seeds="${id}"]`), farm.seeds[id]);
+        setText(find(`[data-meadow-crops="${id}"]`), farm.bag[id]);
+      }
+      setValue(find("#meadowSell"), "disabled", !Object.values(farm.bag).some(Boolean));
+      if (service === "shop") {
+        for (const button of root.querySelectorAll("[data-meadow-buy]")) {
+          const id = button.dataset.meadowBuy;
+          const quantity = Number(button.dataset.quantity);
+          setValue(button, "disabled", s.coins < meadowCrops[id].cost * quantity || farm.seeds[id] + quantity > 9999);
+        }
+      }
+    }
+    function announce(message) {
+      setText(status, message);
+    }
+    function commit(before, message, cue = "tap") {
+      recordEarnings(before);
+      if (message) announce(message);
+      sound(cue);
+      redraw = true;
+      refresh();
+      render();
+      save();
+    }
+    function chooseTool(index) {
+      tool = index;
+      toolButtons.forEach((button, i) => button.setAttribute("aria-pressed", String(i === tool)));
+    }
+    function stopMoving() {
+      keys = /* @__PURE__ */ new Set();
+      route = [];
+      pending = null;
+    }
+    function closeService() {
+      if (!service) return false;
+      service = null;
+      servicePanel.hidden = true;
+      view.scrollIntoView({ block: "nearest" });
+      (serviceFocus?.isConnected ? serviceFocus : canvas).focus({ preventScroll: true });
+      return true;
+    }
+    function openService(id) {
+      service = id;
+      serviceFocus = document.activeElement;
+      stopMoving();
+      setText(find("#meadowServiceTitle"), destinations[id].name);
+      find("#meadowServiceContent").innerHTML = id === "shop" ? Object.entries(meadowCrops).map(([key, crop]) => `<div class="meadow-shop-row">
+          <div><b>${crop.name}</b><small>${crop.days} watered days \xB7 sells for ${crop.sell} coins</small></div>
+          ${[1, 5].map((quantity) => `<button type="button" class="action secondary" data-meadow-buy="${key}" data-quantity="${quantity}"
+              aria-label="Buy ${quantity} ${crop.name} seeds for ${crop.cost * quantity} coins">${quantity === 5 ? "\xD75 \xB7 " : ""}${crop.cost * quantity}</button>`).join("")}
+        </div>`).join("") : '<p>Watered crops grow overnight. Sleep to restore your energy.</p><button type="button" class="action gold" data-meadow-sleep>Sleep until morning</button>';
+      servicePanel.hidden = false;
+      refresh();
+      find("[data-meadow-dismiss]").focus();
+    }
+    function destinationAt(x, y) {
+      if (x >= 3 && x <= 7 && y >= 2 && y <= 6) return "home";
+      if (x >= 23 && x <= 27 && y >= 2 && y <= 7) return "shop";
+      return null;
+    }
+    function useTile(x, y) {
+      const destination = destinationAt(x, y);
+      if (destination) {
+        openService(destination);
+        return;
+      }
+      const before = s.total;
+      const result2 = workMeadowPlot(s, `${x},${y}`, tool, seed);
+      if (result2.changed) commit(before, result2.message, tool === 4 ? "chest" : "tap");
+      else announce(result2.message);
+    }
+    function goTo(x, y) {
+      if (service) return;
+      const interact = Object.hasOwn(farm.plots, `${x},${y}`) || Boolean(destinationAt(x, y));
+      const path = pathTo(farm.player, x, y, interact);
+      if (!path) {
+        announce("That tile is out of reach.");
+        return;
+      }
+      stopMoving();
+      selected2 = [x, y];
+      redraw = true;
+      route = path;
+      if (interact && path.length) pending = selected2;
+      else if (interact) useTile(x, y);
+    }
+    function useFacingTile() {
+      const [dx, dy] = directions[facing];
+      stopMoving();
+      selected2 = [Math.floor(farm.player.x) + dx, Math.floor(farm.player.y) + dy];
+      redraw = true;
+      useTile(...selected2);
+    }
+    function move2(dx, dy, distance) {
+      const player = farm.player;
+      if (Math.abs(dx) > Math.abs(dy)) facing = dx < 0 ? "left" : "right";
+      else facing = dy < 0 ? "up" : "down";
+      const length = Math.hypot(dx, dy);
+      const x = player.x + dx * distance / length;
+      const y = player.y + dy * distance / length;
+      if (!blocked(Math.floor(x), Math.floor(player.y))) player.x = x;
+      if (!blocked(Math.floor(player.x), Math.floor(y))) player.y = y;
+      runtime.saveDirty = true;
+    }
+    function followPlayer(center = false) {
+      const width = canvas.clientWidth;
+      if (width <= view.clientWidth) return;
+      const x = farm.player.x / mapWidth * width;
+      const relative = x - view.scrollLeft;
+      if (center || relative < 44 || relative > view.clientWidth - 44) {
+        view.scrollLeft = Math.max(0, x - view.clientWidth / 2);
+      }
+    }
+    function rest() {
+      stopMoving();
+      closeService();
+      sleepAtMeadowbrook(farm);
+      selected2 = null;
+      clock = 0;
+      commit(s.total, `Day ${farm.day} \xB7 ${farm.weather}`, "upgrade");
+      followPlayer(true);
+    }
+    function frameLoop(now) {
+      const delta = last2 ? Math.min(0.05, (now - last2) / 1e3) : 0;
+      last2 = now;
+      let moving = false;
+      if (!document.hidden && !service) {
+        const dx = Number(keys.has("right")) - Number(keys.has("left"));
+        const dy = Number(keys.has("down")) - Number(keys.has("up"));
+        if (dx || dy) {
+          move2(dx, dy, walkSpeed * delta);
+          moving = true;
+        } else if (route.length) {
+          const [x, y] = route[0];
+          const offsetX = x - farm.player.x;
+          const offsetY = y - farm.player.y;
+          if (Math.hypot(offsetX, offsetY) <= walkSpeed * delta + 0.02) {
+            farm.player.x = x;
+            farm.player.y = y;
+            route.shift();
+            runtime.saveDirty = true;
+            if (!route.length && pending) {
+              const target = pending;
+              pending = null;
+              useTile(...target);
+            }
+          } else move2(offsetX, offsetY, walkSpeed * delta);
+          moving = true;
+        }
+        clock += delta;
+        if (clock >= 2.4) {
+          clock -= 2.4;
+          farm.time += 10;
+          if (farm.time >= 1440) rest();
+          else {
+            runtime.saveDirty = true;
+            refresh();
+            redraw = true;
+          }
+        }
+        anim += delta;
+      }
+      if ((redraw || moving || !motion.matches && !service) && now - lastPaint >= 33) {
+        paint2(farm, { anim, facing, moving, selected: selected2, reduced: motion.matches });
+        if (moving) followPlayer();
+        lastPaint = now;
+        redraw = false;
+      }
+      frame2 = requestAnimationFrame(frameLoop);
+    }
+    canvas.addEventListener("click", (event) => {
+      if (service) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((event.clientX - rect.left) / rect.width * mapWidth);
+      const y = Math.floor((event.clientY - rect.top) / rect.height * mapHeight);
+      if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) goTo(x, y);
+    }, options);
+    canvas.addEventListener("keydown", (event) => {
+      if (service || event.altKey || event.ctrlKey || event.metaKey) return;
+      const key = event.key.toLowerCase();
+      const direction = keyDirections[key];
+      if (direction) {
+        event.preventDefault();
+        route = [];
+        pending = null;
+        keys.add(direction);
+      } else if (key === " " && !event.repeat) {
+        event.preventDefault();
+        useFacingTile();
+      } else if (/^[1-6]$/.test(key)) {
+        event.preventDefault();
+        chooseTool(Number(key) - 1);
+      }
+    }, options);
+    root.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && closeService()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }, options);
+    window.addEventListener("keyup", (event) => keys.delete(keyDirections[event.key.toLowerCase()]), options);
+    window.addEventListener("blur", stopMoving, options);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopMoving();
+      last2 = 0;
+    }, options);
+    canvas.addEventListener("blur", () => keys.clear(), options);
+    for (const button of root.querySelectorAll("[data-meadow-direction]")) {
+      const direction = button.dataset.meadowDirection;
+      button.addEventListener("pointerdown", (event) => {
+        if (service || event.button !== 0) return;
+        event.preventDefault();
+        button.setPointerCapture(event.pointerId);
+        stopMoving();
+        keys.add(direction);
+        move2(...directions[direction], 0.22);
+        followPlayer();
+        redraw = true;
+      }, options);
+      for (const event of ["pointerup", "pointercancel", "lostpointercapture"]) {
+        button.addEventListener(event, () => keys.delete(direction), options);
+      }
+      button.addEventListener("click", (event) => {
+        if (service || event.detail) return;
+        move2(...directions[direction], 0.4);
+        followPlayer();
+        redraw = true;
+      }, options);
+    }
+    root.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const { meadowTarget, meadowTool, meadowBuy, quantity } = button.dataset;
+      if (meadowTarget) goTo(...destinations[meadowTarget].tile);
+      else if (meadowTool !== void 0) chooseTool(Number(meadowTool));
+      else if (button.hasAttribute("data-meadow-use") && !service) useFacingTile();
+      else if (button.hasAttribute("data-meadow-dismiss")) closeService();
+      else if (button.hasAttribute("data-meadow-sleep") && service === "home") rest();
+      else if (meadowBuy && service === "shop" && buyMeadowSeed(s, meadowBuy, Number(quantity))) {
+        seed = meadowBuy;
+        setValue(find("#meadowSeed"), "value", seed);
+        commit(s.total, `Bought ${quantity} ${meadowCrops[seed].name} seeds.`, "equip");
+      } else if (button.id === "meadowSell") {
+        const before = s.total;
+        const result2 = sellMeadowCrops(s);
+        if (result2.changed) commit(before, result2.message, "upgrade");
+      }
+    }, options);
+    find("#meadowSeed").addEventListener("change", (event) => {
+      seed = event.target.value;
+      chooseTool(2);
+    }, options);
+    refresh();
+    followPlayer(true);
+    if (firstVisit) {
+      announce("Three ripe turnips are ready. Tap them to harvest.");
+      save();
+    }
+    paint2(farm, { anim, facing, moving: false, reduced: motion.matches });
+    frame2 = requestAnimationFrame(frameLoop);
+    activeFarm = {
+      refresh,
+      close() {
+        abort.abort();
+        cancelAnimationFrame(frame2);
+        if (runtime.saveDirty) save();
+      }
+    };
+  }
+  function refreshMeadowbrook() {
+    activeFarm?.refresh();
+  }
+  function unmountMeadowbrook() {
+    activeFarm?.close();
+    activeFarm = null;
   }
 
   // src/js/dialogs.js
@@ -9955,11 +11101,12 @@ textarea {
     ).join("");
   }
   function openModal(type, id, location = runtime.fieldLocation) {
-    if (type === "farm" && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt || type === "bosses" && s.total < milestones.combat)
+    if ((type === "farm" || type === "meadowbrook") && s.total < farmAt || type === "mine" && s.total < mineAt || type === "companions" && s.total < companionsAt || type === "bosses" && s.total < milestones.combat)
       return;
     if (type === "wheel" && !wheelReady()) return;
     syncCombat();
     clearWork();
+    unmountMeadowbrook();
     if (["blacksmith", "forge", "recipes"].includes(type)) location = "forge";
     hideSkillTip();
     hideComparison();
@@ -9973,8 +11120,9 @@ textarea {
     $("game").inert = true;
     $("modal").classList.toggle("constellation", type === "skills");
     $("modal").classList.toggle("milestone-wheel", type === "wheel");
+    $("modal").classList.toggle("meadowbrook-window", type === "meadowbrook");
     renderLocationScene(s, runtime.fieldLocation, entering);
-    const returnsToField = landmark || type === "wheel";
+    const returnsToField = landmark || type === "wheel" || type === "meadowbrook";
     $("close").textContent = returnsToField ? "Return to field" : type === "skills" ? "DONE" : "\u2715";
     $("close").setAttribute(
       "aria-label",
@@ -10027,6 +11175,11 @@ textarea {
       b.innerHTML = companionMarkup();
       b.closest(".window").scrollTop = 0;
       renderCompanions();
+    } else if (type === "meadowbrook") {
+      t.textContent = "Meadowbrook Farm";
+      b.innerHTML = meadowMarkup();
+      b.closest(".window").scrollTop = 0;
+      mountMeadowbrook(b.querySelector("#meadowbrook"));
     } else if (type === "farm" || type === "mine") {
       t.textContent = type === "farm" ? "Farming" : "Mining";
       b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
@@ -10085,6 +11238,7 @@ textarea {
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
+        ${readPreMeadowbrookSave() ? '<button class="action secondary" id="exportPreMeadowbrook">Export pre-Meadowbrook backup</button>' : ""}
         ${readPreBlacksmithSave() ? '<button class="action secondary" id="exportPreBlacksmith">Export pre-Blacksmith backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
         <button class="action secondary" id="reset">New game</button>
@@ -10096,7 +11250,7 @@ textarea {
         $("saveWarning").hidden = false;
       }
     }
-    if (landmark) t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
+    if (landmark && type !== "meadowbrook") t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
     refreshBlacksmith();
     if (location === "forge") b.closest(".window").scrollTop = 0;
     if (type === "skills") updateBuyButtons();
@@ -10125,6 +11279,7 @@ textarea {
   }
   function closeModal() {
     clearWork();
+    unmountMeadowbrook();
     hideSkillTip();
     hideComparison();
     runtime.ascConfirm = false;
@@ -10132,6 +11287,7 @@ textarea {
     runtime.wheelGeneration++;
     runtime.wheelMoving = false;
     $("modal").hidden = true;
+    $("modal").classList.remove("meadowbrook-window");
     $("game").inert = false;
     runtime.modalType = "";
     if (runtime.fieldLocation) playFieldReturn();
@@ -11042,10 +12198,11 @@ textarea {
       "exportPreCombat",
       "exportPreLivingField",
       "exportPreBlacksmith",
+      "exportPreMeadowbrook",
       "exportPreExpansion",
       "exportPreFoundation"
     ].includes(b.id)) {
-      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : b.id === "exportPreLivingField" ? readPreLivingFieldSave() : b.id === "exportPreBlacksmith" ? readPreBlacksmithSave() : readPreFoundationSave();
+      const backup = b.id === "exportStoredSave" ? readBlockedSave() : b.id === "exportPreSites" ? readPreSitesSave() : b.id === "exportPreExpansion" ? readPreExpansionSave() : b.id === "exportPreCompanions" ? readPreCompanionsSave() : b.id === "exportPreCombat" ? readPreCombatSave() : b.id === "exportPreLivingField" ? readPreLivingFieldSave() : b.id === "exportPreBlacksmith" ? readPreBlacksmithSave() : b.id === "exportPreMeadowbrook" ? readPreMeadowbrookSave() : readPreFoundationSave();
       if (backup !== null) {
         $("saveText").value = backup;
         $("saveText").select();
