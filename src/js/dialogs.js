@@ -6,6 +6,7 @@ import {
 } from "./combat-view.js";
 import { companionMarkup, renderCompanions } from "./companion-view.js";
 import { companionsAt } from "./companions.js";
+import { hollowMarkup, mountDeepHollow, unmountDeepHollow } from "./deep-hollow-view.js";
 import { meadowMarkup, mountMeadowbrook, unmountMeadowbrook } from "./meadowbrook-view.js";
 import { farmMarkup, mineMarkup, renderSites } from "./site-view.js";
 import { farmAt, mineAt } from "./sites.js";
@@ -47,6 +48,7 @@ import {
   readPreLivingFieldSave,
   readPreBlacksmithSave,
   readPreMeadowbrookSave,
+  readPreDeepHollowSave,
 } from "./saves.js";
 import {
   ascMarkup,
@@ -233,7 +235,7 @@ function showCollection(id) {
 function openModal(type, id, location = runtime.fieldLocation) {
   if (
     ((type === "farm" || type === "meadowbrook") && s.total < farmAt) ||
-    (type === "mine" && s.total < mineAt) ||
+    ((type === "mine" || type === "deep-hollow") && s.total < mineAt) ||
     (type === "companions" && s.total < companionsAt) ||
     (type === "bosses" && s.total < milestones.combat)
   )
@@ -242,6 +244,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
   syncCombat();
   clearWork();
   unmountMeadowbrook();
+  unmountDeepHollow();
   if (["blacksmith", "forge", "recipes"].includes(type)) location = "forge";
   hideSkillTip();
   hideComparison();
@@ -256,8 +259,9 @@ function openModal(type, id, location = runtime.fieldLocation) {
   $("modal").classList.toggle("constellation", type === "skills");
   $("modal").classList.toggle("milestone-wheel", type === "wheel");
   $("modal").classList.toggle("meadowbrook-window", type === "meadowbrook");
+  $("modal").classList.toggle("hollow-window", type === "deep-hollow");
   renderLocationScene(s, runtime.fieldLocation, entering);
-  const returnsToField = landmark || type === "wheel" || type === "meadowbrook";
+  const returnsToField = landmark || type === "wheel" || type === "meadowbrook" || type === "deep-hollow";
   $("close").textContent = returnsToField ? "Return to field" : type === "skills" ? "DONE" : "✕";
   $("close").setAttribute(
     "aria-label",
@@ -319,6 +323,11 @@ function openModal(type, id, location = runtime.fieldLocation) {
     b.innerHTML = meadowMarkup();
     b.closest(".window").scrollTop = 0;
     mountMeadowbrook(b.querySelector("#meadowbrook"));
+  } else if (type === "deep-hollow") {
+    t.textContent = "Deep Hollow";
+    b.innerHTML = hollowMarkup();
+    b.closest(".window").scrollTop = 0;
+    mountDeepHollow(b.querySelector("#deepHollow"));
   } else if (type === "farm" || type === "mine") {
     t.textContent = type === "farm" ? "Farming" : "Mining";
     b.innerHTML = type === "farm" ? farmMarkup() : mineMarkup();
@@ -390,6 +399,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
         ${readPreSitesSave() ? '<button class="action secondary" id="exportPreSites">Export pre-farming and mining backup</button>' : ""}
         ${readPreExpansionSave() ? '<button class="action secondary" id="exportPreExpansion">Export pre-expansion backup</button>' : ""}
         ${readPreFoundationSave() ? '<button class="action secondary" id="exportPreFoundation">Export pre-foundation backup</button>' : ""}
+        ${readPreDeepHollowSave() ? '<button class="action secondary" id="exportPreDeepHollow">Export pre-Deep Hollow backup</button>' : ""}
         ${readPreMeadowbrookSave() ? '<button class="action secondary" id="exportPreMeadowbrook">Export pre-Meadowbrook backup</button>' : ""}
         ${readPreBlacksmithSave() ? '<button class="action secondary" id="exportPreBlacksmith">Export pre-Blacksmith backup</button>' : ""}
         ${readPreForgeSave() ? '<button class="action secondary" id="exportPreForge">Export pre-forge backup</button>' : ""}
@@ -402,7 +412,7 @@ function openModal(type, id, location = runtime.fieldLocation) {
       $("saveWarning").hidden = false;
     }
   }
-  if (landmark && type !== "meadowbrook") t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
+  if (landmark && type !== "meadowbrook" && type !== "deep-hollow") t.textContent = location === "forge" ? "Blacksmith" : landmark.name;
   refreshBlacksmith();
   if (location === "forge") b.closest(".window").scrollTop = 0;
   if (type === "skills") updateBuyButtons();
@@ -433,6 +443,7 @@ function refreshBlacksmithDialog() {
 function closeModal() {
   clearWork();
   unmountMeadowbrook();
+  unmountDeepHollow();
   hideSkillTip();
   hideComparison();
   runtime.ascConfirm = false;
@@ -440,7 +451,7 @@ function closeModal() {
   runtime.wheelGeneration++;
   runtime.wheelMoving = false;
   $("modal").hidden = true;
-  $("modal").classList.remove("meadowbrook-window");
+  $("modal").classList.remove("meadowbrook-window", "hollow-window");
   $("game").inert = false;
   runtime.modalType = "";
   if (runtime.fieldLocation) playFieldReturn();

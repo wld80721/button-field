@@ -3634,7 +3634,7 @@ textarea {
 }
 
 /* Meadowbrook Farm */
-.meadow-entrance {
+.site-entrance {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3645,9 +3645,9 @@ textarea {
   border-radius: 5px;
   background: #244a3a;
 }
-.meadow-entrance button { display: flex; align-items: center; gap: 8px; min-height: 44px; }
-.meadow-entrance img { width: 40px; height: 29px; object-fit: contain; }
-.meadow-entrance p { margin: 0; color: #dfedc8; }
+.site-entrance button { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.site-entrance img { width: 40px; height: 29px; object-fit: contain; }
+.site-entrance p { margin: 0; color: #dfedc8; }
 .modal.meadowbrook-window[data-location] .window { width: min(1150px, 100%); background: #20382c; border-color: #85a66d; }
 .modal.meadowbrook-window[data-location] .window-head { background: #1a2c24; border-color: #85a66d; }
 .meadowbrook-window .location-art { display: none; }
@@ -3727,4 +3727,48 @@ textarea {
 @media (max-width: 780px) {
   .meadow-layout { grid-template-columns: minmax(0, 1fr); gap: 6px; }
   .meadowbrook-window .window-body { padding: 8px; }
+}
+
+/* Deep Hollow */
+.modal.hollow-window[data-location] .window { width: min(1140px, 100%); background: #262c33; border-color: #b7a576; }
+.modal.hollow-window[data-location] .window-head { background: #20232c; border-color: #b7a576; }
+.modal.hollow-window[data-location] #close { min-height: 44px; white-space: nowrap; background: #30343d; border-color: #b7a576; }
+.hollow-window .location-art { display: none; }
+.hollow { --hollow-edge: #77736a; --hollow-panel: #20262d; --hollow-gold: #ffdf95; }
+.hollow-layout { display: grid; grid-template-columns: minmax(0, 3fr) minmax(240px, 1fr); gap: 12px; }
+.hollow-play { min-width: 0; }
+.hollow-hud { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.hollow-hud span { padding: 4px 8px; background: var(--hollow-panel); border: 1px solid var(--hollow-edge); border-radius: 3px; color: #eae9de; }
+#hollowZone, #hollowCoins { color: var(--hollow-gold); }
+.hollow-map { overflow: hidden; background: #182328; border: 2px solid var(--hollow-edge); border-radius: 4px; }
+#hollowCanvas { display: block; width: 100%; height: auto; margin: 0 auto; image-rendering: pixelated; touch-action: none; }
+#hollowCanvas:focus-visible { outline: 3px solid var(--hollow-gold); outline-offset: -3px; }
+.hollow-controls, .hollow-directions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.hollow-controls { justify-content: space-between; margin: 8px 0 3px; }
+.hollow-controls button, .hollow-panel :is(select, button) { min-height: 44px; }
+.hollow-directions button { min-width: 44px; border-radius: 4px; border: 1px solid var(--hollow-edge); background: var(--hollow-panel); color: #fff2ce; touch-action: none; }
+.hollow-notice { min-height: 1.4em; margin: 6px 0 4px; color: var(--hollow-gold); }
+.hollow-panel { margin-bottom: 8px; padding: 9px; border: 1px solid var(--hollow-edge); border-radius: 4px; background: var(--hollow-panel); }
+.hollow-panel h3 { margin: 0 0 4px; color: var(--hollow-gold); }
+.hollow-panel p { margin: 4px 0 6px; }
+.hollow-panel small { color: #ced3cc; }
+.hollow-panel select { max-width: 100%; background: #141d26; color: #fff2ce; border: 1px solid var(--hollow-edge); }
+.hollow-panel-head, .hollow-upgrade { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.hollow-panel-head h3 { margin: 0; }
+.hollow-ores { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; margin: 7px 0; }
+.hollow-ores div { display: flex; min-width: 0; align-items: center; justify-content: space-between; gap: 2px; padding: 3px; border: 1px solid #545653; background: #2d3338; }
+.hollow-ores dt { display: inline-flex; align-items: center; gap: 3px; font-size: .85rem; }
+.hollow-ores dd { margin: 0; font-variant-numeric: tabular-nums; }
+.hollow-ores canvas { width: 16px; height: 16px; image-rendering: pixelated; }
+.hollow-upgrade + .hollow-upgrade { margin-top: 4px; border-top: 1px solid #545653; padding-top: 4px; }
+.hollow-upgrade small, #hollowTradeHint { display: block; }
+.hollow-upgrade button { white-space: nowrap; }
+#hollowTradeAction { margin: 6px 0 0; width: 100%; }
+#hollowTradeHint:not(:empty) { margin-top: 4px; }
+@media (min-width: 761px) {
+  #hollowCanvas { max-width: max(480px, calc((100dvh - 325px) * 1.5)); }
+}
+@media (max-width: 760px) {
+  .hollow-layout { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .hollow-window .window-body { padding: 8px; }
 }

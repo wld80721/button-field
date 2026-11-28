@@ -2,6 +2,7 @@ import { normalizeBlacksmith } from "./blacksmith-data.js";
 import { normalizeCombat } from "./combat.js";
 import { normalizeCompanions } from "./companions.js";
 import { normalizeDiscoveries } from "./field-discoveries.js";
+import { normalizeDeepHollow } from "./deep-hollow.js";
 import { normalizeMeadowbrook } from "./meadowbrook.js";
 import { normalizeSites } from "./sites.js";
 import {
@@ -59,6 +60,7 @@ function normalizeRun(o) {
   f.total = num(o.total, Number.MAX_VALUE);
   normalizeSites(f, o.sites);
   f.meadowbrook = normalizeMeadowbrook(o.meadowbrook);
+  f.deepHollow = normalizeDeepHollow(o.deepHollow);
   for (const k of ["presses", "misses", "opened"]) f[k] = num(o[k]);
   for (const k of ["earned", "runs"])
     f.asc[k] = Math.floor(num(o.asc?.[k], Number.MAX_VALUE));
@@ -214,6 +216,7 @@ function normalizeRun(o) {
   return f;
 }
 const KEY = "treasure-grove-v3";
+const preDeepHollowSaveKey = KEY + "-before-deep-hollow";
 const preMeadowbrookSaveKey = KEY + "-before-meadowbrook";
 const preBlacksmithSaveKey = KEY + "-before-blacksmith";
 const preLivingFieldSaveKey = KEY + "-before-living-field";
@@ -240,6 +243,10 @@ function readPreForgeSave() {
 
 function readPreCombatSave() {
   return readBackup(preCombatSaveKey);
+}
+
+function readPreDeepHollowSave() {
+  return readBackup(preDeepHollowSaveKey);
 }
 
 function readPreMeadowbrookSave() {
@@ -330,7 +337,8 @@ function loadStoredRun() {
   setRunState(run);
   if (version < schemaVersion) {
     try {
-      preserveBackup(preMeadowbrookSaveKey, raw);
+      preserveBackup(preDeepHollowSaveKey, raw);
+      if (version < 8) preserveBackup(preMeadowbrookSaveKey, raw);
       if (version < 7) preserveBackup(preBlacksmithSaveKey, raw);
       if (version < 6) preserveBackup(preLivingFieldSaveKey, raw);
       if (version < 5) preserveBackup(preCombatSaveKey, raw);
@@ -381,6 +389,7 @@ export {
   readPreLivingFieldSave,
   readPreBlacksmithSave,
   readPreMeadowbrookSave,
+  readPreDeepHollowSave,
   readPreFoundationSave,
   resumeSaving,
   save,

@@ -1,3 +1,4 @@
+import { refreshDeepHollow } from "./deep-hollow-view.js";
 import { refreshMeadowbrook } from "./meadowbrook-view.js";
 import { advanceClone, fieldSignatures } from "./blacksmith-effects.js";
 import { signatureMark } from "./sprites.js";
@@ -347,6 +348,7 @@ function render({ rates: v, pieces } = fieldSnapshot()) {
   wheelHUD();
   renderSites();
   refreshMeadowbrook();
+  refreshDeepHollow();
   if (recruitPets(s).length) runtime.saveDirty = true;
   renderCompanions();
   renderCombatField();

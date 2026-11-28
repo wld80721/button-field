@@ -4,6 +4,12 @@ This log tracks player-facing changes and save compatibility.
 
 ## Unreleased
 
+## 2026-11-28 · Deep Hollow
+
+- Enter Deep Hollow from the Mine at 2,500 run earnings. Dig tunnels for six ores, complete guild contracts, upgrade equipment, and take the lift to your deepest checkpoint.
+- Sell ore for Button Field coins or bank copper for crafting. The Mine's existing renewable deposits continue to work.
+- Save schema 9 stores Deep Hollow alongside Meadowbrook and the rest of Button Field. The previous local save is available from **Save & settings → Export pre-Deep Hollow backup**.
+
 ## 2026-11-28 · Meadowbrook Farm
 
 - Visit Meadowbrook from the Garden at 600 run earnings. Explore the farm, work the soil, water and harvest four crops, buy seeds, and complete the farm journal.
